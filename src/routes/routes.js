@@ -7,13 +7,16 @@ import Home from '~/pages/Home';
 import Profile from '~/pages/Profile';
 // import Search from '~/pages/Search';
 import Message from '~/pages/Message';
+import Search from '~/layouts/components/Search';
+import Matching from '~/pages/Matching';
 
 //public routes
 const publicRoutes = [
     { path: config.routes.home, component: Home },
     { path: config.routes.profile, component: Profile, layout: SidebarOnly },
-    // { path: config.routes.search, component: Search, layout: null },
-    { path: config.routes.messages, component: Message, layout: SidebarOnly },
+    { path: config.routes.search, component: Search, layout: null },
+    { path: config.routes.messages, component: Message, layout: null },
+    { path: config.routes.matching, component: Matching, layout: SidebarOnly },
     // { path: config.routes.setting, component: Setting, layout: SidebarOnly },
 ];
 

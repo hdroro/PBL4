@@ -3,6 +3,7 @@ const routes = {
     profile: '/:nickname',
     search: '/search',
     messages: '/messages',
+    matching: '/matching',
     setting: '/setting',
 };
 
