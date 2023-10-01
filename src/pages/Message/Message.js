@@ -3,6 +3,7 @@ import styles from './Message.module.scss';
 import { BackIcon, Images, NotifIcon, PhoneCall, SendMessage, Setting, UserGroup } from '~/components/Icon/Icon';
 import { Link } from 'react-router-dom';
 import images from '~/assets/images';
+import routes from '~/config/routes';
 
 const cx = classNames.bind(styles);
 
@@ -18,7 +19,7 @@ function Message() {
         <div className={cx('wrapper')}>
             <div className={cx('messenger-user')}>
                 <div className={cx('messenges')}>
-                    <Link to={'/'} className={cx('back-icon')}>
+                    <Link to={routes.matching} className={cx('back-icon')}>
                         <BackIcon />
                     </Link>
                     <h1 className={cx('messenges-title')}>Messages</h1>

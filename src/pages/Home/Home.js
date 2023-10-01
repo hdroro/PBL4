@@ -1,11 +1,9 @@
-import classNames from 'classnames/bind';
-import styles from './Home.module.scss';
 import BackGround from '~/layouts/components/BackGround';
-
-const cx = classNames.bind(styles);
+import { useModal } from '~/hooks';
 
 function Home() {
-    return <BackGround />;
+    const { isShowing, toggle } = useModal();
+    return <BackGround isShowing={isShowing} toggle={toggle} />;
 }
 
 export default Home;

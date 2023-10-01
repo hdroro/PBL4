@@ -1,7 +1,4 @@
 .wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     height: 100vh;
     overflow: hidden;
     position: relative;
@@ -30,11 +27,12 @@
     cursor: pointer;
     transition: transform 0.3s ease;
     animation: spin 2s linear infinite;
+    z-index: 9999;
 }
 
 .btnMatching {
     position: absolute;
-    /* top: 75%; */
+    top: 50%;
     left: 50%;
     margin-top: 10%;
     transform: translateX(-50%);
