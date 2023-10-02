@@ -1,9 +1,22 @@
 import classNames from 'classnames/bind';
 import styles from './Message.module.scss';
-import { BackIcon, Images, NotifIcon, PhoneCall, SendMessage, Setting, UserGroup } from '~/components/Icon/Icon';
+import {
+    BackIcon,
+    BlockMessage,
+    Images,
+    NotifIcon,
+    PhoneCall,
+    Remove,
+    SearchIcon,
+    SendMessage,
+    Setting,
+    UserGroup,
+} from '~/components/Icon/Icon';
 import { Link } from 'react-router-dom';
 import images from '~/assets/images';
 import routes from '~/config/routes';
+import Button from '~/components/Button';
+import { useState } from 'react';
 
 const cx = classNames.bind(styles);
 
@@ -14,6 +27,12 @@ function Message() {
         hour: 'numeric',
         minute: 'numeric',
         hour12: true, // Đặt thành 'false' nếu muốn hiển thị theo 24-giờ
+    };
+
+    const [isShowSetting, setIsShowSetting] = useState(false);
+
+    const handleToggleSetting = () => {
+        setIsShowSetting(!isShowSetting);
     };
     return (
         <div className={cx('wrapper')}>
@@ -88,7 +107,7 @@ function Message() {
 
                     <div className={cx('action-group')}>
                         <PhoneCall className={cx('phone-call')} />
-                        <Setting className={cx('chat-setting')} />
+                        <Setting className={cx('chat-setting')} onClick={() => handleToggleSetting()} />
                     </div>
                 </div>
                 <div className={cx('chat-main')}></div>
@@ -100,6 +119,30 @@ function Message() {
                     <SendMessage className={cx('btn-send')} />
                 </div>
             </div>
+
+            {isShowSetting && (
+                <div className={cx('messenger-setting')}>
+                    <div className={cx('header-setting')}>
+                        <BackIcon className={cx('back-icon')} onClick={handleToggleSetting} />
+                        <span className={cx('title-setting')}>Settings</span>
+                    </div>
+                    <div className={cx('setting-main')}>
+                        <div className={cx('search-input')}>
+                            <div className={cx('search-message')}>
+                                <SearchIcon />
+                            </div>
+                            <input type="text" name="search" />
+                        </div>
+                        <Button normal post leftIcon={<BlockMessage />}>
+                            Block
+                        </Button>
+
+                        <Button normal post leftIcon={<Remove />}>
+                            Clear messages
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

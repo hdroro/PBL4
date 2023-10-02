@@ -80,8 +80,9 @@ export const Messenger = ({ width = '1.5rem', height = '1.5rem', className }) =>
     </svg>
 );
 
-export const Setting = ({ width = '1.5rem', height = '1.5rem', className }) => (
+export const Setting = ({ width = '1.5rem', height = '1.5rem', className, onClick }) => (
     <svg
+        onClick={onClick}
         className={className}
         width={width}
         height={height}
@@ -106,8 +107,9 @@ export const Logout = ({ width = '2rem', height = '2rem', className }) => (
     </svg>
 );
 
-export const BackIcon = ({ width = '2rem', height = '2rem', className }) => (
+export const BackIcon = ({ width = '2rem', height = '2rem', className, onClick }) => (
     <svg
+        onClick={onClick}
         className={className}
         width={width}
         height={height}
@@ -233,8 +235,9 @@ export const Remove = ({ width = '1em', height = '1em', className }) => (
     </svg>
 );
 
-export const Eye = ({ width = '1em', height = '1em', className }) => (
+export const Eye = ({ width = '1em', height = '1em', className, onClick }) => (
     <svg
+        onClick={onClick}
         className={className}
         width={width}
         height={height}
@@ -246,8 +249,9 @@ export const Eye = ({ width = '1em', height = '1em', className }) => (
     </svg>
 );
 
-export const NotEye = ({ width = '1em', height = '1em', className }) => (
+export const NotEye = ({ width = '1em', height = '1em', className, onClick }) => (
     <svg
+        onClick={onClick}
         className={className}
         width={width}
         height={height}
@@ -282,5 +286,18 @@ export const Gmail = ({ width = '1em', height = '1em', className }) => (
         xmlns="http://www.w3.org/2000/svg"
     >
         <path d="M224 96C135.6 96 64 167.6 64 256s71.6 160 160 160c77.4 0 142-55 156.8-128H256c-17.7 0-32-14.3-32-32s14.3-32 32-32H400c25.8 0 49.6 21.4 47.2 50.6C437.8 389.6 341.4 480 224 480C100.3 480 0 379.7 0 256S100.3 32 224 32c57.4 0 109.7 21.6 149.3 57c13.2 11.8 14.3 32 2.5 45.2s-32 14.3-45.2 2.5C302.3 111.4 265 96 224 96z" />
+    </svg>
+);
+
+export const BlockMessage = ({ width = '1em', height = '1em', className }) => (
+    <svg
+        className={className}
+        width={width}
+        height={height}
+        viewBox="0 0 640 512"
+        fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L512.9 376.7C552.2 340.2 576 292.3 576 240C576 125.1 461.4 32 320 32c-67.7 0-129.3 21.4-175.1 56.3L38.8 5.1zM64 240c0 45.1 17.7 86.8 47.7 120.9c-1.9 24.5-11.4 46.3-21.4 62.9c-5.5 9.2-11.1 16.6-15.2 21.6c-2.1 2.5-3.7 4.4-4.9 5.7c-.6 .6-1 1.1-1.3 1.4l-.3 .3 0 0 0 0 0 0 0 0c-4.6 4.6-5.9 11.4-3.4 17.4c2.5 6 8.3 9.9 14.8 9.9c28.7 0 57.6-8.9 81.6-19.3c22.9-10 42.4-21.9 54.3-30.6c31.8 11.5 67 17.9 104.1 17.9c37 0 72.3-6.4 104-17.9L82.9 161.3C70.7 185.6 64 212.2 64 240z" />
     </svg>
 );

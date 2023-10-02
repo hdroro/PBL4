@@ -74,7 +74,6 @@ function SignUp() {
                             </div>
                         </div>
                     </div>
-                    <span className={cx('forgot-password')}>Forgot password?</span>
                     <div className={cx('footer')}>
                         <Button home small normal>
                             OK
