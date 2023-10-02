@@ -2,11 +2,14 @@ import classNames from 'classnames/bind';
 import styles from './Profile.module.scss';
 import images from '~/assets/images';
 import Button from '~/components/Button';
-import { Edit, ThreeDots } from '~/components/Icon/Icon';
+import { BookPost, Edit, ThreeDots } from '~/components/Icon/Icon';
 import { PopperWrapper } from '~/components/Popper';
 import Wrapper from '~/components/Wrapper';
 import Tippy from '@tippyjs/react';
 import AdjustPost from '~/components/Popper/AdjustPost/AdjustPost';
+import { useModal } from '~/hooks';
+import Modal from '~/components/Modal/Modal';
+import CreatePost from '~/components/Modal/ModalConfirm/CreatePost';
 
 const cx = classNames.bind(styles);
 
@@ -18,6 +21,7 @@ function Profile() {
             </PopperWrapper>
         );
     };
+    const { isShowing, toggle } = useModal();
 
     return (
         <div className={cx('wrapper')}>
@@ -53,8 +57,22 @@ function Profile() {
                         <div className={cx('blog-container')}>
                             <div className={cx('header-blog')}>
                                 <img src={images.cancer} alt="" />
-                                <textarea className={cx('thinking')} placeholder="Yến Nhi ơi, bạn đang nghĩ gì ?" />
+                                <input
+                                    className={cx('thinking')}
+                                    placeholder="Yến Nhi ơi, bạn đang nghĩ gì ?"
+                                    onClick={toggle}
+                                />
                             </div>
+                            <Modal
+                                title="Create new post"
+                                leftIcon={<BookPost />}
+                                texttype
+                                background
+                                isShowing={isShowing}
+                                hide={toggle}
+                            >
+                                <CreatePost />
+                            </Modal>
 
                             <div className={cx('post-container')}>
                                 <Wrapper>

@@ -9,6 +9,7 @@ import {
     Remove,
     SearchIcon,
     SendMessage,
+    SendMessageDisabled,
     Setting,
     UserGroup,
 } from '~/components/Icon/Icon';
@@ -33,6 +34,12 @@ function Message() {
     };
 
     const [isShowSetting, setIsShowSetting] = useState(false);
+    const [typeMessage, setTypeMessage] = useState('');
+
+    const handleChangeMessage = (event) => {
+        // console.log(event.target.value);
+        setTypeMessage(event.target.value);
+    };
 
     const handleToggleSetting = () => {
         setIsShowSetting(!isShowSetting);
@@ -123,9 +130,19 @@ function Message() {
                 <div className={cx('chat-send-bottom')}>
                     <Images className={cx('btn-image')} />
                     <div className={cx('message-input-area')}>
-                        <input className={cx('input-message')} placeholder="Send a message...." />
+                        <input
+                            className={cx('input-message')}
+                            placeholder="Send a message...."
+                            value={typeMessage}
+                            onChange={(value) => handleChangeMessage(value)}
+                        />
                     </div>
-                    <SendMessage className={cx('btn-send')} />
+
+                    {typeMessage === '' ? (
+                        <SendMessageDisabled className={cx('btn-send')} />
+                    ) : (
+                        <SendMessage className={cx('btn-send')} />
+                    )}
                 </div>
             </div>
 

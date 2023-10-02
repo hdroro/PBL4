@@ -9,6 +9,7 @@ import Tippy from '@tippyjs/react';
 import NotiItem from '~/components/Popper/NotiItem';
 import { PopperWrapper } from '~/components/Popper';
 import { useModal } from '~/hooks';
+import { Link } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 function Sidebar() {
@@ -102,9 +103,11 @@ function Sidebar() {
 
                         <div className={cx('logout')}>
                             <div className={cx('row')}>
-                                <div className={cx('col l-12 m-12 c-12')}>
-                                    <Logout />
-                                </div>
+                                <Link to="/">
+                                    <div className={cx('col l-12 m-12 c-12')}>
+                                        <Logout />
+                                    </div>
+                                </Link>
                             </div>
                         </div>
                     </div>

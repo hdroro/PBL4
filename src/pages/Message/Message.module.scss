@@ -150,11 +150,19 @@
             margin-right: 20px;
             font-size: 23px;
             padding-top: 5px;
+            &:hover {
+                color: #f5115c;
+                opacity: 0.8;
+            }
         }
 
         .chat-setting {
             width: 2rem;
             height: 2rem;
+            &:hover {
+                color: #f5115c;
+                opacity: 0.8;
+            }
         }
     }
 }

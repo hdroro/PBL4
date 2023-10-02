@@ -132,6 +132,7 @@ function SignUp() {
                                         type="date"
                                         name="date"
                                         value={dispatch.payload}
+                                        className={cx('input-date')}
                                         onChange={(event) => handleOnChangeDate(event)}
                                     />
                                 </div>
