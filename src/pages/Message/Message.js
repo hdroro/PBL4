@@ -17,6 +17,9 @@ import images from '~/assets/images';
 import routes from '~/config/routes';
 import Button from '~/components/Button';
 import { useState } from 'react';
+import { useModal } from '~/hooks';
+import Modal from '~/components/Modal/Modal';
+import Block from '~/components/Modal/ModalConfirm/Block/Block';
 
 const cx = classNames.bind(styles);
 
@@ -33,6 +36,12 @@ function Message() {
 
     const handleToggleSetting = () => {
         setIsShowSetting(!isShowSetting);
+    };
+    const { isShowing, toggle } = useModal();
+    const [isShowingClear, setIsShowingClear] = useState(false);
+
+    const handleToggleClear = () => {
+        setIsShowingClear(!isShowingClear);
     };
     return (
         <div className={cx('wrapper')}>
@@ -133,13 +142,26 @@ function Message() {
                             </div>
                             <input type="text" name="search" />
                         </div>
-                        <Button normal post leftIcon={<BlockMessage />}>
+                        <Button normal post leftIcon={<BlockMessage />} onClick={toggle}>
                             Block
                         </Button>
+                        <Modal title="Block Message" texttype background isShowing={isShowing} hide={toggle}>
+                            <Block>Bạn có chắc chắn muốn chặn người này hay không ?</Block>
+                        </Modal>
 
-                        <Button normal post leftIcon={<Remove />}>
+                        <Button normal post leftIcon={<Remove />} onClick={handleToggleClear}>
                             Clear messages
                         </Button>
+
+                        <Modal
+                            title="Clear Message"
+                            texttype
+                            background
+                            isShowing={isShowingClear}
+                            hide={handleToggleClear}
+                        >
+                            <Block>Bạn có chắc chắn muốn xóa toàn bộ tin nhắn hay không ?</Block>
+                        </Modal>
                     </div>
                 </div>
             )}

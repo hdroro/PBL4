@@ -12,7 +12,7 @@ function BackGround({ isMatching, isShowing, toggle }) {
         <div className={cx('wrapper')}>
             <img className={cx('full-screen-image')} src={images.bgImg} alt="" />
             <img className={cx('top-image')} src={images.globe} alt="" onClick={toggle} />
-            <Modal title={'Login'} isShowing={isShowing} hide={toggle}>
+            <Modal isShowing={isShowing} hide={toggle}>
                 <Login isShowing={isShowing} hide={toggle} />
             </Modal>
             <div className={cx('matching')}>

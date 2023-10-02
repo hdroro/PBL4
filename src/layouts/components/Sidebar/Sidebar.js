@@ -8,18 +8,21 @@ import routes from '~/config/routes';
 import Tippy from '@tippyjs/react';
 import NotiItem from '~/components/Popper/NotiItem';
 import { PopperWrapper } from '~/components/Popper';
+import { useModal } from '~/hooks';
 
 const cx = classNames.bind(styles);
 function Sidebar() {
+    const { isShowing, toggle } = useModal();
     const renderPreview = () => {
         return (
             <PopperWrapper className={cx('primary')}>
-                <NotiItem />
+                <NotiItem isShowing={isShowing} toggle={toggle} />
                 <NotiItem />
                 <NotiItem />
             </PopperWrapper>
         );
     };
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container')}>
@@ -37,7 +40,7 @@ function Sidebar() {
                                         interactive
                                         // visible
                                         placement="bottom"
-                                        content={renderPreview()}
+                                        // content={renderPreview()}
                                     >
                                         <div>
                                             <NotifIcon />

@@ -18,6 +18,29 @@
     position: relative;
 }
 
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 72px;
+    align-items: center;
+
+    border-bottom: 1px solid #f593b7;
+    margin-bottom: 10px;
+
+    .header-title {
+        display: flex;
+        align-items: center;
+        text-align: start;
+        color: #da0d58;
+    }
+}
+
+.texttype {
+    font-size: 16px;
+    justify-content: center;
+}
+
 .modal-content {
     position: relative;
     height: auto;
@@ -47,4 +70,23 @@
     background: transparent;
     color: #f51c6a;
     cursor: pointer;
+}
+
+.icon + .title,
+.title + .icon {
+    margin-left: 8px;
+}
+
+.icon {
+    display: flex;
+    width: 24px;
+    text-align: center;
+}
+
+.primary {
+    background-color: #da0d58;
+}
+
+.background {
+    background-color: #f6e2f1;
 }

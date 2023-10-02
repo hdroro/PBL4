@@ -1,17 +1,31 @@
 import classNames from 'classnames/bind';
 import styles from './NotiItem.module.scss';
 import images from '~/assets/images';
+import Modal from '~/components/Modal/Modal';
+import RequestFriend from '~/components/Modal/ModalConfirm/RequestFriend';
+import { UserGroup } from '~/components/Icon/Icon';
 
 const cx = classNames.bind(styles);
 
-function NotiItem() {
+function NotiItem({ isShowing, toggle }) {
     return (
         <div className={cx('wrapper')}>
+            <Modal
+                title={'Request'}
+                leftIcon={<UserGroup />}
+                primary
+                isShowing={isShowing}
+                hide={toggle}
+                background
+                className={cx('background-request')}
+            >
+                <RequestFriend />
+            </Modal>
             <img src={images.cancer} alt="" />
-            <div className={cx('noti-container')}>
+            <div className={cx('noti-container')} onClick={toggle}>
                 <div>
                     <span className={cx('nick-name')}>@xalozodiac</span>
-                    <span className={cx('noti-content')}>đã có thông điệp tuần mới rồi nè Yến Nhi oiii....</span>
+                    <span className={cx('noti-content')}>muốn kết nối với bạn</span>
                     <div className={cx('time')}>12mins ago</div>
                 </div>
             </div>

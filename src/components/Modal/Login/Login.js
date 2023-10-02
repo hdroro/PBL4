@@ -41,7 +41,7 @@ function Login() {
                 // <Modal title={'Sign up'} isShowing={isShowing} hide={toggleSignUp}>
                 <SignUp />
             ) : (
-                <div>
+                <div className={cx('wrapper-form')}>
                     <div className={cx('modal-header')}>
                         <h2 className={cx('header-title')}>Login</h2>
                     </div>
