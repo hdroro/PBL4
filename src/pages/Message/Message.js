@@ -35,6 +35,7 @@ function Message() {
 
     const [isShowSetting, setIsShowSetting] = useState(false);
     const [typeMessage, setTypeMessage] = useState('');
+    const [inputSearch, setInputSearch] = useState('');
 
     const handleChangeMessage = (event) => {
         // console.log(event.target.value);
@@ -43,6 +44,9 @@ function Message() {
 
     const handleToggleSetting = () => {
         setIsShowSetting(!isShowSetting);
+    };
+    const handleChangeInputSearch = (event) => {
+        setInputSearch(event.target.value);
     };
     const { isShowing, toggle } = useModal();
     const [isShowingClear, setIsShowingClear] = useState(false);
@@ -157,7 +161,12 @@ function Message() {
                             <div className={cx('search-message')}>
                                 <SearchIcon />
                             </div>
-                            <input type="text" name="search" />
+                            <input
+                                type="text"
+                                name="search"
+                                value={inputSearch}
+                                onChange={(value) => handleChangeInputSearch(value)}
+                            />
                         </div>
                         <Button normal post leftIcon={<BlockMessage />} onClick={toggle}>
                             Block

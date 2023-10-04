@@ -1,5 +1,6 @@
 const routes = {
     home: '/',
+    call: '/call/:nickname',
     profile: '/:nickname',
     search: '/search',
     messages: '/messages',
