@@ -24,6 +24,34 @@ import Block from '~/components/Modal/ModalConfirm/Block/Block';
 
 const cx = classNames.bind(styles);
 
+const USER_INFO = [
+    {
+        id: 1,
+        avatar: images.cancer,
+        fullname: 'hd.roro',
+    },
+    {
+        id: 2,
+        avatar: images.leo,
+        fullname: 'roro.hd',
+    },
+    {
+        id: 3,
+        avatar: images.cancer,
+        fullname: 'yanni123',
+    },
+    {
+        id: 4,
+        avatar: images.leo,
+        fullname: 'nguoitinhmuadong',
+    },
+    {
+        id: 5,
+        avatar: images.leo,
+        fullname: 'harah109',
+    },
+];
+
 function Message() {
     const currentTime = new Date();
 
@@ -48,6 +76,7 @@ function Message() {
     const handleChangeInputSearch = (event) => {
         setInputSearch(event.target.value);
     };
+
     const { isShowing, toggle } = useModal();
     const [isShowingClear, setIsShowingClear] = useState(false);
 
@@ -70,48 +99,15 @@ function Message() {
                 {/* <div className={cx('users')}>No message</div> */}
 
                 <div>
-                    <div className={cx('message-another')}>
-                        <img className={cx('avatar')} src={images.cancer} alt="" />
-                        <div className={cx('info-user')}>
-                            <div className={cx('fullname')}>choose</div>
-                            <div className={cx('curTime')}>{currentTime.toLocaleTimeString('en-US', options)}</div>
+                    {USER_INFO.map((item) => (
+                        <div className={cx('message-another')} key={item.id}>
+                            <img className={cx('avatar')} src={item.avatar} alt="" />
+                            <div className={cx('info-user')}>
+                                <div className={cx('fullname')}>{item.fullname}</div>
+                                <div className={cx('curTime')}>{currentTime.toLocaleTimeString('en-US', options)}</div>
+                            </div>
                         </div>
-                    </div>
-                    <div className={cx('message-another')}>
-                        <img className={cx('avatar')} src={images.leo} alt="" />
-                        <div className={cx('info-user')}>
-                            <div className={cx('fullname')}>choose</div>
-                            <div className={cx('curTime')}>{currentTime.toLocaleTimeString('en-US', options)}</div>
-                        </div>
-                    </div>
-                    <div className={cx('message-another')}>
-                        <img className={cx('avatar')} src={images.cancer} alt="" />
-                        <div className={cx('info-user')}>
-                            <div className={cx('fullname')}>choose</div>
-                            <div className={cx('curTime')}>{currentTime.toLocaleTimeString('en-US', options)}</div>
-                        </div>
-                    </div>
-                    <div className={cx('message-another')}>
-                        <img className={cx('avatar')} src={images.leo} alt="" />
-                        <div className={cx('info-user')}>
-                            <div className={cx('fullname')}>choose</div>
-                            <div className={cx('curTime')}>{currentTime.toLocaleTimeString('en-US', options)}</div>
-                        </div>
-                    </div>
-                    <div className={cx('message-another')}>
-                        <img className={cx('avatar')} src={images.cancer} alt="" />
-                        <div className={cx('info-user')}>
-                            <div className={cx('fullname')}>choose</div>
-                            <div className={cx('curTime')}>{currentTime.toLocaleTimeString('en-US', options)}</div>
-                        </div>
-                    </div>
-                    <div className={cx('message-another')}>
-                        <img className={cx('avatar')} src={images.leo} alt="" />
-                        <div className={cx('info-user')}>
-                            <div className={cx('fullname')}>choose</div>
-                            <div className={cx('curTime')}>{currentTime.toLocaleTimeString('en-US', options)}</div>
-                        </div>
-                    </div>
+                    ))}
                 </div>
             </div>
 
@@ -126,7 +122,9 @@ function Message() {
                     </div>
 
                     <div className={cx('action-group')}>
-                        <PhoneCall className={cx('phone-call')} />
+                        <a href="/call/@hd.roro">
+                            <PhoneCall className={cx('phone-call')} />
+                        </a>
                         <Setting className={cx('chat-setting')} onClick={() => handleToggleSetting()} />
                     </div>
                 </div>

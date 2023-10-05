@@ -89,7 +89,7 @@ function Sidebar() {
                                             Message
                                         </Button>
 
-                                        <Button to={routes.profile} normal large text leftIcon={<User />}>
+                                        <Button to={'/profile/@yanni'} normal large text leftIcon={<User />}>
                                             My blog
                                         </Button>
 
