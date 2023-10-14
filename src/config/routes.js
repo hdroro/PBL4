@@ -5,7 +5,8 @@ const routes = {
     search: '/search',
     messages: '/messages',
     matching: '/matching',
-    setting: '/setting',
+    settingProfile: '/setting/editprofile',
+    settingPassword: '/setting/changePassword',
 };
 
 export default routes;

@@ -10,6 +10,8 @@ import AdjustPost from '~/components/Popper/AdjustPost/AdjustPost';
 import { useModal } from '~/hooks';
 import Modal from '~/components/Modal/Modal';
 import CreatePost from '~/components/Modal/ModalConfirm/CreatePost';
+import { useState } from 'react';
+import ProfileBrief from '~/components/Modal/ModalConfirm/ProfileBrief';
 
 const cx = classNames.bind(styles);
 
@@ -22,6 +24,10 @@ function Profile() {
         );
     };
     const { isShowing, toggle } = useModal();
+    const [isShowingProfile, setShowingProfile] = useState(false);
+    const toggleProfile = () => {
+        setShowingProfile(!isShowingProfile);
+    };
 
     return (
         <div className={cx('wrapper')}>
@@ -36,9 +42,17 @@ function Profile() {
                                     <div className={cx('info-user')}>
                                         <div className={cx('fullname')}>Yến Nhi</div>
                                         <div className={cx('nickname')}>@yanni</div>
-                                        <Button normal className={cx('btn-edit')} leftIcon={<Edit />}>
+                                        <Button
+                                            onClick={toggleProfile}
+                                            normal
+                                            className={cx('btn-edit')}
+                                            leftIcon={<Edit />}
+                                        >
                                             Edit Profile
                                         </Button>
+                                        <Modal isShowing={isShowingProfile} hide={toggleProfile}>
+                                            <ProfileBrief toggle={toggleProfile} />
+                                        </Modal>
                                     </div>
                                 </div>
                                 <div className={cx('bio')}>

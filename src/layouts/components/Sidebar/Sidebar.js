@@ -93,7 +93,7 @@ function Sidebar() {
                                             My blog
                                         </Button>
 
-                                        <Button normal large text leftIcon={<Setting />}>
+                                        <Button to={routes.settingProfile} normal large text leftIcon={<Setting />}>
                                             Settings
                                         </Button>
                                     </div>
