@@ -6,7 +6,7 @@ import { Heart, HeartCrack } from '~/components/Icon/Icon';
 
 const cx = classNames.bind(styles);
 
-function RequestFriend() {
+function RequestFriend({ hide }) {
     return (
         <div className={cx('wrapper')}>
             <div className={cx('top-content')}>
@@ -29,7 +29,7 @@ function RequestFriend() {
                 <Button medium leftIcon={<Heart />} className={cx('btn-accept')}>
                     Accept
                 </Button>
-                <Button medium leftIcon={<HeartCrack />} noMargin className={cx('btn-deny')}>
+                <Button onClick={hide} medium leftIcon={<HeartCrack />} noMargin className={cx('btn-deny')}>
                     Deny
                 </Button>
             </div>

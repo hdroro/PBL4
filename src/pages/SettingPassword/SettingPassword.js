@@ -43,7 +43,7 @@ function SettingPassword() {
                     <form className={cx('form-setting')} name="settingPassword" method="POST" action="">
                         <div className={cx('form-item')}>
                             <div className={cx('name-item')}>
-                                <label for="currentpassword">Current password</label>
+                                <label htmlFor="currentpassword">Current password</label>
                             </div>
                             <div className={cx('body-item')}>
                                 <div className={cx('input-container')}>
@@ -66,7 +66,7 @@ function SettingPassword() {
                         </div>
                         <div className={cx('form-item')}>
                             <div className={cx('name-item')}>
-                                <label for="newpassword">New password</label>
+                                <label htmlFor="newpassword">New password</label>
                             </div>
                             <div className={cx('body-item')}>
                                 <div className={cx('input-container')}>
@@ -89,7 +89,7 @@ function SettingPassword() {
                         </div>
                         <div className={cx('form-item')}>
                             <div className={cx('name-item')}>
-                                <label for="retypepassword">Re-type password</label>
+                                <label htmlFor="retypepassword">Re-type password</label>
                             </div>
                             <div className={cx('body-item')}>
                                 <div className={cx('input-container')}>

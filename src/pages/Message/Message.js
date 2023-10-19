@@ -170,7 +170,7 @@ function Message() {
                             Block
                         </Button>
                         <Modal title="Block Message" texttype background isShowing={isShowing} hide={toggle}>
-                            <Block>Bạn có chắc chắn muốn chặn người này hay không ?</Block>
+                            <Block hide={toggle}>Bạn có chắc chắn muốn chặn người này hay không ?</Block>
                         </Modal>
 
                         <Button normal post leftIcon={<Remove />} onClick={handleToggleClear}>
@@ -184,7 +184,9 @@ function Message() {
                             isShowing={isShowingClear}
                             hide={handleToggleClear}
                         >
-                            <Block>Bạn có chắc chắn muốn xóa toàn bộ tin nhắn hay không ?</Block>
+                            <Block hide={handleToggleClear}>
+                                Bạn có chắc chắn muốn xóa toàn bộ tin nhắn hay không ?
+                            </Block>
                         </Modal>
                     </div>
                 </div>

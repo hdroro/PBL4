@@ -4,7 +4,7 @@ import Button from '~/components/Button';
 
 const cx = classNames.bind(styles);
 
-function Block({ children }) {
+function Block({ children, hide }) {
     return (
         <div className={cx('wrapper')}>
             <div className={cx('content')}>{children}</div>
@@ -12,7 +12,7 @@ function Block({ children }) {
                 <Button medium className={cx('btn-yes')}>
                     Yes
                 </Button>
-                <Button medium className={cx('btn-no')}>
+                <Button onClick={hide} medium className={cx('btn-no')}>
                     No
                 </Button>
             </div>

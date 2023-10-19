@@ -20,6 +20,7 @@ function Button({
     medium = false,
     large = false,
     noMargin = false,
+    hover = false,
     children,
     className,
     leftIcon,

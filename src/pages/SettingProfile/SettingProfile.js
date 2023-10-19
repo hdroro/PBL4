@@ -39,7 +39,7 @@ function SettingProfile() {
                     <form className={cx('form-setting')} name="settingProfile" method="POST" action="">
                         <div className={cx('form-item')}>
                             <div className={cx('name-item')}>
-                                <label for="username">Username</label>
+                                <label htmlFor="username">Username</label>
                             </div>
                             <div className={cx('body-item')}>
                                 <input
@@ -60,7 +60,7 @@ function SettingProfile() {
                         </div>
                         <div className={cx('form-item')}>
                             <div className={cx('name-item')}>
-                                <label for="name">Name</label>
+                                <label htmlFor="name">Name</label>
                             </div>
                             <div className={cx('body-item')}>
                                 <input
@@ -76,7 +76,7 @@ function SettingProfile() {
                         </div>
                         <div className={cx('form-item')}>
                             <div className={cx('name-item')}>
-                                <label for="bio">Bio</label>
+                                <label htmlFor="bio">Bio</label>
                             </div>
                             <div className={cx('body-item')}>
                                 <textarea
@@ -94,7 +94,7 @@ function SettingProfile() {
                         </div>
                         <div className={cx('form-item')}>
                             <div className={cx('name-item')}>
-                                <label for="birthday">Date of birth</label>
+                                <label htmlFor="birthday">Date of birth</label>
                             </div>
                             <div className={cx('body-item')}>
                                 <input
@@ -109,7 +109,7 @@ function SettingProfile() {
                         </div>
                         <div className={cx('form-item')}>
                             <div className={cx('name-item')}>
-                                <label for="gender">Gender</label>
+                                <label htmlFor="gender">Gender</label>
                             </div>
                             <div className={cx('body-item')}>
                                 <select id="gender" onChange={(e) => handleOnChangeGender(e)} value={gender}>

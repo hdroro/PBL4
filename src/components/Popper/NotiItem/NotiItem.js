@@ -19,7 +19,7 @@ function NotiItem({ isShowing, toggle }) {
                 background
                 className={cx('background-request')}
             >
-                <RequestFriend />
+                <RequestFriend hide={toggle} />
             </Modal>
             <img src={images.cancer} alt="" />
             <div className={cx('noti-container')} onClick={toggle}>

@@ -20,6 +20,10 @@
         pointer-events: none;
         opacity: 0.5;
     }
+
+    &:hover {
+        opacity: 0.9;
+    }
 }
 
 .icon + .title,
