@@ -20,15 +20,18 @@ function Login() {
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [loginError, setLoginError] = useState('');
     const [isShowPassword, setShowPassword] = useState(false);
 
     const handleOnChangeUsername = (event) => {
         setUsername(event.target.value);
+        setLoginError('');
         console.log(event.target.value);
     };
 
     const handleOnChangePassword = (event) => {
         setPassword(event.target.value);
+        setLoginError('');
         console.log(event.target.value);
     };
 
@@ -37,10 +40,12 @@ function Login() {
 
         try {
             let data = await handleLoginApi(username, password);
-
             if (data && data.errCode === 0) {
                 navigate('/api/matching', { state: { data } });
                 console.log('loging success');
+            } else {
+                console.log('data.message ' + data.message);
+                setLoginError(data.message);
             }
         } catch (e) {
             console.log('error message', e.response);
@@ -89,6 +94,9 @@ function Login() {
                         </div>
                     </div>
                     <span className={cx('forgot-password')}>Forgot password?</span>
+                    <div className={cx('login-error')}>
+                        <span className={cx('login-error-message')}>{loginError}</span>
+                    </div>
                     <div className={cx('footer')}>
                         <Button
                             home

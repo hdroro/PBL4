@@ -42,10 +42,15 @@
     margin-top: 5px;
     font-size: 12px;
     color: #f51460;
-    text-align: end;
     cursor: pointer;
+    display: flex;
+    justify-content: end;
 }
 
+.login-error {
+    font-size: 14px;
+    color: #e44a3e;
+}
 .footer {
     margin-top: 10px;
     display: flex;
