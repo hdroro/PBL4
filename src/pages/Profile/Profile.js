@@ -12,6 +12,7 @@ import Modal from '~/components/Modal/Modal';
 import CreatePost from '~/components/Modal/ModalConfirm/CreatePost';
 import { useState } from 'react';
 import ProfileBrief from '~/components/Modal/ModalConfirm/ProfileBrief';
+import { useParams } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
@@ -29,6 +30,10 @@ function Profile() {
         setShowingProfile(!isShowingProfile);
     };
 
+    const { nickname } = useParams();
+
+    console.log(nickname);
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('grid')}>
@@ -41,7 +46,7 @@ function Profile() {
                                     <img className={cx('avatar')} src={images.cancer} alt="" />
                                     <div className={cx('info-user')}>
                                         <div className={cx('fullname')}>Yến Nhi</div>
-                                        <div className={cx('nickname')}>@yanni</div>
+                                        <div className={cx('nickname')}>{nickname}</div>
                                         <Button
                                             onClick={toggleProfile}
                                             normal

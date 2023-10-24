@@ -1,12 +1,12 @@
 const routes = {
     home: '/',
-    call: '/call/:nickname',
-    profile: '/profile/:nickname',
-    search: '/search',
-    messages: '/messages',
-    matching: '/matching',
-    settingProfile: '/setting/editprofile',
-    settingPassword: '/setting/changePassword',
+    call: '/api/call/:nickname',
+    profile: '/api/profile/:nickname',
+    search: '/api/search',
+    messages: '/api/messages',
+    matching: '/api/matching',
+    settingProfile: '/api/setting/editprofile',
+    settingPassword: '/api/setting/changePassword',
 };
 
 export default routes;

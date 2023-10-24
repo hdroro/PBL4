@@ -4,10 +4,14 @@ import Button from '~/components/Button';
 import { Eye, Facebook, Gmail, NotEye } from '~/components/Icon/Icon';
 import SignUp from '../SignUp';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { handleLoginApi } from '~/services/userService';
 
 const cx = classNames.bind(styles);
 
 function Login() {
+    const navigate = useNavigate();
     const [isShowingSignUp, setIsShowingSignUp] = useState(false);
 
     function toggleSignUp() {
@@ -28,8 +32,19 @@ function Login() {
         console.log(event.target.value);
     };
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         console.log('username: ' + username + ', password: ' + password);
+
+        try {
+            let data = await handleLoginApi(username, password);
+
+            if (data && data.errCode === 0) {
+                navigate('/api/matching', { state: { data } });
+                console.log('loging success');
+            }
+        } catch (e) {
+            console.log('error message', e.response);
+        }
     };
 
     const handleTogglePassword = () => {

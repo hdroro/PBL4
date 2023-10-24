@@ -12,7 +12,7 @@ import { useModal } from '~/hooks';
 import { Link } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
-function Sidebar() {
+function Sidebar({ user }) {
     const { isShowing, toggle } = useModal();
     const renderPreview = () => {
         return (
@@ -71,8 +71,8 @@ function Sidebar() {
                             <div className={cx('col l-12 m-12 c-12')}>
                                 <div className={cx('infor')}>
                                     <img src={images.cancer} alt="Cancer" />
-                                    <span className={cx('name')}>Yến Nhi</span>
-                                    <span className={cx('nickname')}>@yanni</span>
+                                    <span className={cx('name')}>{user.fullName}</span>
+                                    <span className={cx('nickname')}>@{user.userName}</span>
                                 </div>
                             </div>
                         </div>
@@ -89,7 +89,13 @@ function Sidebar() {
                                             Message
                                         </Button>
 
-                                        <Button to={'/profile/@yanni'} normal large text leftIcon={<User />}>
+                                        <Button
+                                            to={`/api/profile/@${user.userName}`}
+                                            normal
+                                            large
+                                            text
+                                            leftIcon={<User />}
+                                        >
                                             My blog
                                         </Button>
 
