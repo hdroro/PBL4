@@ -10,4 +10,11 @@ const handleGetInfo = () => {
     return axios.get('api/matching', { withCredentials: true });
 };
 
-export { handleLoginApi, handleGetInfo };
+const handleSignupApi = (username, password, fullname, date, gender) => {
+    return axios.post('api/signup', {
+        withCredentials: true,
+        username, password, fullname, date, gender
+    });
+}
+
+export { handleLoginApi, handleGetInfo, handleSignupApi };
