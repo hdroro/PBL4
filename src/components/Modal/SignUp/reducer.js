@@ -6,7 +6,7 @@ export const initialState = {
     repeatpassword: '',
     fullname: '',
     date: '',
-    gender: '',
+    gender: 0,
     isShowPassword: false,
 };
 

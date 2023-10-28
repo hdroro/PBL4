@@ -6,6 +6,7 @@ import { useReducer, useState } from 'react';
 import Login from '../Login';
 import reducer from './reducer';
 import { initialState } from './reducer';
+import { handleSignupApi } from '~/services/userService';
 
 const cx = classNames.bind(styles);
 
@@ -29,6 +30,7 @@ function SignUp() {
     }
 
     const [state, dispatch] = useReducer(reducer, initialState);
+    const {username, password, repeatpassword, fullname, date, gender} = state;
     // Các hàm xử lý sự kiện
     const handleOnChangeUsername = (event) => {
         dispatch({ type: 'SET_USERNAME', payload: event.target.value });
@@ -54,6 +56,22 @@ function SignUp() {
         dispatch({ type: 'SET_GENDER', payload: event.target.value });
     };
 
+    const [signupError, setSignupError] = useState('');
+    const handleSignup = async () => {
+        try {
+            let data = await handleSignupApi(username, password, fullname, date, gender);
+            console.log(data);
+            if (data && data.errCode === 0) {
+                console.log('sign up success');
+            } else {
+                console.log('data.message ' + data.message);
+            }
+            setSignupError(data.message);
+        } catch (e) {
+            console.log('error message', e.response);
+        }
+    };
+
     return (
         <div>
             {isShowLogin ? (
@@ -70,8 +88,8 @@ function SignUp() {
                                 <div className={cx('input')}>
                                     <input
                                         type="text"
-                                        name="text"
-                                        value={dispatch.payload}
+                                        name="username"
+                                        value={username}
                                         onChange={(event) => handleOnChangeUsername(event)}
                                     />
                                 </div>
@@ -83,7 +101,7 @@ function SignUp() {
                                     <input
                                         type={isTogglePassword ? 'text' : 'password'}
                                         name="password"
-                                        value={dispatch.payload}
+                                        value={password}
                                         onChange={(event) => handleOnChangePassword(event)}
                                     />
                                     {isTogglePassword ? (
@@ -100,7 +118,7 @@ function SignUp() {
                                     <input
                                         type={isTogglePasswordRepeat ? 'text' : 'password'}
                                         name="reapeatpassword"
-                                        value={dispatch.payload}
+                                        value={repeatpassword}
                                         onChange={(event) => handleOnChangeRepeatPassword(event)}
                                     />
                                     {isTogglePasswordRepeat ? (
@@ -119,7 +137,7 @@ function SignUp() {
                                     <input
                                         type="text"
                                         name="fullname"
-                                        value={dispatch.payload}
+                                        value={fullname}
                                         onChange={(event) => handleOnChangeFullName(event)}
                                     />
                                 </div>
@@ -131,7 +149,7 @@ function SignUp() {
                                     <input
                                         type="date"
                                         name="date"
-                                        value={dispatch.payload}
+                                        value={date}
                                         className={cx('input-date')}
                                         onChange={(event) => handleOnChangeDate(event)}
                                     />
@@ -143,18 +161,22 @@ function SignUp() {
                                 <div className={cx('input')}>
                                     <select
                                         className={cx('selection-options')}
-                                        value={dispatch.payload}
+                                        value={gender}
                                         onChange={(event) => handleOnChangeGender(event)}
+                                        name="gender"
                                     >
-                                        <option value="1">Male</option>
-                                        <option value="2">Female</option>
+                                        <option value="0">Male</option>
+                                        <option value="1">Female</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
+                    </div>  
+                    <div className={cx('signup-error')}>
+                        <span className={cx('signup-error-message')}>{signupError}</span>
                     </div>
                     <div className={cx('footer')}>
-                        <Button home small normal>
+                        <Button home small normal onClick={() => handleSignup()}>
                             OK
                         </Button>
 

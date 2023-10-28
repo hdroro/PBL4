@@ -34,6 +34,17 @@ const handleGetAccById = (idConversation) => {
 const handlePostMessage = (direct, messageText, timeSend, idConversation) => {
     return axios.post('/api/save-message', { withCredentials: true, direct, messageText, timeSend, idConversation });
 };
+
+const handleSignupApi = (username, password, fullname, date, gender) => {
+    return axios.post('api/signup', {
+        withCredentials: true,
+        username,
+        password,
+        fullname,
+        date,
+        gender,
+    });
+};
 export {
     handleLoginApi,
     handleGetInfo,
@@ -42,4 +53,5 @@ export {
     handleLoadMessage,
     handleGetAccById,
     handlePostMessage,
+    handleSignupApi,
 };

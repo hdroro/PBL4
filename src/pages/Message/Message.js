@@ -223,7 +223,6 @@ function Message() {
                         <UserGroup className={cx('connect-friend')} />
                     </div>
                 </div>
-                {/* <div className={cx('users')}>No message</div> */}
 
                 <div>
                     {userChat?.map((item) => (
