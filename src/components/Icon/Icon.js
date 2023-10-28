@@ -183,8 +183,9 @@ export const Images = ({ width = '1.5em', height = '1.5em', className }) => (
     </svg>
 );
 
-export const SendMessage = ({ width = '1.5em', height = '1.5em', className }) => (
+export const SendMessage = ({ width = '1.5em', height = '1.5em', className, onClick }) => (
     <svg
+        onClick={onClick}
         className={className}
         width={width}
         height={height}
