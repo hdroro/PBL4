@@ -97,7 +97,7 @@ function Message() {
 
             const re = await handleGetInfoByID(idUser);
             setLoadInfoChatSide(re.userData.user);
-            console.log('re.userData ' + re.userData.user[0]);
+            console.log('re.userData ' + re.userData.user);
         } catch (error) {
             console.error(error);
         }
@@ -121,7 +121,6 @@ function Message() {
                 handleLoadMessage(idConversation_, idUser_),
                 handleFetchChatUser(),
             ]);
-            setLoadMessages(messageResponse.loadMessage);
             setLoadMessages(messageResponse.loadMessage);
             setUserChat(chatUserResponse.userChatData);
         });
@@ -173,7 +172,6 @@ function Message() {
             setUserChat(response_.userChatData);
             setTypeMessage('');
         } catch (error) {
-            // Handle any errors here
             console.error('Error in handleSendMessage:', error);
         }
     };
@@ -235,7 +233,7 @@ function Message() {
                                 handleSetLoadMessage(item.idConversation, item.userInfo.idUser); // idConversation + id người được nhắn
                             }}
                         >
-                            <img className={cx('avatar')} src={images.cancer} alt="" />
+                            <img className={cx('avatar')} src={images[item.avatar]} alt="" />
                             <div className={cx('info-user')}>
                                 <div className={cx('fullname')}>{item.userInfo.userName}</div>
                                 <div className={cx('message-info')}>
@@ -265,18 +263,18 @@ function Message() {
                 {isShowMessage ? (
                     <>
                         <div className={cx('chat-header')}>
-                            {loadInfoChatSide.map((item, index) => (
-                                <div className={cx('header-content')} key={index}>
-                                    <img className={cx('avatar-header')} src={images.cancer} alt="" />
+                            {loadInfoChatSide && (
+                                <div className={cx('header-content')}>
+                                    <img className={cx('avatar-header')} src={images[loadInfoChatSide.avatar]} alt="" />
                                     <div className={cx('info-user')}>
-                                        <div className={cx('fullname-header')}>{item.fullName}</div>
-                                        <div className={cx('nickname-header')}>@{item.userName}</div>
+                                        <div className={cx('fullname-header')}>{loadInfoChatSide.fullName}</div>
+                                        <div className={cx('nickname-header')}>@{loadInfoChatSide.userName}</div>
                                     </div>
                                 </div>
-                            ))}
+                            )}
 
                             <div className={cx('action-group')}>
-                                <a href="/call/@hd.roro">
+                                <a href="/api/call/@hd.roro">
                                     <PhoneCall className={cx('phone-call')} />
                                 </a>
                                 <Setting className={cx('chat-setting')} onClick={() => handleToggleSetting()} />
@@ -286,7 +284,8 @@ function Message() {
                             {loadMessages.chat.map((item, index) =>
                                 item.direct === 0 ? (
                                     <div className={cx('chat-item')} key={index}>
-                                        <img src={images.leo} alt="" />
+                                        <img src={images[item.avatar]} alt="" />
+
                                         <div className={cx('message-detail')}>
                                             <p className={cx('message')}>{item.messageText}</p>
                                             <span className={cx('time-send')}>{formatTime(item.timeSend)}</span>
