@@ -112,16 +112,20 @@ function Message() {
         newSocket.on('recieve-message', async (data) => {
             console.log('Received message: ', data);
 
-            // setLoadMessages((prevLoadMessages) => ({
-            //     chat: [data, ...prevLoadMessages.chat],
-            // }));
+            data.direct = 0;
+            setLoadMessages((prevLoadMessages) => ({
+                chat: [data, ...prevLoadMessages.chat],
+            }));
 
-            console.log(idConversation_ + ' ' + idUser_);
-            const [messageResponse, chatUserResponse] = await Promise.all([
-                handleLoadMessage(idConversation_, idUser_),
-                handleFetchChatUser(),
-            ]);
-            setLoadMessages(messageResponse.loadMessage);
+            // console.log('idUser ' + idUser_ + 'idSession ' + idSession);
+
+            // console.log(idConversation_ + ' ' + idUser_);
+            // const [messageResponse, chatUserResponse] = await Promise.all([
+            //     handleLoadMessage(idConversation_, idUser_),
+            //     handleFetchChatUser(),
+            // ]);
+            // setLoadMessages(messageResponse.loadMessage);
+            const chatUserResponse = await handleFetchChatUser();
             setUserChat(chatUserResponse.userChatData);
         });
 
@@ -156,7 +160,9 @@ function Message() {
                 _idSession = a2;
             }
             let direct_ = 1;
-            const newMessage = { direct_, messageText, timeSend, idConversation };
+            const re = await handleGetInfoByID(idSession);
+            const avatar = re.userData.user.avatar;
+            const newMessage = { direct_, avatar, messageText, timeSend, idConversation };
             setNewMessage(newMessage);
             setLoad(!load);
             console.log('haizzzzzzzzzzzzzzzzz ' + newMessage.messageText);
