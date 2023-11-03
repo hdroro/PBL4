@@ -33,8 +33,6 @@ import { handleGetConversationByID } from '~/services/conversationService';
 const cx = classNames.bind(styles);
 
 function Message({ socket, onlineUsers }) {
-    // console.log('socket: ', socket);
-    // console.log('online: ', onlineUsers);
     const [isShowSetting, setIsShowSetting] = useState(false);
     const [typeMessage, setTypeMessage] = useState('');
     const [inputSearch, setInputSearch] = useState('');
@@ -113,24 +111,6 @@ function Message({ socket, onlineUsers }) {
         }
     };
 
-    // useEffect(() => {
-    //     if (socket === null) return;
-    //     socket.on('blocked-conversation', (data) => {
-    //         console.log('data ' + data);
-    //         setIsBlocked(data);
-    //     });
-    // }, [socket]);
-
-    // useEffect(() => {
-    //     if (socket === null) return;
-    //     socket.emit('addNewUser', idSession);
-    //     socket.on('getOnlineUsers', (response) => {
-    //         setOnlineUsers(response);
-    //     });
-    // }, [socket]);
-
-    // console.log('OnlineUser', onlineUsers);
-
     const handleSendMessage = async () => {
         try {
             const messageText = typeMessage;
@@ -177,6 +157,7 @@ function Message({ socket, onlineUsers }) {
             setNewMessage(newMessage);
             setLoad(!load);
             console.log('haizzzzzzzzzzzzzzzzz ' + newMessage.messageText);
+            console.log('isBlockeddddđ ' + isBlocked);
             setLoadMessages((prevLoadMessages) => ({
                 chat: [newMessage, ...prevLoadMessages.chat],
             }));

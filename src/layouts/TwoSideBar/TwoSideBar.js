@@ -1,16 +1,20 @@
 import classNames from 'classnames/bind';
 import styles from './TwoSideBar.module.scss';
+import React from 'react';
 
 import PropTypes from 'prop-types';
 import Sidebar from '../components/Sidebar';
 import SubSidebar from '../components/SubSidebar';
 import { useEffect, useState } from 'react';
 import { handleGetInfo } from '~/services/userService';
+import { io } from 'socket.io-client';
 
 const cx = classNames.bind(styles);
 
 function TwoSideBar({ children }) {
     const [user, setUser] = useState({});
+    const [onlineUsers, setOnlineUsers] = useState([]);
+    const [socket, setSocket] = useState(null);
 
     useEffect(() => {
         const fetchUserInfo = async () => {
@@ -27,6 +31,32 @@ function TwoSideBar({ children }) {
         fetchUserInfo();
     }, []);
 
+    useEffect(() => {
+        const newSocket = io('http://localhost:3001');
+        setSocket(newSocket);
+
+        return () => {
+            newSocket.disconnect();
+        };
+    }, [user]);
+
+    useEffect(() => {
+        if (socket === null) return;
+        socket.emit('addNewUser', user.idUser);
+        socket.on('getOnlineUsers', (response) => {
+            setOnlineUsers(response);
+        });
+    }, [socket]);
+
+    console.log('OnlineUser', onlineUsers);
+
+    const childrenWithProps = React.Children.map(children, (child) => {
+        if (React.isValidElement(child)) {
+            return React.cloneElement(child, { socket, onlineUsers });
+        }
+        return child;
+    });
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container')}>
@@ -39,7 +69,7 @@ function TwoSideBar({ children }) {
                             <div className={cx('col l-2 m-2 c-2')}>
                                 <SubSidebar />
                             </div>
-                            <div className={cx('col l-7 m-7 c-7')}>{children}</div>
+                            <div className={cx('col l-7 m-7 c-7')}>{childrenWithProps}</div>
                         </div>
                     </div>
                 </div>
