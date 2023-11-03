@@ -28,14 +28,32 @@ import {
     handleLoadMessage,
     handlePostMessage,
 } from '~/services/userService';
-import { io } from 'socket.io-client';
+import { handleGetConversationByID } from '~/services/conversationService';
 
 const cx = classNames.bind(styles);
 
-function Message() {
+function Message({ socket, onlineUsers }) {
+    // console.log('socket: ', socket);
+    // console.log('online: ', onlineUsers);
     const [isShowSetting, setIsShowSetting] = useState(false);
     const [typeMessage, setTypeMessage] = useState('');
     const [inputSearch, setInputSearch] = useState('');
+    const { isShowing, toggle } = useModal();
+    const [isShowingClear, setIsShowingClear] = useState(false);
+    //FETCH USER CHAT
+    const [userChat, setUserChat] = useState([]);
+    const [idSession, setIdSession] = useState(null);
+    const [load, setLoad] = useState(false);
+    const [loadMessages, setLoadMessages] = useState([]);
+    const [isShowMessage, setIsShowMessage] = useState(false);
+    const [newMessage, setNewMessage] = useState({});
+
+    //SETTTTTTTTTTTTTTTTTTTTTTT
+    const [idConversation_, setIdconversation] = useState(1);
+    const [idUser_, setIdUser] = useState(1);
+    const [loadInfoChatSide, setLoadInfoChatSide] = useState([]);
+    const [isBlocked, setIsBlocked] = useState(false);
+    //INITIAL SOCKET
 
     const handleChangeMessage = (event) => {
         setTypeMessage(event.target.value);
@@ -48,17 +66,9 @@ function Message() {
         setInputSearch(event.target.value);
     };
 
-    const { isShowing, toggle } = useModal();
-    const [isShowingClear, setIsShowingClear] = useState(false);
-
     const handleToggleClear = () => {
         setIsShowingClear(!isShowingClear);
     };
-
-    //FETCH USER CHAT
-    const [userChat, setUserChat] = useState([]);
-    const [idSession, setIdSession] = useState(0);
-    const [load, setLoad] = useState(false);
 
     useEffect(() => {
         const fetchUserChat = async () => {
@@ -76,19 +86,19 @@ function Message() {
         fetchUserChat();
     }, []);
 
-    const [loadMessages, setLoadMessages] = useState([]);
-    const [isShowMessage, setIsShowMessage] = useState(false);
-    const [newMessage, setNewMessage] = useState({});
-
-    //SETTTTTTTTTTTTTTTTTTTTTTT
-    const [idConversation_, setIdconversation] = useState(1);
-    const [idUser_, setIdUser] = useState(1);
-    const [loadInfoChatSide, setLoadInfoChatSide] = useState([]);
     //GET MESSAGE
     const handleSetLoadMessage = async (idConversation, idUser) => {
         try {
             setIdconversation(idConversation);
             setIdUser(idUser);
+
+            const blocked = await handleGetConversationByID(idConversation);
+
+            const _isBlocked = blocked.conversationData.newConversation[0].isBlocked;
+            if (_isBlocked === 1) {
+                // socket.emit('block-conversation', _isBlocked);
+                setIsBlocked(true);
+            } else setIsBlocked(false);
 
             const response = await handleLoadMessage(idConversation, idUser);
             setLoadMessages(response.loadMessage);
@@ -103,36 +113,23 @@ function Message() {
         }
     };
 
-    //INITIAL SOCKET
-    const [socket, setSocket] = useState(null);
-    useEffect(() => {
-        const newSocket = io('http://localhost:3001');
-        setSocket(newSocket);
+    // useEffect(() => {
+    //     if (socket === null) return;
+    //     socket.on('blocked-conversation', (data) => {
+    //         console.log('data ' + data);
+    //         setIsBlocked(data);
+    //     });
+    // }, [socket]);
 
-        newSocket.on('recieve-message', async (data) => {
-            console.log('Received message: ', data);
+    // useEffect(() => {
+    //     if (socket === null) return;
+    //     socket.emit('addNewUser', idSession);
+    //     socket.on('getOnlineUsers', (response) => {
+    //         setOnlineUsers(response);
+    //     });
+    // }, [socket]);
 
-            data.direct = 0;
-            setLoadMessages((prevLoadMessages) => ({
-                chat: [data, ...prevLoadMessages.chat],
-            }));
-
-            // console.log('idUser ' + idUser_ + 'idSession ' + idSession);
-
-            // console.log(idConversation_ + ' ' + idUser_);
-            // const [messageResponse, chatUserResponse] = await Promise.all([
-            //     handleLoadMessage(idConversation_, idUser_),
-            //     handleFetchChatUser(),
-            // ]);
-            // setLoadMessages(messageResponse.loadMessage);
-            const chatUserResponse = await handleFetchChatUser();
-            setUserChat(chatUserResponse.userChatData);
-        });
-
-        return () => {
-            newSocket.disconnect();
-        };
-    }, [idConversation_, idUser_]);
+    // console.log('OnlineUser', onlineUsers);
 
     const handleSendMessage = async () => {
         try {
@@ -152,7 +149,7 @@ function Message() {
             const a1 = response.accountList.chat[0].idAcc1;
 
             let direct, _idSession;
-            if (idSession === a2) {
+            if (idSession == a2) {
                 direct = 0;
                 _idSession = a1;
             } else {
@@ -162,17 +159,30 @@ function Message() {
             let direct_ = 1;
             const re = await handleGetInfoByID(idSession);
             const avatar = re.userData.user.avatar;
-            const newMessage = { direct_, avatar, messageText, timeSend, idConversation };
+
+            setIdUser(_idSession);
+            console.log('idUser_ ' + idUser_);
+            console.log('id ' + isBlocked);
+
+            const newMessage = {
+                _idSession,
+                idSession,
+                idUser_,
+                direct_,
+                avatar,
+                messageText,
+                timeSend,
+                idConversation,
+            };
             setNewMessage(newMessage);
             setLoad(!load);
             console.log('haizzzzzzzzzzzzzzzzz ' + newMessage.messageText);
             setLoadMessages((prevLoadMessages) => ({
                 chat: [newMessage, ...prevLoadMessages.chat],
             }));
-            setIdUser(_idSession);
-            handlePostMessage(direct, messageText, timeSend, idConversation);
 
-            await socket.emit('send-message', newMessage);
+            handlePostMessage(direct, messageText, timeSend, idConversation);
+            socket.emit('send-message', newMessage);
 
             const response_ = await handleFetchChatUser();
             setUserChat(response_.userChatData);
@@ -181,6 +191,31 @@ function Message() {
             console.error('Error in handleSendMessage:', error);
         }
     };
+
+    useEffect(() => {
+        if (socket === null) {
+            console.log(null);
+            return;
+        }
+        console.log('Socket connected:', socket.connected);
+        socket.off('recieve-message');
+
+        socket.on('recieve-message', async (data) => {
+            // console.log('room ' + data.room);
+            console.log('Received message: ', data);
+            console.log('idSession ' + idSession + 'idUser_ ' + idUser_);
+            if (data.idSession == idUser_ && data.idUser_ == idSession) {
+                data.direct = 0;
+                setLoadMessages((prevLoadMessages) => ({
+                    chat: [data, ...prevLoadMessages.chat],
+                }));
+            }
+
+            const chatUserResponse = await handleFetchChatUser();
+            setUserChat(chatUserResponse.userChatData);
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [socket, newMessage, idUser_]);
 
     function isSameDay(date) {
         const currentDate = new Date();
@@ -214,6 +249,15 @@ function Message() {
         }
     }
 
+    const handleBlockConversationChange = async (value) => {
+        setIsBlocked(value);
+        toggle(false);
+    };
+
+    const handleDeleteConversationChange = async (value) => {
+        setIsShowingClear(false);
+    };
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('messenger-user')}>
@@ -241,7 +285,16 @@ function Message() {
                         >
                             <img className={cx('avatar')} src={images[item.avatar]} alt="" />
                             <div className={cx('info-user')}>
-                                <div className={cx('fullname')}>{item.userInfo.userName}</div>
+                                <div className={cx('name-active')}>
+                                    <div className={cx('fullname')}>{item.userInfo.userName}</div>
+                                    <span
+                                        className={cx({
+                                            'online-user': onlineUsers.some(
+                                                (user) => user?.userID === item.userInfo.idUser,
+                                            ),
+                                        })}
+                                    ></span>{' '}
+                                </div>
                                 <div className={cx('message-info')}>
                                     <div className={cx('lastest-message')}>
                                         <span>{item.direct === 1 ? 'Bạn: ' : ''}</span>
@@ -307,32 +360,38 @@ function Message() {
                                 ),
                             )}
                         </div>
-                        <div className={cx('chat-send-bottom')}>
-                            <Images className={cx('btn-image')} />
-                            <div className={cx('message-input-area')}>
-                                <input
-                                    className={cx('input-message')}
-                                    placeholder="Send a message...."
-                                    value={typeMessage}
-                                    onChange={(value) => handleChangeMessage(value)}
-                                    onKeyPress={(event) => {
-                                        if (
-                                            (typeMessage !== '' && event.key === 'Enter') ||
-                                            event.key === 'NumpadEnter'
-                                        ) {
-                                            console.log('Enter key pressed. Calling handleSendMessage.');
-                                            handleSendMessage();
-                                        }
-                                    }}
-                                />
+                        {isBlocked ? (
+                            <div className={cx('block-container')}>
+                                <span className={cx('block-title')}>Cuộc trò chuyện đã bị chặn!</span>
+                                <span className={cx('block-note')}>Hiện các bạn không thể trò chuyện.</span>
                             </div>
-
-                            {typeMessage === '' ? (
-                                <SendMessageDisabled className={cx('btn-send')} />
-                            ) : (
-                                <SendMessage className={cx('btn-send')} onClick={() => handleSendMessage()} />
-                            )}
-                        </div>
+                        ) : (
+                            <div className={cx('chat-send-bottom')}>
+                                <Images className={cx('btn-image')} />
+                                <div className={cx('message-input-area')}>
+                                    <input
+                                        className={cx('input-message')}
+                                        placeholder="Send a message...."
+                                        value={typeMessage}
+                                        onChange={(value) => handleChangeMessage(value)}
+                                        onKeyPress={(event) => {
+                                            if (
+                                                (typeMessage !== '' && event.key === 'Enter') ||
+                                                event.key === 'NumpadEnter'
+                                            ) {
+                                                console.log('Enter key pressed. Calling handleSendMessage.');
+                                                handleSendMessage();
+                                            }
+                                        }}
+                                    />
+                                </div>
+                                {typeMessage === '' || isBlocked ? (
+                                    <SendMessageDisabled className={cx('btn-send')} />
+                                ) : (
+                                    <SendMessage className={cx('btn-send')} onClick={() => handleSendMessage()} />
+                                )}
+                            </div>
+                        )}
                     </>
                 ) : (
                     <div className={cx('chat-main-no-conversation')}>
@@ -363,7 +422,13 @@ function Message() {
                             Block
                         </Button>
                         <Modal title="Block Message" texttype background isShowing={isShowing} hide={toggle}>
-                            <Block hide={toggle}>Bạn có chắc chắn muốn chặn người này hay không ?</Block>
+                            <Block
+                                hide={toggle}
+                                idConversation={idConversation_}
+                                onBlockConversationChange={handleBlockConversationChange}
+                            >
+                                Bạn có chắc chắn muốn chặn người này hay không ?
+                            </Block>
                         </Modal>
 
                         <Button normal post leftIcon={<Remove />} onClick={handleToggleClear}>
@@ -377,7 +442,12 @@ function Message() {
                             isShowing={isShowingClear}
                             hide={handleToggleClear}
                         >
-                            <Block hide={handleToggleClear}>
+                            <Block
+                                hide={handleToggleClear}
+                                idConversation={idConversation_}
+                                onDeleteConversation={handleDeleteConversationChange}
+                                isDelete={true}
+                            >
                                 Bạn có chắc chắn muốn xóa toàn bộ tin nhắn hay không ?
                             </Block>
                         </Modal>

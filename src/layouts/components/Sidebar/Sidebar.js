@@ -10,6 +10,7 @@ import NotiItem from '~/components/Popper/NotiItem';
 import { PopperWrapper } from '~/components/Popper';
 import { useModal } from '~/hooks';
 import { Link } from 'react-router-dom';
+import { handleLogoutApi } from '~/services/userService';
 
 const cx = classNames.bind(styles);
 function Sidebar({ user }) {
@@ -22,6 +23,10 @@ function Sidebar({ user }) {
                 <NotiItem />
             </PopperWrapper>
         );
+    };
+
+    const handleLogoutAccout = async () => {
+        await handleLogoutApi();
     };
 
     return (
@@ -111,7 +116,7 @@ function Sidebar({ user }) {
                             <div className={cx('row')}>
                                 <Link to="/">
                                     <div className={cx('col l-12 m-12 c-12')}>
-                                        <Logout />
+                                        <Logout onClick={() => handleLogoutAccout()} />
                                     </div>
                                 </Link>
                             </div>

@@ -1,6 +1,7 @@
 import BackGround from '~/layouts/components/BackGround';
 
-function Matching() {
+function Matching({ socket, onlineUsers }) {
+    console.log(onlineUsers);
     return <BackGround isMatching />;
 }
 

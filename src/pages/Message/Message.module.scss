@@ -92,10 +92,22 @@
     padding-left: 12px;
     width: 100%;
 
-    .fullname {
-        font-weight: 700;
-        font-size: 17px;
+    .name-active {
+        display: flex;
+        justify-content: space-between;
+        .fullname {
+            font-weight: 700;
+            font-size: 17px;
+        }
+
+        .online-user {
+            width: 10px;
+            height: 10px;
+            background-color: #31a24c;
+            border-radius: 50%;
+        }
     }
+
     .message-info {
         display: flex;
         justify-content: space-between;
@@ -277,6 +289,22 @@
     }
 }
 
+.block-container {
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .block-title {
+        color: #ff68d9;
+        font-weight: 600;
+    }
+
+    .block-note {
+        color: #bebebe;
+        font-size: 13px;
+        font-style: italic;
+    }
+}
 .message-input-area {
     background-color: rgba(22, 24, 35, 0.06);
     width: 100%;

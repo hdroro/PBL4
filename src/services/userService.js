@@ -6,6 +6,10 @@ const handleLoginApi = (username, password) => {
     return axios.post('api/login', { withCredentials: true, username, password });
 };
 
+const handleLogoutApi = () => {
+    return axios.post('api/logout');
+};
+
 const handleGetInfo = () => {
     return axios.get('api/matching', { withCredentials: true });
 };
@@ -47,6 +51,7 @@ const handleSignupApi = (username, password, fullname, date, gender) => {
 };
 export {
     handleLoginApi,
+    handleLogoutApi,
     handleGetInfo,
     handleGetInfoByID,
     handleFetchChatUser,

@@ -94,8 +94,9 @@ export const Setting = ({ width = '1.5rem', height = '1.5rem', className, onClic
     </svg>
 );
 
-export const Logout = ({ width = '2rem', height = '2rem', className }) => (
+export const Logout = ({ width = '2rem', height = '2rem', className, onClick }) => (
     <svg
+        onClick={onClick}
         className={className}
         width={width}
         height={height}
