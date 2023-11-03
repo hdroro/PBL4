@@ -305,10 +305,27 @@ function Message({ socket, onlineUsers }) {
                         <div className={cx('chat-header')}>
                             {loadInfoChatSide && (
                                 <div className={cx('header-content')}>
-                                    <img className={cx('avatar-header')} src={images[loadInfoChatSide.avatar]} alt="" />
+                                    <Link
+                                        to={`/api/profile/@${loadInfoChatSide.userName}`}
+                                        className={cx('link-to-profile')}
+                                    >
+                                        <img
+                                            className={cx('avatar-header')}
+                                            src={images[loadInfoChatSide.avatar]}
+                                            alt=""
+                                        />
+                                    </Link>
                                     <div className={cx('info-user')}>
-                                        <div className={cx('fullname-header')}>{loadInfoChatSide.fullName}</div>
-                                        <div className={cx('nickname-header')}>@{loadInfoChatSide.userName}</div>
+                                        <div className={cx('fullname-header')}>
+                                            <Link to={`/api/profile/@${loadInfoChatSide.userName}`}>
+                                                {loadInfoChatSide.fullName}
+                                            </Link>
+                                        </div>
+                                        <div className={cx('nickname-header')}>
+                                            <Link to={`/api/profile/@${loadInfoChatSide.userName}`}>
+                                                @{loadInfoChatSide.userName}
+                                            </Link>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -324,7 +341,12 @@ function Message({ socket, onlineUsers }) {
                             {loadMessages.chat.map((item, index) =>
                                 item.direct === 0 ? (
                                     <div className={cx('chat-item')} key={index}>
-                                        <img src={images[item.avatar]} alt="" />
+                                        <Link
+                                            to={`/api/profile/@${loadInfoChatSide.userName}`}
+                                            className={cx('link-to-profile')}
+                                        >
+                                            <img src={images[item.avatar]} alt="" />
+                                        </Link>
 
                                         <div className={cx('message-detail')}>
                                             <p className={cx('message')}>{item.messageText}</p>

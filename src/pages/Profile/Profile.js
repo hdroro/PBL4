@@ -12,8 +12,8 @@ import Modal from '~/components/Modal/Modal';
 import CreatePost from '~/components/Modal/ModalConfirm/CreatePost';
 import { useEffect, useState } from 'react';
 import ProfileBrief from '~/components/Modal/ModalConfirm/ProfileBrief';
-import { useParams } from 'react-router-dom';
-import { handleGetInfoByID } from '~/services/userService';
+import { useParams, useLocation } from 'react-router-dom';
+import { handleGetInfoByID, handleGetInfoByUsername } from '~/services/userService';
 import { handleGetPost } from '~/services/postService';
 
 const cx = classNames.bind(styles);
@@ -33,16 +33,22 @@ function Profile({ user }) {
     };
     const [infoUser, setInfoUser] = useState({});
     const [listPost, setListPost] = useState([]);
+    const [idUser, setIdUser] = useState(null);
 
     const { nickname } = useParams();
+    console.log('nikcname ' + nickname.replace('@', ''));
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await handleGetInfoByID(user.idUser);
+                console.log('New nickname:', nickname.replace('@', ''));
+                const data = await handleGetInfoByUsername(nickname.replace('@', ''));
+                console.log('data.userData.user[0].idUser ' + data.userData.user[0].idUser);
+                setIdUser(data.userData.user[0].idUser);
+                const response = await handleGetInfoByID(data.userData.user[0].idUser);
                 setInfoUser(response.userData.user);
 
-                const response_post = await handleGetPost(user.idUser);
+                const response_post = await handleGetPost(data.userData.user[0].idUser);
                 console.log(response_post.postData.posts);
                 setListPost(response_post.postData.posts);
             } catch (error) {
@@ -51,7 +57,7 @@ function Profile({ user }) {
         };
 
         fetchData();
-    }, [user.idUser]);
+    }, [nickname]);
 
     function formatISODateToCustomFormat(isoDateString) {
         const date = new Date(isoDateString);
@@ -80,16 +86,18 @@ function Profile({ user }) {
                                     <div className={cx('info-user')}>
                                         <div className={cx('fullname')}>{infoUser.fullName}</div>
                                         <div className={cx('nickname')}>@{infoUser.userName}</div>
-                                        <Button
-                                            onClick={toggleProfile}
-                                            normal
-                                            className={cx('btn-edit')}
-                                            leftIcon={<Edit />}
-                                        >
-                                            Edit Profile
-                                        </Button>
+                                        {idUser === user.idUser && (
+                                            <Button
+                                                onClick={toggleProfile}
+                                                normal
+                                                className={cx('btn-edit')}
+                                                leftIcon={<Edit />}
+                                            >
+                                                Edit Profile
+                                            </Button>
+                                        )}
                                         <Modal isShowing={isShowingProfile} hide={toggleProfile}>
-                                            <ProfileBrief toggle={toggleProfile} />
+                                            <ProfileBrief toggle={toggleProfile} infoUser={infoUser} />
                                         </Modal>
                                     </div>
                                 </div>
@@ -104,14 +112,16 @@ function Profile({ user }) {
                 <div className={cx('row')}>
                     <div className={cx('col l-12 m-12 c-12')}>
                         <div className={cx('blog-container')}>
-                            <div className={cx('header-blog')}>
-                                <img src={images.cancer} alt="" />
-                                <input
-                                    className={cx('thinking')}
-                                    placeholder="Yến Nhi ơi, bạn đang nghĩ gì ?"
-                                    onClick={toggle}
-                                />
-                            </div>
+                            {idUser === user.idUser && (
+                                <div className={cx('header-blog')}>
+                                    <img src={images[infoUser.avatar]} alt="" />
+                                    <input
+                                        className={cx('thinking')}
+                                        placeholder={`${infoUser.fullName} ơi, bạn đang nghĩ gì ?`}
+                                        onClick={toggle}
+                                    />
+                                </div>
+                            )}
                             <Modal
                                 title="Create new post"
                                 leftIcon={<BookPost />}
@@ -120,7 +130,7 @@ function Profile({ user }) {
                                 isShowing={isShowing}
                                 hide={toggle}
                             >
-                                <CreatePost />
+                                <CreatePost infoUser={infoUser} />
                             </Modal>
 
                             <div className={cx('post-container')}>
@@ -141,17 +151,19 @@ function Profile({ user }) {
                                                 </div>
                                             </div>
 
-                                            <Tippy
-                                                offset={[100, -30]}
-                                                interactive
-                                                delay={[0, 100]}
-                                                placement="bottom"
-                                                content={renderPreview()}
-                                            >
-                                                <div>
-                                                    <ThreeDots className={cx('icon-dots')} />
-                                                </div>
-                                            </Tippy>
+                                            {idUser === user.idUser && (
+                                                <Tippy
+                                                    offset={[100, -30]}
+                                                    interactive
+                                                    delay={[0, 100]}
+                                                    placement="bottom"
+                                                    content={renderPreview()}
+                                                >
+                                                    <div>
+                                                        <ThreeDots className={cx('icon-dots')} />
+                                                    </div>
+                                                </Tippy>
+                                            )}
                                         </div>
 
                                         <div className={cx('post-content')}>{item.content}</div>

@@ -17,6 +17,10 @@ const handleGetInfo = () => {
 const handleGetInfoByID = (idUser) => {
     return axios.get('api/get-user', { withCredentials: true, params: { idUser } });
 };
+
+const handleGetInfoByUsername = (nickname) => {
+    return axios.get('api/get-user-by-username', { withCredentials: true, params: { nickname } });
+};
 const handleFetchChatUser = () => {
     return axios.get('api/user-chat', { withCredentials: true });
 };
@@ -54,6 +58,7 @@ export {
     handleLogoutApi,
     handleGetInfo,
     handleGetInfoByID,
+    handleGetInfoByUsername,
     handleFetchChatUser,
     handleLoadMessage,
     handleGetAccById,

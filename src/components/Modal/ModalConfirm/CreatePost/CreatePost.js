@@ -5,18 +5,18 @@ import Button from '~/components/Button';
 
 const cx = classNames.bind(styles);
 
-function CreatePost() {
+function CreatePost({ infoUser }) {
     return (
         <div className={cx('wrapper')}>
             <div className={cx('header')}>
-                <img src={images.cancer} alt="cancer" />
+                <img src={images[infoUser.avatar]} alt="cancer" />
                 <div className={cx('info-user')}>
-                    <div className={cx('fullname')}>Yến Nhi</div>
-                    <div className={cx('nickname')}> @yanni</div>
+                    <div className={cx('fullname')}>{infoUser.fullName}</div>
+                    <div className={cx('nickname')}> @{infoUser.userName}</div>
                 </div>
             </div>
             <div className={cx('content')}>
-                <textarea placeholder="Yến Nhi ơi, bạn đang nghĩ gì ?" />
+                <textarea placeholder={`${infoUser.fullName} ơi, bạn đang nghĩ gì ?`} />
             </div>
             <div className={cx('footer')}>
                 <Button normal className={cx('btn-post')}>
