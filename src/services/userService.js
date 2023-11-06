@@ -40,8 +40,19 @@ const handleGetAccById = (idConversation) => {
 };
 
 const handlePostMessage = (direct, messageText, timeSend, idConversation) => {
-    return axios.post('/api/save-message', { withCredentials: true, direct, messageText, timeSend, idConversation });
+    return axios.post('/api/save-message', { withCredentials: true, direct, messageText, timeSend, idConversation })
 };
+
+const handlePostFile = (direct, file, timeSend, idConversation) =>{
+    return axios.post('/api/save-file', { withCredentials: true, direct, file, timeSend, idConversation}, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }});
+}
+
+const getFile = (filename)=>{
+    return axios.get('/api/get-file', { withCredentials: true, filename});
+}
 
 const handleSignupApi = (username, password, fullname, date, gender) => {
     return axios.post('api/signup', {
@@ -63,5 +74,7 @@ export {
     handleLoadMessage,
     handleGetAccById,
     handlePostMessage,
+    handlePostFile,
     handleSignupApi,
+    getFile
 };
