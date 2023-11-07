@@ -25,22 +25,11 @@ const handleFetchChatUser = () => {
     return axios.get('api/user-chat', { withCredentials: true });
 };
 
-const handleLoadMessage = (idConversation, idUser) => {
-    return axios.get('/api/user-load-message', {
-        withCredentials: true,
-        params: { idConversation, idUser },
-    });
-};
-
 const handleGetAccById = (idConversation) => {
     return axios.get('/api/user-list', {
         withCredentials: true,
         params: { idConversation },
     });
-};
-
-const handlePostMessage = (direct, messageText, timeSend, idConversation) => {
-    return axios.post('/api/save-message', { withCredentials: true, direct, messageText, timeSend, idConversation });
 };
 
 const handleSignupApi = (username, password, fullname, date, gender) => {
@@ -60,8 +49,6 @@ export {
     handleGetInfoByID,
     handleGetInfoByUsername,
     handleFetchChatUser,
-    handleLoadMessage,
     handleGetAccById,
-    handlePostMessage,
     handleSignupApi,
 };

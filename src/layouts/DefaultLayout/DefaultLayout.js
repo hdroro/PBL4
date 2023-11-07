@@ -48,7 +48,7 @@ function DefaultLayout({ children }) {
 
     const childrenWithProps = React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
-            return React.cloneElement(child, { socket, onlineUsers });
+            return React.cloneElement(child, { socket, onlineUsers, user });
         }
         return child;
     });

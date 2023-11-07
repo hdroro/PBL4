@@ -15,8 +15,9 @@ export const SearchIcon = ({ width = '2.4rem', height = '2.4rem', className }) =
     </svg>
 );
 
-export const NotifIcon = ({ width = '2rem', height = '2rem', className }) => (
+export const NotifIcon = ({ width = '2rem', height = '2rem', className, onClick }) => (
     <svg
+        onClick={onClick}
         className={className}
         width={width}
         height={height}
@@ -317,6 +318,19 @@ export const BlockMessage = ({ width = '1em', height = '1em', className }) => (
     </svg>
 );
 
+export const NotBlockMessage = ({ width = '1em', height = '1em', className }) => (
+    <svg
+        className={className}
+        width={width}
+        height={height}
+        viewBox="0 0 512 512"
+        fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <path d="M512 240c0 114.9-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6C73.6 471.1 44.7 480 16 480c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4l0 0 0 0 0 0 0 0 .3-.3c.3-.3 .7-.7 1.3-1.4c1.1-1.2 2.8-3.1 4.9-5.7c4.1-5 9.6-12.4 15.2-21.6c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208z" />
+    </svg>
+);
+
 export const Heart = ({ width = '1em', height = '1em', className }) => (
     <svg
         className={className}
@@ -507,5 +521,53 @@ export const Age = ({ width = '1em', height = '1em', className, onClick }) => (
         xmlns="http://www.w3.org/2000/svg"
     >
         <path d="M248 167.5l64.9 98.8H183.1l64.9-98.8zM496 256c0 136.9-111.1 248-248 248S0 392.9 0 256 111.1 8 248 8s248 111.1 248 248zm-99.8 82.7L248 115.5 99.8 338.7h30.4l33.6-51.7h168.6l33.6 51.7h30.2z" />
+    </svg>
+);
+
+export const CloseIcon = ({ width = '1em', height = '1em', className, onClick }) => (
+    <svg
+        onClick={onClick}
+        className={className}
+        width={width}
+        height={height}
+        viewBox="0 0 384 512"
+        fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <svg>
+            <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
+        </svg>
+    </svg>
+);
+
+export const SearchUp = ({ width = '1em', height = '1em', className, onClick }) => (
+    <svg
+        onClick={onClick}
+        className={className}
+        width={width}
+        height={height}
+        viewBox="0 0 512 512"
+        fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <svg>
+            <path d="M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z" />
+        </svg>
+    </svg>
+);
+
+export const SearchDown = ({ width = '1em', height = '1em', className, onClick }) => (
+    <svg
+        onClick={onClick}
+        className={className}
+        width={width}
+        height={height}
+        viewBox="0 0 512 512"
+        fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <svg>
+            <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
+        </svg>
     </svg>
 );

@@ -3,36 +3,36 @@ import styles from './Message.module.scss';
 import {
     BackIcon,
     BlockMessage,
+    CloseIcon,
     Images,
+    NotBlockMessage,
     NotifIcon,
     PhoneCall,
     Remove,
+    SearchDown,
     SearchIcon,
+    SearchUp,
     SendMessage,
     SendMessageDisabled,
     Setting,
     UserGroup,
 } from '~/components/Icon/Icon';
-import { Link } from 'react-router-dom';
+import { Link, parsePath } from 'react-router-dom';
 import images from '~/assets/images';
 import routes from '~/config/routes';
 import Button from '~/components/Button';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useModal } from '~/hooks';
 import Modal from '~/components/Modal/Modal';
 import Block from '~/components/Modal/ModalConfirm/Block/Block';
-import {
-    handleFetchChatUser,
-    handleGetAccById,
-    handleGetInfoByID,
-    handleLoadMessage,
-    handlePostMessage,
-} from '~/services/userService';
-import { handleGetConversationByID } from '~/services/conversationService';
+import { handleFetchChatUser, handleGetAccById, handleGetInfoByID } from '~/services/userService';
+import { handleLoadMessage, handlePostMessage } from '~/services/messageService';
+import { handleGetConversationByID, handleUpdateBlockStatusConversation } from '~/services/conversationService';
+import { handlePostBlockInfo, handleGetBlockInfo, handleDeleteBlockInfo } from '~/services/blockService';
 
 const cx = classNames.bind(styles);
 
-function Message({ socket, onlineUsers }) {
+function Message({ socket, onlineUsers, user }) {
     const [isShowSetting, setIsShowSetting] = useState(false);
     const [typeMessage, setTypeMessage] = useState('');
     const [inputSearch, setInputSearch] = useState('');
@@ -51,7 +51,24 @@ function Message({ socket, onlineUsers }) {
     const [idUser_, setIdUser] = useState(1);
     const [loadInfoChatSide, setLoadInfoChatSide] = useState([]);
     const [isBlocked, setIsBlocked] = useState(false);
+    const [userBlock, setUserBlock] = useState(null);
+    const [isOpenBlock, setIsOpenBlock] = useState(false);
+    const [isDisableBlock, setIsDisableBlock] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [blockInfo, setBlockInfo] = useState({});
+    const [blocked, setBlocked] = useState(false);
+    const [isCloseSearch, setIsCloseSearch] = useState(true);
+    const [isShowingDetailSearch, setIsShowingDetailSearch] = useState(false);
+    const [currentResultIndex, setCurrentResultIndex] = useState(0);
+    const [currentResultIndexFounded, setCurrentResultIndexFounded] = useState(0);
+    const [firstVisit, setFirstVisit] = useState(true);
+    const [isShowingResultsSearch, setIsShowingResultsSearch] = useState(null);
+
     //INITIAL SOCKET
+    useEffect(() => {
+        console.log(1);
+        setFirstVisit(false);
+    }, []);
 
     const handleChangeMessage = (event) => {
         setTypeMessage(event.target.value);
@@ -62,20 +79,26 @@ function Message({ socket, onlineUsers }) {
     };
     const handleChangeInputSearch = (event) => {
         setInputSearch(event.target.value);
+        if (event.target.value === '') setIsCloseSearch(false);
+        else setIsCloseSearch(true);
+    };
+
+    const handleDeleteInputSearch = () => {
+        setInputSearch('');
+        setIsShowingResultsSearch(null);
+        setIsCloseSearch(false);
     };
 
     const handleToggleClear = () => {
         setIsShowingClear(!isShowingClear);
+        console.log('delete side: ', user.idUser);
     };
 
     useEffect(() => {
         const fetchUserChat = async () => {
             try {
                 const response = await handleFetchChatUser();
-                console.log(response);
-                console.log('npppp ' + response.userChatData);
                 setUserChat(response.userChatData);
-                // console.log(userChat[0].idSession);
                 setIdSession(response.userChatData[0].idSession);
             } catch (error) {
                 console.error(error);
@@ -89,14 +112,23 @@ function Message({ socket, onlineUsers }) {
         try {
             setIdconversation(idConversation);
             setIdUser(idUser);
+            setIsBlocked(false);
+            setIsOpenBlock(false);
+            setIsDisableBlock(false);
+            setIsShowingDetailSearch(false);
+            setInputSearch('');
+            console.log('idConversation_    ' + idConversation);
+            const blockInfo = await handleGetBlockInfo(idConversation);
+            console.log('blockInfo.blockDataInfo.blockDataInfo ' + blockInfo.blockDataInfo?.infoBlock[0]);
+            setBlockInfo(blockInfo.blockDataInfo?.infoBlock[0]);
 
             const blocked = await handleGetConversationByID(idConversation);
 
             const _isBlocked = blocked.conversationData.newConversation[0].isBlocked;
-            if (_isBlocked === 1) {
-                // socket.emit('block-conversation', _isBlocked);
-                setIsBlocked(true);
-            } else setIsBlocked(false);
+            console.log('_isBlocked ' + _isBlocked);
+
+            if (_isBlocked === 1) setBlocked(true);
+            else setBlocked(false);
 
             const response = await handleLoadMessage(idConversation, idUser);
             setLoadMessages(response.loadMessage);
@@ -105,7 +137,6 @@ function Message({ socket, onlineUsers }) {
 
             const re = await handleGetInfoByID(idUser);
             setLoadInfoChatSide(re.userData.user);
-            console.log('re.userData ' + re.userData.user);
         } catch (error) {
             console.error(error);
         }
@@ -156,15 +187,13 @@ function Message({ socket, onlineUsers }) {
             };
             setNewMessage(newMessage);
             setLoad(!load);
-            console.log('haizzzzzzzzzzzzzzzzz ' + newMessage.messageText);
-            console.log('isBlockeddddđ ' + isBlocked);
             setLoadMessages((prevLoadMessages) => ({
                 chat: [newMessage, ...prevLoadMessages.chat],
             }));
 
             handlePostMessage(direct, messageText, timeSend, idConversation);
             socket.emit('send-message', newMessage);
-
+            chatRef.current.scrollTop = chatRef.current.scrollHeight;
             const response_ = await handleFetchChatUser();
             setUserChat(response_.userChatData);
             setTypeMessage('');
@@ -173,16 +202,32 @@ function Message({ socket, onlineUsers }) {
         }
     };
 
+    const handleOpenBlock = useCallback(async () => {
+        setIsOpenBlock(false);
+        setIsDisableBlock(false);
+        setBlockInfo(null);
+        setIsBlocked(false);
+        setBlocked(false);
+        socket?.emit('open-block-conversation', {
+            idUser_,
+            isOpenBlock,
+            isDisableBlock,
+            blockInfo,
+            isBlocked,
+            blocked,
+        });
+        console.log('idUser_ ' + idSession + 'idConversation_ ' + idConversation_);
+        await Promise.all([
+            handleUpdateBlockStatusConversation(idConversation_),
+            handleDeleteBlockInfo(idSession, idConversation_),
+        ]);
+    }, [blockInfo, blocked, idConversation_, idSession, idUser_, isBlocked, isDisableBlock, isOpenBlock, socket]);
+
     useEffect(() => {
-        if (socket === null) {
-            console.log(null);
-            return;
-        }
-        console.log('Socket connected:', socket.connected);
+        if (socket === null) return;
         socket.off('recieve-message');
 
         socket.on('recieve-message', async (data) => {
-            // console.log('room ' + data.room);
             console.log('Received message: ', data);
             console.log('idSession ' + idSession + 'idUser_ ' + idUser_);
             if (data.idSession == idUser_ && data.idUser_ == idSession) {
@@ -197,6 +242,44 @@ function Message({ socket, onlineUsers }) {
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [socket, newMessage, idUser_]);
+
+    useEffect(() => {
+        if (socket === null) return;
+        socket.on('blocked-conversation', async (data) => {
+            const response = await handleGetAccById(data.idConversation_);
+            const a2 = response.accountList.chat[0].idAcc2;
+            const a1 = response.accountList.chat[0].idAcc1;
+
+            // console.log('idConversation_ ' + data.idConversation_);
+            let idBlock = null;
+            if (a2 == data.idUser_) {
+                setUserBlock(a1);
+                idBlock = a1;
+            } else {
+                setUserBlock(a2);
+                idBlock = a2;
+            }
+            await handlePostBlockInfo(idBlock, data.idUser_, data.idConversation_);
+
+            setBlocked(data.value);
+            setIsDisableBlock(true);
+            setIsOpenBlock(false);
+
+            // console.log('block: ' + idBlock + ' blocked: ' + data.idUser_);
+        });
+    }, [socket]);
+
+    useEffect(() => {
+        if (socket === null) return;
+        socket.on('opened-block-conversation', async (data) => {
+            console.log(data);
+            setIsOpenBlock(false);
+            setIsDisableBlock(false);
+            setBlockInfo(null);
+            setIsBlocked(false);
+            setBlocked(false);
+        });
+    }, [socket]);
 
     function isSameDay(date) {
         const currentDate = new Date();
@@ -233,10 +316,66 @@ function Message({ socket, onlineUsers }) {
     const handleBlockConversationChange = async (value) => {
         setIsBlocked(value);
         toggle(false);
+        setIsOpenBlock(true);
+        await socket?.emit('block-conversation', { value, idUser_, idConversation_ });
     };
 
     const handleDeleteConversationChange = async (value) => {
         setIsShowingClear(false);
+    };
+
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0];
+        setSelectedFile(selectedFile);
+        setTypeMessage(selectedFile);
+        console.log('selectedFile', selectedFile);
+    };
+
+    const handleDeletImageAlt = () => {
+        setSelectedFile(null);
+        setTypeMessage('');
+    };
+
+    const [filteredMessages, setFilteredMessages] = useState([]);
+    const handleSearch = () => {
+        setFirstVisit(true);
+        setIsShowingDetailSearch(true);
+        const foundIndexes = [];
+        loadMessages.chat.forEach((message, index) => {
+            if (message.messageText.includes(inputSearch)) {
+                foundIndexes.push(index);
+            }
+        });
+        setFilteredMessages(foundIndexes);
+        // setCurrentResultIndex(0);
+        setCurrentResultIndexFounded(foundIndexes[0]);
+        setIsShowingResultsSearch(foundIndexes.length);
+    };
+    const chatRef = useRef(null);
+
+    const handleSearchDown = () => {
+        if (currentResultIndex > 0) {
+            setCurrentResultIndex(currentResultIndex - 1);
+            setCurrentResultIndexFounded(filteredMessages[currentResultIndex - 1]);
+            const selectedMessage = chatRef.current.children[filteredMessages[currentResultIndex - 1]];
+            selectedMessage?.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    const handleSearchUp = () => {
+        if (currentResultIndex < filteredMessages.length - 1) {
+            setCurrentResultIndex(currentResultIndex + 1);
+            setCurrentResultIndexFounded(filteredMessages[currentResultIndex + 1]);
+            const selectedMessage = chatRef.current.children[filteredMessages[currentResultIndex + 1]];
+            selectedMessage?.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    const handleCloseDetailSearch = () => {
+        setInputSearch('');
+        setFirstVisit(false);
+        setIsShowingDetailSearch(false);
+        chatRef.current.scrollTop = chatRef.current.scrollHeight;
     };
 
     return (
@@ -337,62 +476,139 @@ function Message({ socket, onlineUsers }) {
                                 <Setting className={cx('chat-setting')} onClick={() => handleToggleSetting()} />
                             </div>
                         </div>
-                        <div className={cx('chat-main')}>
-                            {loadMessages.chat.map((item, index) =>
-                                item.direct === 0 ? (
-                                    <div className={cx('chat-item')} key={index}>
-                                        <Link
-                                            to={`/api/profile/@${loadInfoChatSide.userName}`}
-                                            className={cx('link-to-profile')}
-                                        >
-                                            <img src={images[item.avatar]} alt="" />
-                                        </Link>
+                        {isShowingDetailSearch && (
+                            <div className={cx('search-action')}>
+                                <div className={cx('search-input')}>
+                                    <div className={cx('search-message')} onClick={handleSearch}>
+                                        <SearchIcon />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        name="search"
+                                        value={inputSearch}
+                                        onChange={(value) => handleChangeInputSearch(value)}
+                                    />
+                                    {console.log('isShowingResultsSearch ' + isShowingResultsSearch)}
+                                    {isShowingResultsSearch !== null && (
+                                        <span className={cx('search-results')}>
+                                            {isShowingResultsSearch}{' '}
+                                            <span> {isShowingResultsSearch >= 2 ? 'results' : 'result'}</span>
+                                        </span>
+                                    )}
 
-                                        <div className={cx('message-detail')}>
-                                            <p className={cx('message')}>{item.messageText}</p>
-                                            <span className={cx('time-send')}>{formatTime(item.timeSend)}</span>
-                                        </div>
+                                    <div className={cx('search-icon')}>
+                                        {isCloseSearch && (
+                                            <CloseIcon
+                                                className={cx('close-icon', 'icon')}
+                                                onClick={handleDeleteInputSearch}
+                                            />
+                                        )}
+                                        <SearchUp className={cx('searchup-icon', 'icon')} onClick={handleSearchUp} />
+                                        <SearchDown
+                                            className={cx('searchdown-icon', 'icon')}
+                                            onClick={handleSearchDown}
+                                        />
                                     </div>
-                                ) : (
-                                    <div className={cx('chat-item-user')} key={index}>
-                                        <div className={cx('message-detail-user')}>
-                                            <p className={cx('message')}>{item.messageText}</p>
-                                            <span className={cx('time-send')}>{formatTime(item.timeSend)}</span>
+                                </div>
+                                <button className={cx('close-search')} onClick={handleCloseDetailSearch}>
+                                    Close
+                                </button>
+                            </div>
+                        )}
+                        <div className={cx('chat-main')} ref={chatRef}>
+                            {console.log('firstVisit ' + firstVisit)}
+                            {loadMessages.chat.map((result, index) => (
+                                <div key={result.idMessage}>
+                                    {result.direct === 0 ? (
+                                        <div className={cx('chat-item')} key={index}>
+                                            <Link
+                                                to={`/api/profile/@${loadInfoChatSide.userName}`}
+                                                className={cx('link-to-profile')}
+                                            >
+                                                <img src={images[result.avatar]} alt="" />
+                                            </Link>
+                                            <div className={cx('message-detail')}>
+                                                <p
+                                                    className={cx('message', {
+                                                        highlighted: firstVisit && index === currentResultIndexFounded,
+                                                    })}
+                                                >
+                                                    {result.messageText}
+                                                </p>
+
+                                                <span className={cx('time-send')}>{formatTime(result.timeSend)}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                ),
-                            )}
+                                    ) : (
+                                        <div className={cx('chat-item-user')} key={index}>
+                                            <div className={cx('message-detail-user')}>
+                                                <p
+                                                    className={cx('message', {
+                                                        highlighted: firstVisit && index === currentResultIndexFounded,
+                                                    })}
+                                                >
+                                                    {result.messageText}
+                                                </p>
+                                                <span className={cx('time-send')}>{formatTime(result.timeSend)}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
                         </div>
-                        {isBlocked ? (
+                        {console.log('isBlocked ' + isBlocked + 'blocked ' + blocked)}
+                        {isBlocked || blocked ? (
                             <div className={cx('block-container')}>
                                 <span className={cx('block-title')}>Cuộc trò chuyện đã bị chặn!</span>
                                 <span className={cx('block-note')}>Hiện các bạn không thể trò chuyện.</span>
                             </div>
                         ) : (
                             <div className={cx('chat-send-bottom')}>
-                                <Images className={cx('btn-image')} />
-                                <div className={cx('message-input-area')}>
-                                    <input
-                                        className={cx('input-message')}
-                                        placeholder="Send a message...."
-                                        value={typeMessage}
-                                        onChange={(value) => handleChangeMessage(value)}
-                                        onKeyPress={(event) => {
-                                            if (
-                                                (typeMessage !== '' && event.key === 'Enter') ||
-                                                event.key === 'NumpadEnter'
-                                            ) {
-                                                console.log('Enter key pressed. Calling handleSendMessage.');
-                                                handleSendMessage();
-                                            }
-                                        }}
-                                    />
-                                </div>
-                                {typeMessage === '' || isBlocked ? (
-                                    <SendMessageDisabled className={cx('btn-send')} />
-                                ) : (
-                                    <SendMessage className={cx('btn-send')} onClick={() => handleSendMessage()} />
+                                {selectedFile && (
+                                    <div className={cx('image-alt')}>
+                                        <img
+                                            src={URL.createObjectURL(selectedFile)}
+                                            alt="Selected Image"
+                                            className={cx('image-file')}
+                                        />
+                                        <span onClick={handleDeletImageAlt}>×</span>
+                                    </div>
                                 )}
+                                <div className={cx('chat-action')}>
+                                    <label htmlFor="fileInput" className={cx('btn-image')}>
+                                        <Images className={cx('btn-image')} />
+                                    </label>
+                                    <input
+                                        type="file"
+                                        id="fileInput"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        style={{ display: 'none' }}
+                                    />
+
+                                    <div className={cx('message-input-area')}>
+                                        <input
+                                            className={cx('input-message')}
+                                            placeholder="Send a message...."
+                                            value={typeMessage}
+                                            onChange={(value) => handleChangeMessage(value)}
+                                            onKeyPress={(event) => {
+                                                if (
+                                                    (typeMessage !== '' && event.key === 'Enter') ||
+                                                    event.key === 'NumpadEnter'
+                                                ) {
+                                                    console.log('Enter key pressed. Calling handleSendMessage.');
+                                                    handleSendMessage();
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                    {typeMessage === '' ? (
+                                        <SendMessageDisabled className={cx('btn-send')} />
+                                    ) : (
+                                        <SendMessage className={cx('btn-send')} onClick={() => handleSendMessage()} />
+                                    )}
+                                </div>
                             </div>
                         )}
                     </>
@@ -411,7 +627,7 @@ function Message({ socket, onlineUsers }) {
                     </div>
                     <div className={cx('setting-main')}>
                         <div className={cx('search-input')}>
-                            <div className={cx('search-message')}>
+                            <div className={cx('search-message')} onClick={handleSearch}>
                                 <SearchIcon />
                             </div>
                             <input
@@ -421,9 +637,40 @@ function Message({ socket, onlineUsers }) {
                                 onChange={(value) => handleChangeInputSearch(value)}
                             />
                         </div>
-                        <Button normal post leftIcon={<BlockMessage />} onClick={toggle}>
-                            Block
-                        </Button>
+                        {filteredMessages.map((message) => (
+                            <div key={message.idMessage}>{message.messageText}</div>
+                        ))}
+                        {console.log(
+                            'idUser_ ' +
+                                idUser_ +
+                                'isOpenBlock ' +
+                                isOpenBlock +
+                                'isDisableBlock ' +
+                                isDisableBlock +
+                                'blockInfo?.idBlocked ' +
+                                blockInfo?.idBlocked,
+                        )}
+
+                        {(isOpenBlock || blockInfo?.idBlocked === idUser_) && (
+                            <Button normal post leftIcon={<NotBlockMessage />} onClick={handleOpenBlock}>
+                                UnBlock
+                            </Button>
+                        )}
+                        {!isOpenBlock &&
+                            !isDisableBlock &&
+                            blockInfo?.idBlocked !== idUser_ &&
+                            blockInfo?.idBlock !== idUser_ && (
+                                <Button normal post leftIcon={<BlockMessage />} onClick={toggle}>
+                                    Block
+                                </Button>
+                            )}
+
+                        {(isDisableBlock || blockInfo?.idBlock === idUser_) && (
+                            <Button normal post leftIcon={<BlockMessage />} onClick={toggle} disabled>
+                                Block
+                            </Button>
+                        )}
+
                         <Modal title="Block Message" texttype background isShowing={isShowing} hide={toggle}>
                             <Block
                                 hide={toggle}
