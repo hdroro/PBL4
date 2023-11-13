@@ -233,6 +233,9 @@
             background: #fff;
             padding: 10px 15px;
             border-radius: 13px;
+            display: flex;
+            flex-direction: column;
+            // text-align: right;
         }
     }
 
@@ -243,8 +246,17 @@
             background: #fdbfec;
             padding: 10px 15px;
             border-radius: 13px;
+            display: flex;
+            flex-direction: column;
+            text-align: right;
         }
     }
+}
+
+.transfer-image {
+    width: 200px !important;
+    height: 200px !important;
+    border-radius: 0 !important ;
 }
 
 .time-send {
@@ -252,6 +264,7 @@
     font-style: italic;
     float: right;
     color: #a79b9b;
+    text-align: right;
     /* margin-right: -9px; */
 }
 

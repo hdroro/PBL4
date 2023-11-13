@@ -17,7 +17,7 @@ import {
     Setting,
     UserGroup,
 } from '~/components/Icon/Icon';
-import { Link, parsePath } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import images from '~/assets/images';
 import routes from '~/config/routes';
 import Button from '~/components/Button';
@@ -29,6 +29,7 @@ import { handleFetchChatUser, handleGetAccById, handleGetInfoByID } from '~/serv
 import { handleLoadMessage, handlePostMessage } from '~/services/messageService';
 import { handleGetConversationByID, handleUpdateBlockStatusConversation } from '~/services/conversationService';
 import { handlePostBlockInfo, handleGetBlockInfo, handleDeleteBlockInfo } from '~/services/blockService';
+import { handlePostFile } from '~/services/userService';
 
 const cx = classNames.bind(styles);
 
@@ -54,7 +55,6 @@ function Message({ socket, onlineUsers, user }) {
     const [userBlock, setUserBlock] = useState(null);
     const [isOpenBlock, setIsOpenBlock] = useState(false);
     const [isDisableBlock, setIsDisableBlock] = useState(false);
-    const [selectedFile, setSelectedFile] = useState(null);
     const [blockInfo, setBlockInfo] = useState({});
     const [blocked, setBlocked] = useState(false);
     const [isCloseSearch, setIsCloseSearch] = useState(true);
@@ -64,9 +64,10 @@ function Message({ socket, onlineUsers, user }) {
     const [firstVisit, setFirstVisit] = useState(true);
     const [isShowingResultsSearch, setIsShowingResultsSearch] = useState(null);
 
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [newFile, setNewFile] = useState({});
     //INITIAL SOCKET
     useEffect(() => {
-        console.log(1);
         setFirstVisit(false);
     }, []);
 
@@ -144,6 +145,7 @@ function Message({ socket, onlineUsers, user }) {
 
     const handleSendMessage = async () => {
         try {
+            if (typeMessage == '') return;
             const messageText = typeMessage;
             const currentDate = new Date();
             const year = currentDate.getFullYear();
@@ -153,12 +155,10 @@ function Message({ socket, onlineUsers, user }) {
             const minutes = currentDate.getMinutes().toString().padStart(2, '0');
             const seconds = currentDate.getSeconds().toString().padStart(2, '0');
             const timeSend = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-
             const idConversation = idConversation_;
             const response = await handleGetAccById(idConversation);
             const a2 = response.accountList.chat[0].idAcc2;
             const a1 = response.accountList.chat[0].idAcc1;
-
             let direct, _idSession;
             if (idSession == a2) {
                 direct = 0;
@@ -184,19 +184,90 @@ function Message({ socket, onlineUsers, user }) {
                 messageText,
                 timeSend,
                 idConversation,
+                isImage: 0,
             };
+
             setNewMessage(newMessage);
             setLoad(!load);
             setLoadMessages((prevLoadMessages) => ({
                 chat: [newMessage, ...prevLoadMessages.chat],
             }));
-
             handlePostMessage(direct, messageText, timeSend, idConversation);
+            // const res = handlePostMessage(direct, messageText, timeSend, idConversation);
+            // console.log(res);
             socket.emit('send-message', newMessage);
             chatRef.current.scrollTop = chatRef.current.scrollHeight;
+
             const response_ = await handleFetchChatUser();
             setUserChat(response_.userChatData);
             setTypeMessage('');
+        } catch (error) {
+            console.error('Error in handleSendMessage:', error);
+        }
+    };
+
+    const handleSendFile = async () => {
+        console.log('selectedFile ' + selectedFile);
+        try {
+            if (selectedFile == null) return;
+            const file = selectedFile;
+            const currentDate = new Date();
+            const year = currentDate.getFullYear();
+            const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+            const day = currentDate.getDate().toString().padStart(2, '0');
+            const hours = currentDate.getHours().toString().padStart(2, '0');
+            const minutes = currentDate.getMinutes().toString().padStart(2, '0');
+            const seconds = currentDate.getSeconds().toString().padStart(2, '0');
+            const timeSend = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            const idConversation = idConversation_;
+            const response = await handleGetAccById(idConversation);
+            const a2 = response.accountList.chat[0].idAcc2;
+            const a1 = response.accountList.chat[0].idAcc1;
+            let direct, _idSession;
+            if (idSession == a2) {
+                direct = 0;
+                _idSession = a1;
+            } else {
+                direct = 1;
+                _idSession = a2;
+            }
+            let direct_ = 1;
+            const re = await handleGetInfoByID(idSession);
+            const avatar = re.userData.user.avatar;
+
+            setIdUser(_idSession);
+            console.log('idUser_ ' + idUser_);
+            console.log('id ' + isBlocked);
+            const newFile = {
+                _idSession,
+                idSession,
+                idUser_,
+                direct_,
+                avatar,
+                file,
+                timeSend,
+                idConversation,
+                isImage: 1,
+            };
+            //Lúc load lại thì dĩm preview cái file ni ra ảnh nghen
+            console.log(newFile.file);
+            setNewFile(newFile);
+            setLoad(!load);
+            console.log('haizzzzzzzzzzzzzzzzz ' + newFile.file.name);
+            console.log('isBlockeddddđ ' + isBlocked);
+            // truyền đi new file ni là dữ liệu mềm, chưa lưu => không lấy link được
+            await handlePostFile(direct, file, timeSend, idConversation).then((res) => {
+                newFile.messageText = res.saveMessage.chat;
+            });
+            console.log('newFile ' + newFile.messageText);
+            setLoadMessages((prevLoadMessages) => ({
+                chat: [newFile, ...prevLoadMessages.chat],
+            }));
+            socket.emit('send-file', newFile);
+
+            const response_ = await handleFetchChatUser();
+            setUserChat(response_.userChatData);
+            setSelectedFile(null);
         } catch (error) {
             console.error('Error in handleSendMessage:', error);
         }
@@ -225,18 +296,16 @@ function Message({ socket, onlineUsers, user }) {
 
     useEffect(() => {
         if (socket === null) return;
-        socket.off('recieve-message');
+        socket.off('receive-message');
 
-        socket.on('recieve-message', async (data) => {
-            console.log('Received message: ', data);
-            console.log('idSession ' + idSession + 'idUser_ ' + idUser_);
+        socket.on('receive-message', async (data) => {
             if (data.idSession == idUser_ && data.idUser_ == idSession) {
                 data.direct = 0;
                 setLoadMessages((prevLoadMessages) => ({
                     chat: [data, ...prevLoadMessages.chat],
                 }));
             }
-
+            chatRef.current.scrollTop = chatRef.current.scrollHeight;
             const chatUserResponse = await handleFetchChatUser();
             setUserChat(chatUserResponse.userChatData);
         });
@@ -315,9 +384,9 @@ function Message({ socket, onlineUsers, user }) {
 
     const handleBlockConversationChange = async (value) => {
         setIsBlocked(value);
+        await socket?.emit('block-conversation', { value, idUser_, idConversation_ });
         toggle(false);
         setIsOpenBlock(true);
-        await socket?.emit('block-conversation', { value, idUser_, idConversation_ });
     };
 
     const handleDeleteConversationChange = async (value) => {
@@ -418,7 +487,7 @@ function Message({ socket, onlineUsers, user }) {
                                 <div className={cx('message-info')}>
                                     <div className={cx('lastest-message')}>
                                         <span>{item.direct === 1 ? 'Bạn: ' : ''}</span>
-                                        {item.messageText}
+                                        {item.isImage === 0 ? item.messageText : 'Đã gửi 1 ảnh'}
                                     </div>
                                     <div className={cx('curTime')}>
                                         {isSameDay(new Date(item.timeSend))
@@ -528,13 +597,22 @@ function Message({ socket, onlineUsers, user }) {
                                                 <img src={images[result.avatar]} alt="" />
                                             </Link>
                                             <div className={cx('message-detail')}>
-                                                <p
-                                                    className={cx('message', {
-                                                        highlighted: firstVisit && index === currentResultIndexFounded,
-                                                    })}
-                                                >
-                                                    {result.messageText}
-                                                </p>
+                                                {result.isImage === 0 ? (
+                                                    <p
+                                                        className={cx('message', {
+                                                            highlighted:
+                                                                firstVisit && index === currentResultIndexFounded,
+                                                        })}
+                                                    >
+                                                        {result.messageText}
+                                                    </p>
+                                                ) : (
+                                                    <img
+                                                        className={cx('transfer-image')}
+                                                        src={'http://localhost:8080/public/img/' + result.messageText}
+                                                        alt=""
+                                                    />
+                                                )}
 
                                                 <span className={cx('time-send')}>{formatTime(result.timeSend)}</span>
                                             </div>
@@ -542,13 +620,22 @@ function Message({ socket, onlineUsers, user }) {
                                     ) : (
                                         <div className={cx('chat-item-user')} key={index}>
                                             <div className={cx('message-detail-user')}>
-                                                <p
-                                                    className={cx('message', {
-                                                        highlighted: firstVisit && index === currentResultIndexFounded,
-                                                    })}
-                                                >
-                                                    {result.messageText}
-                                                </p>
+                                                {result.isImage === 0 ? (
+                                                    <p
+                                                        className={cx('message', {
+                                                            highlighted:
+                                                                firstVisit && index === currentResultIndexFounded,
+                                                        })}
+                                                    >
+                                                        {result.messageText}
+                                                    </p>
+                                                ) : (
+                                                    <img
+                                                        className={cx('transfer-image')}
+                                                        src={'http://localhost:8080/public/img/' + result.messageText}
+                                                        alt=""
+                                                    />
+                                                )}
                                                 <span className={cx('time-send')}>{formatTime(result.timeSend)}</span>
                                             </div>
                                         </div>
@@ -578,6 +665,7 @@ function Message({ socket, onlineUsers, user }) {
                                     <label htmlFor="fileInput" className={cx('btn-image')}>
                                         <Images className={cx('btn-image')} />
                                     </label>
+                                    {/* //chỗ chọn file */}
                                     <input
                                         type="file"
                                         id="fileInput"
@@ -599,14 +687,21 @@ function Message({ socket, onlineUsers, user }) {
                                                 ) {
                                                     console.log('Enter key pressed. Calling handleSendMessage.');
                                                     handleSendMessage();
+                                                    handleSendFile();
                                                 }
                                             }}
                                         />
                                     </div>
-                                    {typeMessage === '' ? (
+                                    {typeMessage === '' && selectedFile == null ? (
                                         <SendMessageDisabled className={cx('btn-send')} />
                                     ) : (
-                                        <SendMessage className={cx('btn-send')} onClick={() => handleSendMessage()} />
+                                        <SendMessage
+                                            className={cx('btn-send')}
+                                            onClick={() => {
+                                                handleSendMessage();
+                                                handleSendFile();
+                                            }}
+                                        />
                                     )}
                                 </div>
                             </div>
