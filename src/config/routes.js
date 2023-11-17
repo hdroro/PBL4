@@ -6,7 +6,7 @@ const routes = {
     messages: '/api/messages',
     matching: '/api/matching',
     settingProfile: '/api/setting/editprofile',
-    settingPassword: '/api/setting/changePassword',
+    settingPassword: '/api/setting/changepassword',
 };
 
 export default routes;

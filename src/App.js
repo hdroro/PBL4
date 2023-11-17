@@ -1,7 +1,8 @@
-import { Fragment } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { publicRoutes } from '~/routes';
 import DefaultLayout from './layouts';
+import { io } from 'socket.io-client';
 // import React, { useEffect, useState } from 'react';
 
 function App() {
@@ -13,6 +14,15 @@ function App() {
     //         setLoading(false);
     //     }, 2000);
     // }, []);
+    const [socket, setSocket] = useState(null);
+    useEffect(() => {
+        const newSocket = io('http://localhost:3001');
+        setSocket(newSocket);
+
+        return () => {
+            newSocket.disconnect();
+        };
+    }, []);
     return (
         <Router>
             <div className="App">
@@ -30,7 +40,7 @@ function App() {
                                 key={index}
                                 path={route.path}
                                 element={
-                                    <Layout>
+                                    <Layout socket={socket}>
                                         <Page />
                                     </Layout>
                                 }

@@ -7,13 +7,23 @@ import { useEffect, useState } from 'react';
 import { handleGetInfo } from '~/services/userService';
 
 import { io } from 'socket.io-client';
+import Modal from '~/components/Modal/Modal';
+import RequestFriend from '~/components/Modal/ModalConfirm/RequestFriend';
+import { UserGroup } from '~/components/Icon/Icon';
+import Message from '~/pages/Message';
+import ConfirmMatching from '~/components/Modal/ModalConfirm/ConfirmMatching';
 
 const cx = classNames.bind(styles);
 
-function SidebarOnly({ children }) {
+function SidebarOnly({ children, socket }) {
     const [user, setUser] = useState({});
     const [onlineUsers, setOnlineUsers] = useState([]);
-    const [socket, setSocket] = useState(null);
+    const [isShowRequest, setShowRequest] = useState(false);
+    const [fromId, setFromId] = useState();
+    const [matchId, setMatchId] = useState();
+    const [isShowNotifMatching, setShowNotifMatching] = useState(false);
+    // const [isCreateConversation, setCreateConversation] = useState(false);
+    // const [socket, setSocket] = useState(null);
 
     useEffect(() => {
         const fetchUserInfo = async () => {
@@ -30,28 +40,65 @@ function SidebarOnly({ children }) {
         fetchUserInfo();
     }, []);
 
-    useEffect(() => {
-        const newSocket = io('http://localhost:3001');
-        setSocket(newSocket);
+    // useEffect(() => {
+    //     const newSocket = io('http://localhost:3001');
+    //     setSocket(newSocket);
 
-        return () => {
-            newSocket.disconnect();
-        };
-    }, [user]);
+    //     return () => {
+    //         newSocket.disconnect();
+    //     };
+    // }, [user]);
 
     useEffect(() => {
         if (socket === null) return;
-        socket.emit('addNewUser', user.idUser);
-        socket.on('getOnlineUsers', (response) => {
-            setOnlineUsers(response);
-        });
-    }, [socket]);
+        console.log(user);
+        if(user.idUser) {
+            socket.emit('addNewUser', user.idUser);
+            socket.on('getOnlineUsers', (response) => {
+                setOnlineUsers(response);
+            });
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if(socket === null) return;
+        socket.on('receive-request-matching', (response) => {
+            console.log(response);
+            setShowRequest(!isShowRequest);
+            setFromId(response.fromId);
+            setMatchId(response.matchId);
+        })
+    }, [])
+
+    // if(socket != null) {
+    //     socket.on('receive-request-matching', (response) => {
+    //         console.log(response);
+    //         setShowRequest(!isShowRequest);
+    //         setFromId(response.fromId);
+    //         setMatchId(response.matchId);
+    //     })
+    // }
+    useEffect(() => {
+        if(socket === null) return;
+        socket.on('move-to-new-conversation', (data) => {
+            console.log(data);
+            setShowNotifMatching(true);
+        })
+    }, [])
+
+    const handleToggleShowRequest = () => {
+        setShowRequest(!isShowRequest);
+    }
+
+    const handleToggleShowNotifMatching = () => {
+        setShowNotifMatching(!isShowNotifMatching);
+    }
 
     console.log('OnlineUser', onlineUsers);
 
     const childrenWithProps = React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
-            return React.cloneElement(child, { socket, onlineUsers });
+            return React.cloneElement(child, { socket, onlineUsers, user });
         }
         return child;
     });
@@ -66,6 +113,19 @@ function SidebarOnly({ children }) {
                                 <Sidebar user={user} />
                             </div>
                             <div className={cx('col l-9 m-9 c-9')}>{childrenWithProps}</div>
+                        </div>
+                        <div className={cx('matching')}>
+                            {isShowRequest && (
+                                <Modal background leftIcon={<UserGroup/>} title={'Request matching'} isShowing={isShowRequest} hide={handleToggleShowRequest}>
+                                    <RequestFriend hide={handleToggleShowRequest} fromId={fromId && fromId} socket={socket} onlineUsers={onlineUsers} matchId={matchId && matchId}/>
+                                </Modal>
+                            )}
+
+                            {isShowNotifMatching && (
+                                <Modal background leftIcon={<UserGroup/>} title={'Notification'} isShowing={isShowNotifMatching} hide={handleToggleShowNotifMatching}>
+                                    <ConfirmMatching hide={handleToggleShowNotifMatching} fromId={fromId && fromId} socket={socket} onlineUsers={onlineUsers} matchId={matchId && matchId}/>
+                                </Modal>
+                            )}
                         </div>
                     </div>
                 </div>

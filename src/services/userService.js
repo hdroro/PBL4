@@ -49,6 +49,46 @@ const handleSignupApi = (username, password, fullname, date, gender) => {
         gender,
     });
 };
+
+const handleEditProfile = (username, fullname, bio, birth, gender) => {
+    return axios.post('api/setting/editprofile', {
+        withCredentials: true,
+        username,
+        fullname,
+        bio,
+        birth,
+        gender,
+    });
+};
+
+const getProfileSetting = () => {
+    return axios.get('api/setting/editprofile', {
+        withCredentials: true,
+    });
+}
+
+const handleChangePassword = (currentpassword, newpassword, retypepassword) => {
+    return axios.post('api/setting/changepassword', {
+        withCredentials: true,
+        currentpassword,
+        newpassword,
+        retypepassword,
+    });
+}
+
+const handleCheckFriendRelation = (idAcc1, idAcc2) => {
+    return axios.get('api/check-friend-relation', {
+        withCredentials: true,
+        params: {idAcc1, idAcc2},
+    });
+}
+
+const handleAddFriendRelation = (idAcc1, idAcc2) => {
+    return axios.post('api/add-friend-relation', {
+        withCredentials: true,
+        idAcc1, idAcc2
+    });
+}
 export {
     handleLoginApi,
     handleLogoutApi,
@@ -59,4 +99,9 @@ export {
     handleGetAccById,
     handlePostMessage,
     handleSignupApi,
+    handleEditProfile,
+    getProfileSetting,
+    handleChangePassword,
+    handleAddFriendRelation,
+    handleCheckFriendRelation,
 };

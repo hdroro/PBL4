@@ -44,13 +44,24 @@
     }
 }
 
-.btn-accept,
-.btn-deny {
+.btn.btn-accept + .btn.btn-deny {
+    margin-top: 0px;
+    margin-left: 15px;
+}
+
+.btn-accept.btn,
+.btn-deny.btn {
     font-weight: 600;
     color: #fff;
     background-color: #f882c1;
+    margin-top: 0;
 }
 
 .btn-accept {
     margin-right: 73px;
+}
+
+.footer {
+    display: flex;
+    margin-top: 20px;
 }

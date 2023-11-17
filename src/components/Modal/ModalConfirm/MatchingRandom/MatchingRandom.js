@@ -3,40 +3,81 @@ import styles from './MatchingRandom.module.scss';
 import images from '~/assets/images';
 import Button from '~/components/Button';
 import { Age, Female, FriendPlus, Zodiac } from '~/components/Icon/Icon';
+import { handleGetInfoByID } from '~/services/userService';
+import { useEffect, useState } from 'react';
 
 const cx = classNames.bind(styles);
 
-function MatchingRandom() {
+function MatchingRandom({fromId, matchId, socket, onlineUsers, hide}) {
+    const [user, setUser] = useState();
+    useEffect(() => {
+        const fetchApi = async () => {
+            try {
+                let data = await handleGetInfoByID(matchId);
+                console.log('match randommmmmmmm');
+                // data = data.userData;
+                
+                if (data && data.userData.errCode === 0) {
+                    console.log('Get info user successfully');
+                    const temp = String(data.userData.user.birth);
+                    const tempDate = new Date(temp);
+                    const year = tempDate.getFullYear();
+                    data.userData.user.age = new Date().getFullYear() - year;
+                    setUser(data.userData.user);
+                } else {
+                    console.log('data.message ' + data.errMessage);
+                }
+            } catch (e) {
+                console.log('error message', e.response);
+            }
+        }
+        fetchApi();
+    }, [])
+
+    const handleRequestMatching = () => {
+        // console.log('requestttttttttt');
+        // console.log(socket);
+        // socket.emit("test", 'bicute');
+        socket.emit("send-request-matching", {
+            fromId: fromId,
+            matchId: matchId
+        });
+        hide();
+        // console.log('hihi');
+        // socket.on('hello', (response) => {
+        //     console.log(response);
+        // });
+    }
     return (
         <div className={cx('wrapper')}>
             <div className={cx('header')}></div>
             <div className={cx('content')}>
-                <img src={images.cancer} alt="" />
+                <img src={user && images[user.avatar]} alt="" />
                 <div className={cx('info')}>
                     <div>
-                        <div className={cx('fullname')}>Hồng Diễm</div>
-                        <div className={cx('nickname')}>@hd.roro</div>
+                        <div className={cx('fullname')}>{user && user.fullName}</div>
+                        <div className={cx('nickname')}>@{user && user.userName}</div>
                     </div>
 
-                    <Button large normal leftIcon={<FriendPlus />} className={cx('btn-request')}>
+                    <Button onClick={handleRequestMatching} large normal leftIcon={<FriendPlus />} className={cx('btn-request')}>
                         Request
                     </Button>
                 </div>
                 <div className={cx('detail-info')}>
                     <div className={cx('zodiac')}>
-                        <Zodiac /> Leo
+                        <Zodiac /> {user && user.avatar}
                     </div>
                     <div className={cx('gender')}>
-                        <Female /> Female
+                        <Female /> {user && user.gender ? 'Female' : 'Male'} 
                     </div>
                     <div className={cx('age')}>
-                        <Age /> 20
+                        <Age /> {user && user.age}
                     </div>
                 </div>
                 <div className={cx('bio')}>
                     Bio:{' '}
                     <span className={cx('bio-content')}>
-                        Tôi là một cô nàng cự giải cute hột me, nếu bạn thích hãy kết nối với toi kakakakakka
+                        {user && user.bio}
                     </span>
                 </div>
             </div>

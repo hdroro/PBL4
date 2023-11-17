@@ -2,6 +2,7 @@ import classNames from 'classnames/bind';
 import styles from './SettingPassword.module.scss';
 import { Eye, NotEye } from '~/components/Icon/Icon';
 import { useState } from 'react';
+import { handleChangePassword } from '~/services/userService';
 
 const cx = classNames.bind(styles);
 
@@ -9,6 +10,7 @@ function SettingPassword() {
     const [isShowCurrentPassword, setShowCurrentPassword] = useState(false);
     const [isShowNewPassword, setShowNewPassword] = useState(false);
     const [isShowRetypePassword, setShowRetypePassword] = useState(false);
+    const [updateInfoError, setUpdateInfoError] = useState('');
     const handleToggleCurrentPassword = () => {
         setShowCurrentPassword(!isShowCurrentPassword);
     };
@@ -34,6 +36,20 @@ function SettingPassword() {
     const handleOnChangeRetypePassword = (event) => {
         setRetypePassword(event.target.value);
         console.log(event.target.value);
+    };
+    const handleOnSubmit = async () => {
+        try {
+            let data = await handleChangePassword(currentPassword, newPassword, retypePassword);
+            console.log(data);
+            if (data && data.errCode === 0) {
+                console.log('Update password successfully!');
+            } else {
+                console.log('data.message ' + data.message);
+            }
+            setUpdateInfoError(data.message);
+        } catch (e) {
+            console.log('error message', e.response);
+        }
     };
     return (
         <div className={cx('wrapper')}>
@@ -115,8 +131,12 @@ function SettingPassword() {
                             </div>
                         </div>
 
+                        <div className={cx('update-error')}>
+                            <span className={cx('update-error-message')}>{updateInfoError}</span>
+                        </div>
+
                         <div className={cx('submit-contaniner')}>
-                            <button type="submit" className={cx('submit-btn')}>
+                            <button type="button" className={cx('submit-btn')} onClick={handleOnSubmit}>
                                 Save
                             </button>
                         </div>

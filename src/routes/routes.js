@@ -1,6 +1,6 @@
 //Layouts
 import config from '../config/routes';
-import { SidebarOnly, TwoSideBar } from '~/layouts';
+import { DefaultLayout, SidebarOnly, TwoSideBar } from '~/layouts';
 
 //Pages
 import Home from '~/pages/Home';
@@ -16,10 +16,10 @@ import SettingProfile from '~/pages/SettingProfile';
 //public routes
 const publicRoutes = [
     { path: config.home, component: Home },
-    { path: config.call, component: Call },
+    { path: config.call, component: Call, layout: DefaultLayout },
     { path: config.profile, component: Profile, layout: SidebarOnly },
     { path: config.search, component: Search, layout: null },
-    { path: config.messages, component: Message, layout: null },
+    { path: config.messages, component: Message, layout: DefaultLayout },
     { path: config.matching, component: Matching, layout: SidebarOnly },
     { path: config.settingProfile, component: SettingProfile, layout: TwoSideBar },
     { path: config.settingPassword, component: SettingPassword, layout: TwoSideBar },
