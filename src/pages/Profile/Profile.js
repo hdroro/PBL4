@@ -12,17 +12,24 @@ import Modal from '~/components/Modal/Modal';
 import CreatePost from '~/components/Modal/ModalConfirm/CreatePost';
 import { useEffect, useState } from 'react';
 import ProfileBrief from '~/components/Modal/ModalConfirm/ProfileBrief';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { handleGetInfoByID, handleGetInfoByUsername } from '~/services/userService';
 import { handleGetPost } from '~/services/postService';
+import { formatISODateToCustomFormat } from '~/utils/date';
 
 const cx = classNames.bind(styles);
 
 function Profile({ user }) {
-    const renderPreview = () => {
+    const [reloadProfile, setReloadProfile] = useState(false);
+
+    const renderPreview = (idPost) => {
         return (
             <PopperWrapper>
-                <AdjustPost />
+                <AdjustPost
+                    idPost={idPost}
+                    infoUser={infoUser}
+                    reloadProfile={() => setReloadProfile(!reloadProfile)}
+                />
             </PopperWrapper>
         );
     };
@@ -36,42 +43,29 @@ function Profile({ user }) {
     const [idUser, setIdUser] = useState(null);
 
     const { nickname } = useParams();
-    console.log('nikcname ' + nickname.replace('@', ''));
+
+    const fetchData = async () => {
+        try {
+            const data = await handleGetInfoByUsername(nickname.replace('@', ''));
+            setIdUser(data.userData.user[0].idUser);
+            const response = await handleGetInfoByID(data.userData.user[0].idUser);
+            setInfoUser(response.userData.user);
+
+            const response_post = await handleGetPost(data.userData.user[0].idUser);
+            setListPost(response_post.postData.posts);
+        } catch (error) {
+            console.error('Error fetching user information: ' + error);
+        }
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                console.log('New nickname:', nickname.replace('@', ''));
-                const data = await handleGetInfoByUsername(nickname.replace('@', ''));
-                console.log('data.userData.user[0].idUser ' + data.userData.user[0].idUser);
-                setIdUser(data.userData.user[0].idUser);
-                const response = await handleGetInfoByID(data.userData.user[0].idUser);
-                setInfoUser(response.userData.user);
-
-                const response_post = await handleGetPost(data.userData.user[0].idUser);
-                console.log(response_post.postData.posts);
-                setListPost(response_post.postData.posts);
-            } catch (error) {
-                console.error('Error fetching user information: ' + error);
-            }
-        };
-
         fetchData();
-    }, [nickname]);
+    }, [nickname, reloadProfile]);
 
-    function formatISODateToCustomFormat(isoDateString) {
-        const date = new Date(isoDateString);
-
-        const options = {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        };
-
-        return date.toLocaleString('en-US', options);
-    }
+    const handleChangeStatusCreatePost = async (value) => {
+        toggle(value);
+        setReloadProfile(!reloadProfile);
+    };
 
     return (
         <div className={cx('wrapper')}>
@@ -130,7 +124,10 @@ function Profile({ user }) {
                                 isShowing={isShowing}
                                 hide={toggle}
                             >
-                                <CreatePost infoUser={infoUser} />
+                                <CreatePost
+                                    onChangeStatusCreatePost={handleChangeStatusCreatePost}
+                                    infoUser={infoUser}
+                                />
                             </Modal>
 
                             <div className={cx('post-container')}>
@@ -146,7 +143,9 @@ function Profile({ user }) {
                                                 <div className={cx('post')}>
                                                     <div className={cx('name')}>{infoUser.fullName}</div>
                                                     <div className={cx('time-post')}>
-                                                        {formatISODateToCustomFormat(item.timePost)}
+                                                        {item.timePost == item.updatedAt
+                                                            ? formatISODateToCustomFormat(item.timePost)
+                                                            : 'Edited: ' + formatISODateToCustomFormat(item.updatedAt)}
                                                     </div>
                                                 </div>
                                             </div>
@@ -157,7 +156,7 @@ function Profile({ user }) {
                                                     interactive
                                                     delay={[0, 100]}
                                                     placement="bottom"
-                                                    content={renderPreview()}
+                                                    content={renderPreview(item.idPost)}
                                                 >
                                                     <div>
                                                         <ThreeDots className={cx('icon-dots')} />

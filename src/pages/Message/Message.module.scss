@@ -100,11 +100,22 @@
             font-size: 17px;
         }
 
-        .online-user {
-            width: 10px;
-            height: 10px;
-            background-color: #31a24c;
-            border-radius: 50%;
+        .group-info-message {
+            display: flex;
+            align-items: center;
+
+            .online-user {
+                width: 10px;
+                height: 10px;
+                background-color: #31a24c;
+                border-radius: 50%;
+            }
+            .count-message {
+                margin-right: 10px;
+                font-weight: 600;
+                color: #ce0909;
+                font-size: 14px;
+            }
         }
     }
 

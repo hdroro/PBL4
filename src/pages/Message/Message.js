@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/img-redundant-alt */
 import classNames from 'classnames/bind';
 import styles from './Message.module.scss';
 import {
@@ -27,9 +28,15 @@ import Modal from '~/components/Modal/Modal';
 import Block from '~/components/Modal/ModalConfirm/Block/Block';
 import { handleFetchChatUser, handleGetAccById, handleGetInfoByID } from '~/services/userService';
 import { handleLoadMessage, handlePostMessage } from '~/services/messageService';
-import { handleGetConversationByID, handleUpdateBlockStatusConversation } from '~/services/conversationService';
+import {
+    handleDeleteConversation,
+    handleGetConversationByID,
+    handleUpdateBlockStatusConversation,
+} from '~/services/conversationService';
 import { handlePostBlockInfo, handleGetBlockInfo, handleDeleteBlockInfo } from '~/services/blockService';
 import { handlePostFile } from '~/services/userService';
+import { handleGetDeleteInfo, handlePostDeleteInfo, handleDeleteInfoDeleted } from '~/services/deleteService';
+import { mydate, formatTime, isSameDay } from '~/utils/date';
 
 const cx = classNames.bind(styles);
 
@@ -57,6 +64,9 @@ function Message({ socket, onlineUsers, user }) {
     const [isDisableBlock, setIsDisableBlock] = useState(false);
     const [blockInfo, setBlockInfo] = useState({});
     const [blocked, setBlocked] = useState(false);
+    const [currentChatBlock, setCurrentChatBlock] = useState(null);
+
+    const [isDelete, setIsDelete] = useState(false);
     const [isCloseSearch, setIsCloseSearch] = useState(true);
     const [isShowingDetailSearch, setIsShowingDetailSearch] = useState(false);
     const [currentResultIndex, setCurrentResultIndex] = useState(0);
@@ -66,7 +76,15 @@ function Message({ socket, onlineUsers, user }) {
 
     const [selectedFile, setSelectedFile] = useState(null);
     const [newFile, setNewFile] = useState({});
+    const [notifications, setNotifications] = useState([]);
+    // const [unreadnotifications, setUnreadNotifications] = useState([]);
+    const [currentConversation, setCurrentConversation] = useState(null);
+    const [thisUserNotification, setThisUserNotification] = useState([]);
+    const [idConversationDeleted, setIdconversationDeleted] = useState([]);
+    const [reLoadPage, setReloadPage] = useState(false);
     //INITIAL SOCKET
+    console.log('notification ', notifications);
+
     useEffect(() => {
         setFirstVisit(false);
     }, []);
@@ -92,7 +110,6 @@ function Message({ socket, onlineUsers, user }) {
 
     const handleToggleClear = () => {
         setIsShowingClear(!isShowingClear);
-        console.log('delete side: ', user.idUser);
     };
 
     useEffect(() => {
@@ -101,12 +118,14 @@ function Message({ socket, onlineUsers, user }) {
                 const response = await handleFetchChatUser();
                 setUserChat(response.userChatData);
                 setIdSession(response.userChatData[0].idSession);
+
+                // const response_deleted = await handleGetDeleteInfo(response.userChatData[0])
             } catch (error) {
                 console.error(error);
             }
         };
         fetchUserChat();
-    }, []);
+    }, [reLoadPage]);
 
     //GET MESSAGE
     const handleSetLoadMessage = async (idConversation, idUser) => {
@@ -118,7 +137,13 @@ function Message({ socket, onlineUsers, user }) {
             setIsDisableBlock(false);
             setIsShowingDetailSearch(false);
             setInputSearch('');
+            setIsShowSetting(false);
+            setIsDelete(false);
+            setCurrentChatBlock(null);
+            setCurrentConversation(idConversation);
+            markThisUserNotificationsAsRead(thisUserNotification, notifications);
             console.log('idConversation_    ' + idConversation);
+            console.log('idUser ' + idUser);
             const blockInfo = await handleGetBlockInfo(idConversation);
             console.log('blockInfo.blockDataInfo.blockDataInfo ' + blockInfo.blockDataInfo?.infoBlock[0]);
             setBlockInfo(blockInfo.blockDataInfo?.infoBlock[0]);
@@ -145,16 +170,10 @@ function Message({ socket, onlineUsers, user }) {
 
     const handleSendMessage = async () => {
         try {
-            if (typeMessage == '') return;
+            if (typeMessage === '') return;
             const messageText = typeMessage;
             const currentDate = new Date();
-            const year = currentDate.getFullYear();
-            const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-            const day = currentDate.getDate().toString().padStart(2, '0');
-            const hours = currentDate.getHours().toString().padStart(2, '0');
-            const minutes = currentDate.getMinutes().toString().padStart(2, '0');
-            const seconds = currentDate.getSeconds().toString().padStart(2, '0');
-            const timeSend = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            const timeSend = mydate(currentDate);
             const idConversation = idConversation_;
             const response = await handleGetAccById(idConversation);
             const a2 = response.accountList.chat[0].idAcc2;
@@ -198,8 +217,9 @@ function Message({ socket, onlineUsers, user }) {
             socket.emit('send-message', newMessage);
             chatRef.current.scrollTop = chatRef.current.scrollHeight;
 
-            const response_ = await handleFetchChatUser();
-            setUserChat(response_.userChatData);
+            // const response_ = await handleFetchChatUser();
+            // setUserChat(response_.userChatData);
+            setReloadPage(!reLoadPage);
             setTypeMessage('');
         } catch (error) {
             console.error('Error in handleSendMessage:', error);
@@ -207,18 +227,11 @@ function Message({ socket, onlineUsers, user }) {
     };
 
     const handleSendFile = async () => {
-        console.log('selectedFile ' + selectedFile);
         try {
             if (selectedFile == null) return;
             const file = selectedFile;
             const currentDate = new Date();
-            const year = currentDate.getFullYear();
-            const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-            const day = currentDate.getDate().toString().padStart(2, '0');
-            const hours = currentDate.getHours().toString().padStart(2, '0');
-            const minutes = currentDate.getMinutes().toString().padStart(2, '0');
-            const seconds = currentDate.getSeconds().toString().padStart(2, '0');
-            const timeSend = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            const timeSend = mydate(currentDate);
             const idConversation = idConversation_;
             const response = await handleGetAccById(idConversation);
             const a2 = response.accountList.chat[0].idAcc2;
@@ -250,26 +263,23 @@ function Message({ socket, onlineUsers, user }) {
                 isImage: 1,
             };
             //Lúc load lại thì dĩm preview cái file ni ra ảnh nghen
-            console.log(newFile.file);
             setNewFile(newFile);
             setLoad(!load);
-            console.log('haizzzzzzzzzzzzzzzzz ' + newFile.file.name);
-            console.log('isBlockeddddđ ' + isBlocked);
             // truyền đi new file ni là dữ liệu mềm, chưa lưu => không lấy link được
             await handlePostFile(direct, file, timeSend, idConversation).then((res) => {
                 newFile.messageText = res.saveMessage.chat;
             });
-            console.log('newFile ' + newFile.messageText);
             setLoadMessages((prevLoadMessages) => ({
                 chat: [newFile, ...prevLoadMessages.chat],
             }));
             socket.emit('send-file', newFile);
 
-            const response_ = await handleFetchChatUser();
-            setUserChat(response_.userChatData);
+            // const response_ = await handleFetchChatUser();
+            // setUserChat(response_.userChatData);
+            setReloadPage(!reLoadPage);
             setSelectedFile(null);
         } catch (error) {
-            console.error('Error in handleSendMessage:', error);
+            console.error('Error in handleSendFile:', error);
         }
     };
 
@@ -279,6 +289,8 @@ function Message({ socket, onlineUsers, user }) {
         setBlockInfo(null);
         setIsBlocked(false);
         setBlocked(false);
+        setCurrentChatBlock(null);
+
         socket?.emit('open-block-conversation', {
             idUser_,
             isOpenBlock,
@@ -294,23 +306,77 @@ function Message({ socket, onlineUsers, user }) {
         ]);
     }, [blockInfo, blocked, idConversation_, idSession, idUser_, isBlocked, isDisableBlock, isOpenBlock, socket]);
 
+    const unreadNotificationsFuc = (notifications) => {
+        return notifications?.filter((n) => n?.isRead === false);
+    };
+
+    //NOTIFI--- Can't fix
+    useEffect(() => {
+        console.log('idSession ' + idUser_);
+        const res = unreadNotificationsFuc(notifications)?.filter((n) => n.senderID === idUser_);
+        setThisUserNotification(res);
+    }, [idUser_, notifications]);
+
+    const markThisUserNotificationsAsRead = useCallback((thisUserNotification, notifications) => {
+        const mNotifications = notifications?.map((el) => {
+            let notification;
+            thisUserNotification?.forEach((n) => {
+                if (n.senderID === el.senderID) {
+                    console.log('vo day a????????');
+                    notification = { ...n, isRead: true };
+                } else {
+                    console.log('vo day a');
+                    notification = el;
+                }
+            });
+            return notification;
+        });
+        setNotifications(mNotifications);
+    }, []);
+
     useEffect(() => {
         if (socket === null) return;
         socket.off('receive-message');
+        socket.off('receive-notification');
 
         socket.on('receive-message', async (data) => {
-            if (data.idSession == idUser_ && data.idUser_ == idSession) {
+            if (data.idSession === idUser_ && data.idUser_ === idSession) {
                 data.direct = 0;
                 setLoadMessages((prevLoadMessages) => ({
-                    chat: [data, ...prevLoadMessages.chat],
+                    chat: [data, ...(prevLoadMessages?.chat || [])],
                 }));
             }
-            chatRef.current.scrollTop = chatRef.current.scrollHeight;
+            // chatRef.current.scrollTop = chatRef?.current?.scrollHeight;
             const chatUserResponse = await handleFetchChatUser();
+            chatUserResponse.userChatData?.map(async (item) => {
+                if (item.idConversation === data.idConversation && item.infoUserDelete.length !== 0) {
+                    await handleDeleteInfoDeleted(item.infoUserDelete[0].idDelete, item.infoUserDelete[0].idDeleted);
+                    setLoadMessages((prevLoadMessages) => ({
+                        chat: [data, ...(prevLoadMessages?.chat || [])],
+                    }));
+                    setReloadPage(!reLoadPage);
+                }
+            });
             setUserChat(chatUserResponse.userChatData);
+            // setReloadPage(!reLoadPage);
+        });
+
+        socket.on('receive-notification', async (data) => {
+            const currentUser = await handleGetAccById(currentConversation);
+            const idAcc1 = currentUser.accountList?.chat[0]?.idAcc1;
+            const idAcc2 = currentUser.accountList?.chat[0]?.idAcc2;
+            console.log('currenCOnver:' + currentConversation + ' ACC1 ' + idAcc1 + ' ACC2 ' + idAcc2);
+            if (
+                (data.senderID === idAcc1 && data.receiverID === idAcc2) ||
+                (data.senderID === idAcc2 && data.receiverID === idAcc1)
+            ) {
+                setNotifications((prev) => prev && [{ ...data, isRead: true }, ...prev]);
+            } else {
+                setNotifications((prev) => prev && [data, ...prev]);
+            }
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [socket, newMessage, idUser_]);
+    }, [socket, newMessage, idUser_, currentConversation]);
 
     useEffect(() => {
         if (socket === null) return;
@@ -319,21 +385,23 @@ function Message({ socket, onlineUsers, user }) {
             const a2 = response.accountList.chat[0].idAcc2;
             const a1 = response.accountList.chat[0].idAcc1;
 
-            // console.log('idConversation_ ' + data.idConversation_);
+            // console.log('data ' + data);
+            // console.log('a2 ' + a2 + 'a1 ' + a1 + 'idUser_ ' + idUser_);
             let idBlock = null;
-            if (a2 == data.idUser_) {
+            if (a2 === data.idUser_) {
                 setUserBlock(a1);
                 idBlock = a1;
-            } else {
+            } else if (a1 === data.idUser_) {
                 setUserBlock(a2);
                 idBlock = a2;
             }
+            // setBlocked(data.value);
+            setCurrentChatBlock(data.idConversation_);
             await handlePostBlockInfo(idBlock, data.idUser_, data.idConversation_);
 
-            setBlocked(data.value);
+            // setIsBlocked(data.value);
             setIsDisableBlock(true);
             setIsOpenBlock(false);
-
             // console.log('block: ' + idBlock + ' blocked: ' + data.idUser_);
         });
     }, [socket]);
@@ -341,46 +409,14 @@ function Message({ socket, onlineUsers, user }) {
     useEffect(() => {
         if (socket === null) return;
         socket.on('opened-block-conversation', async (data) => {
-            console.log(data);
             setIsOpenBlock(false);
             setIsDisableBlock(false);
             setBlockInfo(null);
             setIsBlocked(false);
             setBlocked(false);
+            setCurrentChatBlock(null);
         });
     }, [socket]);
-
-    function isSameDay(date) {
-        const currentDate = new Date();
-        return (
-            date.getDate() === currentDate.getDate() &&
-            date.getMonth() === currentDate.getMonth() &&
-            date.getFullYear() === currentDate.getFullYear()
-        );
-    }
-
-    function formatTime(timeSend) {
-        const currentTime = new Date();
-        const messageTime = new Date(timeSend);
-        const timeDifference = (currentTime - messageTime) / 1000; // Chuyển đổi thành giây
-
-        if (timeDifference < 60) {
-            return 'just now';
-        } else if (timeDifference < 3600) {
-            const minutes = Math.floor(timeDifference / 60);
-            return `${minutes}m ago`;
-        } else if (timeDifference < 86400) {
-            // Dưới 24 giờ
-            const hours = Math.floor(timeDifference / 3600);
-            return `${hours}h ago`;
-        } else {
-            const day = messageTime.getDate();
-            const month = messageTime.getMonth() + 1;
-            const hour = messageTime.getHours();
-            const minute = messageTime.getMinutes();
-            return `${day}/${month} ${hour}:${String(minute).padStart(2, '0')}`;
-        }
-    }
 
     const handleBlockConversationChange = async (value) => {
         setIsBlocked(value);
@@ -390,13 +426,23 @@ function Message({ socket, onlineUsers, user }) {
     };
 
     const handleDeleteConversationChange = async (value) => {
+        // console.log('value of delete: ', value);
+        // console.log('delete side: ', user.idUser);
+        // console.log('delete side     aaaa: ', idUser_);
+        // console.log('currentConversation: ', currentConversation);
+        setIsShowSetting(false);
         setIsShowingClear(false);
+        await handlePostDeleteInfo(user.idUser, idUser_, currentConversation);
+        await handleDeleteConversation(currentConversation);
+        const newUserChat = userChat?.filter((u) => u.userInfo.idUser !== idUser_);
+        setUserChat(newUserChat);
+        setIsDelete(value);
     };
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
         setSelectedFile(selectedFile);
-        setTypeMessage(selectedFile);
+        setTypeMessage('');
         console.log('selectedFile', selectedFile);
     };
 
@@ -462,53 +508,81 @@ function Message({ socket, onlineUsers, user }) {
                 </div>
 
                 <div>
-                    {userChat?.map((item) => (
-                        <div
-                            className={cx('message-another')}
-                            key={item.idConversation}
-                            onClick={() => {
-                                console.log('uerrrrrrrrrr ' + item.userInfo.userName);
-                                console.log('item.direct ' + item.userInfo.idUser);
-                                handleSetLoadMessage(item.idConversation, item.userInfo.idUser); // idConversation + id người được nhắn
-                            }}
-                        >
-                            <img className={cx('avatar')} src={images[item.avatar]} alt="" />
-                            <div className={cx('info-user')}>
-                                <div className={cx('name-active')}>
-                                    <div className={cx('fullname')}>{item.userInfo.userName}</div>
-                                    <span
-                                        className={cx({
-                                            'online-user': onlineUsers.some(
-                                                (user) => user?.userID === item.userInfo.idUser,
-                                            ),
-                                        })}
-                                    ></span>{' '}
-                                </div>
-                                <div className={cx('message-info')}>
-                                    <div className={cx('lastest-message')}>
-                                        <span>{item.direct === 1 ? 'Bạn: ' : ''}</span>
-                                        {item.isImage === 0 ? item.messageText : 'Đã gửi 1 ảnh'}
+                    {userChat
+                        ?.filter(
+                            (item) =>
+                                item.isDelete !== 1 &&
+                                (item.infoUserDelete[0]?.idDelete !== idSession ||
+                                    item.infoUserDelete[1]?.idDeleted !== idSession) &&
+                                item.isDelete === 0 &&
+                                item.infoUserDelete[0]?.idDelete !== idSession,
+                        )
+                        .map((item) => (
+                            <div
+                                className={cx('message-another')}
+                                key={item.idConversation}
+                                onClick={() => {
+                                    handleSetLoadMessage(item.idConversation, item.userInfo.idUser); // idConversation + id người được nhắn
+                                }}
+                            >
+                                <img className={cx('avatar')} src={images[item.avatar]} alt="" />
+                                <div className={cx('info-user')}>
+                                    <div className={cx('name-active')}>
+                                        <div className={cx('fullname')}>{item.userInfo.userName}</div>
+                                        <div className={cx('group-info-message')}>
+                                            <span
+                                                className={cx(
+                                                    unreadNotificationsFuc(notifications)?.filter(
+                                                        (n) => n.senderID === item.userInfo.idUser,
+                                                    )?.length > 0
+                                                        ? 'count-message'
+                                                        : '',
+                                                )}
+                                            >
+                                                {unreadNotificationsFuc(notifications)?.filter(
+                                                    (n) => n.senderID === item.userInfo.idUser,
+                                                )?.length > 0
+                                                    ? '(' +
+                                                      unreadNotificationsFuc(notifications)?.filter(
+                                                          (n) => n.senderID === item.userInfo.idUser,
+                                                      )?.length +
+                                                      ')'
+                                                    : ''}
+                                            </span>
+                                            <span
+                                                className={cx({
+                                                    'online-user': onlineUsers.some(
+                                                        (user) => user?.userID === item.userInfo.idUser,
+                                                    ),
+                                                })}
+                                            ></span>
+                                        </div>
                                     </div>
-                                    <div className={cx('curTime')}>
-                                        {isSameDay(new Date(item.timeSend))
-                                            ? `${new Date(item.timeSend).getHours()}:${String(
-                                                  new Date(item.timeSend).getMinutes(),
-                                              ).padStart(2, '0')}${
-                                                  new Date(item.timeSend).getHours() < 12 ? ' AM' : ' PM'
-                                              }`
-                                            : `${new Date(item.timeSend).getDate()}/${
-                                                  new Date(item.timeSend).getMonth() + 1
-                                              }`}
+                                    <div className={cx('message-info')}>
+                                        <div className={cx('lastest-message')}>
+                                            <span>{item.direct === 1 ? 'Bạn: ' : ''}</span>
+                                            {item.isImage === 0 ? item.messageText : 'Đã gửi 1 ảnh'}
+                                        </div>
+                                        <div className={cx('curTime')}>
+                                            {isSameDay(new Date(item.timeSend))
+                                                ? `${new Date(item.timeSend).getHours()}:${String(
+                                                      new Date(item.timeSend).getMinutes(),
+                                                  ).padStart(2, '0')}${
+                                                      new Date(item.timeSend).getHours() < 12 ? ' AM' : ' PM'
+                                                  }`
+                                                : `${new Date(item.timeSend).getDate()}/${
+                                                      new Date(item.timeSend).getMonth() + 1
+                                                  }`}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
                 </div>
             </div>
 
             <div className={cx('messenger-content')}>
-                {isShowMessage ? (
+                {isShowMessage && !isDelete ? (
                     <>
                         <div className={cx('chat-header')}>
                             {loadInfoChatSide && (
@@ -557,7 +631,6 @@ function Message({ socket, onlineUsers, user }) {
                                         value={inputSearch}
                                         onChange={(value) => handleChangeInputSearch(value)}
                                     />
-                                    {console.log('isShowingResultsSearch ' + isShowingResultsSearch)}
                                     {isShowingResultsSearch !== null && (
                                         <span className={cx('search-results')}>
                                             {isShowingResultsSearch}{' '}
@@ -586,7 +659,7 @@ function Message({ socket, onlineUsers, user }) {
                         )}
                         <div className={cx('chat-main')} ref={chatRef}>
                             {console.log('firstVisit ' + firstVisit)}
-                            {loadMessages.chat.map((result, index) => (
+                            {loadMessages?.chat.map((result, index) => (
                                 <div key={result.idMessage}>
                                     {result.direct === 0 ? (
                                         <div className={cx('chat-item')} key={index}>
@@ -644,7 +717,7 @@ function Message({ socket, onlineUsers, user }) {
                             ))}
                         </div>
                         {console.log('isBlocked ' + isBlocked + 'blocked ' + blocked)}
-                        {isBlocked || blocked ? (
+                        {isBlocked || blocked || currentChatBlock === currentConversation ? (
                             <div className={cx('block-container')}>
                                 <span className={cx('block-title')}>Cuộc trò chuyện đã bị chặn!</span>
                                 <span className={cx('block-note')}>Hiện các bạn không thể trò chuyện.</span>

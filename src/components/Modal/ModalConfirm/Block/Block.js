@@ -3,21 +3,35 @@ import styles from './Block.module.scss';
 import Button from '~/components/Button';
 import { useState } from 'react';
 
-import { handlePutBlockConversation, handleDeleteConversation } from '~/services/conversationService';
-
+import { handlePutBlockConversation } from '~/services/conversationService';
+import { handleDeletePost } from '~/services/postService';
 const cx = classNames.bind(styles);
 
-function Block({ children, hide, idConversation, onBlockConversationChange, onDeleteConversation, isDelete }) {
+function Block({
+    children,
+    hide,
+    idConversation,
+    onBlockConversationChange,
+    onDeleteConversation,
+    onDeletePost,
+    isDelete,
+    isDeletePost,
+    idPost,
+    idAccPost,
+}) {
     console.log('idConversation ' + idConversation);
     const [blockConversation, setBlockConversation] = useState(false);
     const handleYes = async () => {
         try {
-            if (!isDelete) {
+            if (!isDelete && !isDeletePost) {
                 await handlePutBlockConversation(idConversation);
                 setBlockConversation(true);
                 onBlockConversationChange(true);
+            } else if (isDeletePost) {
+                await handleDeletePost(idAccPost, idPost);
+                onDeletePost(false);
             } else {
-                await handleDeleteConversation(idConversation);
+                // await handleDeleteConversation(idConversation);
                 onDeleteConversation(true);
             }
         } catch (error) {
