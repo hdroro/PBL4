@@ -17,15 +17,12 @@ const handleGetInfo = () => {
 const handleGetInfoByID = (idUser) => {
     return axios.get('api/get-user', { withCredentials: true, params: { idUser } });
 };
+
+const handleGetInfoByUsername = (nickname) => {
+    return axios.get('api/get-user-by-username', { withCredentials: true, params: { nickname } });
+};
 const handleFetchChatUser = () => {
     return axios.get('api/user-chat', { withCredentials: true });
-};
-
-const handleLoadMessage = (idConversation, idUser) => {
-    return axios.get('/api/user-load-message', {
-        withCredentials: true,
-        params: { idConversation, idUser },
-    });
 };
 
 const handleGetAccById = (idConversation) => {
@@ -37,6 +34,22 @@ const handleGetAccById = (idConversation) => {
 
 const handlePostMessage = (direct, messageText, timeSend, idConversation) => {
     return axios.post('/api/save-message', { withCredentials: true, direct, messageText, timeSend, idConversation });
+};
+
+const handlePostFile = (direct, file, timeSend, idConversation) => {
+    return axios.post(
+        '/api/save-file',
+        { withCredentials: true, direct, file, timeSend, idConversation },
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        },
+    );
+};
+
+const getFile = (filename) => {
+    return axios.get('/api/get-file', { withCredentials: true, filename });
 };
 
 const handleSignupApi = (username, password, fullname, date, gender) => {
@@ -94,11 +107,13 @@ export {
     handleLogoutApi,
     handleGetInfo,
     handleGetInfoByID,
+    handleGetInfoByUsername,
     handleFetchChatUser,
-    handleLoadMessage,
     handleGetAccById,
     handlePostMessage,
+    handlePostFile,
     handleSignupApi,
+    getFile,
     handleEditProfile,
     getProfileSetting,
     handleChangePassword,

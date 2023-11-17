@@ -10,17 +10,26 @@ import AdjustPost from '~/components/Popper/AdjustPost/AdjustPost';
 import { useModal } from '~/hooks';
 import Modal from '~/components/Modal/Modal';
 import CreatePost from '~/components/Modal/ModalConfirm/CreatePost';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ProfileBrief from '~/components/Modal/ModalConfirm/ProfileBrief';
 import { useParams } from 'react-router-dom';
+import { handleGetInfoByID, handleGetInfoByUsername } from '~/services/userService';
+import { handleGetPost } from '~/services/postService';
+import { formatISODateToCustomFormat } from '~/utils/date';
 
 const cx = classNames.bind(styles);
 
-function Profile() {
-    const renderPreview = () => {
+function Profile({ user }) {
+    const [reloadProfile, setReloadProfile] = useState(false);
+
+    const renderPreview = (idPost) => {
         return (
             <PopperWrapper>
-                <AdjustPost />
+                <AdjustPost
+                    idPost={idPost}
+                    infoUser={infoUser}
+                    reloadProfile={() => setReloadProfile(!reloadProfile)}
+                />
             </PopperWrapper>
         );
     };
@@ -29,10 +38,34 @@ function Profile() {
     const toggleProfile = () => {
         setShowingProfile(!isShowingProfile);
     };
+    const [infoUser, setInfoUser] = useState({});
+    const [listPost, setListPost] = useState([]);
+    const [idUser, setIdUser] = useState(null);
 
     const { nickname } = useParams();
 
-    console.log(nickname);
+    const fetchData = async () => {
+        try {
+            const data = await handleGetInfoByUsername(nickname.replace('@', ''));
+            setIdUser(data.userData.user[0].idUser);
+            const response = await handleGetInfoByID(data.userData.user[0].idUser);
+            setInfoUser(response.userData.user);
+
+            const response_post = await handleGetPost(data.userData.user[0].idUser);
+            setListPost(response_post.postData.posts);
+        } catch (error) {
+            console.error('Error fetching user information: ' + error);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, [nickname, reloadProfile]);
+
+    const handleChangeStatusCreatePost = async (value) => {
+        toggle(value);
+        setReloadProfile(!reloadProfile);
+    };
 
     return (
         <div className={cx('wrapper')}>
@@ -43,29 +76,28 @@ function Profile() {
                             <img className={cx('full-screen-image')} src={images.bg_profile} alt="" />
                             <div className={cx('user-info')}>
                                 <div className={cx('info')}>
-                                    <img className={cx('avatar')} src={images.cancer} alt="" />
+                                    <img className={cx('avatar')} src={images[infoUser.avatar]} alt="" />
                                     <div className={cx('info-user')}>
-                                        <div className={cx('fullname')}>Yến Nhi</div>
-                                        <div className={cx('nickname')}>{nickname}</div>
-                                        <Button
-                                            onClick={toggleProfile}
-                                            normal
-                                            className={cx('btn-edit')}
-                                            leftIcon={<Edit />}
-                                        >
-                                            Edit Profile
-                                        </Button>
+                                        <div className={cx('fullname')}>{infoUser.fullName}</div>
+                                        <div className={cx('nickname')}>@{infoUser.userName}</div>
+                                        {idUser === user.idUser && (
+                                            <Button
+                                                onClick={toggleProfile}
+                                                normal
+                                                className={cx('btn-edit')}
+                                                leftIcon={<Edit />}
+                                            >
+                                                Edit Profile
+                                            </Button>
+                                        )}
                                         <Modal isShowing={isShowingProfile} hide={toggleProfile}>
-                                            <ProfileBrief toggle={toggleProfile} />
+                                            <ProfileBrief toggle={toggleProfile} infoUser={infoUser} />
                                         </Modal>
                                     </div>
                                 </div>
                                 <div className={cx('bio')}>
                                     <span className={cx('title')}>Bio: </span>
-                                    <span className={cx('content')}>
-                                        Tôi là một cô nàng cự giải cute hột me, nếu bạn thích hãy kết nối với toi
-                                        kakakakakka
-                                    </span>
+                                    <span className={cx('content')}>{infoUser.bio}</span>
                                 </div>
                             </div>
                         </div>
@@ -74,14 +106,16 @@ function Profile() {
                 <div className={cx('row')}>
                     <div className={cx('col l-12 m-12 c-12')}>
                         <div className={cx('blog-container')}>
-                            <div className={cx('header-blog')}>
-                                <img src={images.cancer} alt="" />
-                                <input
-                                    className={cx('thinking')}
-                                    placeholder="Yến Nhi ơi, bạn đang nghĩ gì ?"
-                                    onClick={toggle}
-                                />
-                            </div>
+                            {idUser === user.idUser && (
+                                <div className={cx('header-blog')}>
+                                    <img src={images[infoUser.avatar]} alt="" />
+                                    <input
+                                        className={cx('thinking')}
+                                        placeholder={`${infoUser.fullName} ơi, bạn đang nghĩ gì ?`}
+                                        onClick={toggle}
+                                    />
+                                </div>
+                            )}
                             <Modal
                                 title="Create new post"
                                 leftIcon={<BookPost />}
@@ -90,71 +124,50 @@ function Profile() {
                                 isShowing={isShowing}
                                 hide={toggle}
                             >
-                                <CreatePost />
+                                <CreatePost
+                                    onChangeStatusCreatePost={handleChangeStatusCreatePost}
+                                    infoUser={infoUser}
+                                />
                             </Modal>
 
                             <div className={cx('post-container')}>
-                                <Wrapper>
-                                    <div className={cx('post-top')}>
-                                        <div className={cx('info-post')}>
-                                            <img className={cx('avatar-post')} src={images.cancer} alt="" />
-                                            <div className={cx('post')}>
-                                                <div className={cx('name')}>Yến Nhi</div>
-                                                <div className={cx('time-post')}>September 14, 2023 at 10:20</div>
+                                {listPost?.map((item, index) => (
+                                    <Wrapper key={index}>
+                                        <div className={cx('post-top')}>
+                                            <div className={cx('info-post')}>
+                                                <img
+                                                    className={cx('avatar-post')}
+                                                    src={images[infoUser.avatar]}
+                                                    alt=""
+                                                />
+                                                <div className={cx('post')}>
+                                                    <div className={cx('name')}>{infoUser.fullName}</div>
+                                                    <div className={cx('time-post')}>
+                                                        {item.timePost == item.updatedAt
+                                                            ? formatISODateToCustomFormat(item.timePost)
+                                                            : 'Edited: ' + formatISODateToCustomFormat(item.updatedAt)}
+                                                    </div>
+                                                </div>
                                             </div>
+
+                                            {idUser === user.idUser && (
+                                                <Tippy
+                                                    offset={[100, -30]}
+                                                    interactive
+                                                    delay={[0, 100]}
+                                                    placement="bottom"
+                                                    content={renderPreview(item.idPost)}
+                                                >
+                                                    <div>
+                                                        <ThreeDots className={cx('icon-dots')} />
+                                                    </div>
+                                                </Tippy>
+                                            )}
                                         </div>
 
-                                        <Tippy
-                                            offset={[100, -30]} // Đặt offset trong một mảng
-                                            interactive
-                                            delay={[0, 100]} // Đặt delay trong một mảng
-                                            placement="bottom"
-                                            content={renderPreview()} // Sử dụng content thay vì render
-                                        >
-                                            <div>
-                                                <ThreeDots className={cx('icon-dots')} />
-                                            </div>
-                                        </Tippy>
-                                    </div>
-
-                                    <div className={cx('post-content')}>
-                                        “Wow wow chúc mừng sinh nhật anh cả của chúng ta Hôm nay và ngày mai hãy tận
-                                        hưởng thật vui vẻ nhé iu anh nhiều ạ Woa woa otp tui nè mọi người ơi, kakakakak.
-                                        Chúc mừng mà đăng ảnh như boyfriend dzị ó. Otp mãi keooooo Anw Yeonjun chúc mừng
-                                        sinh nhật zui zẻ nhaaaa, mãi iuuu.
-                                    </div>
-                                </Wrapper>
-
-                                <Wrapper>
-                                    <div className={cx('post-top')}>
-                                        <div className={cx('info-post')}>
-                                            <img className={cx('avatar-post')} src={images.cancer} alt="" />
-                                            <div className={cx('post')}>
-                                                <div className={cx('name')}>Yến Nhi</div>
-                                                <div className={cx('time-post')}>September 14, 2023 at 10:20</div>
-                                            </div>
-                                        </div>
-
-                                        <Tippy
-                                            offset={[100, -30]} // Đặt offset trong một mảng
-                                            interactive
-                                            delay={[0, 100]} // Đặt delay trong một mảng
-                                            placement="bottom"
-                                            content={renderPreview()} // Sử dụng content thay vì render
-                                        >
-                                            <div>
-                                                <ThreeDots className={cx('icon-dots')} />
-                                            </div>
-                                        </Tippy>
-                                    </div>
-
-                                    <div className={cx('post-content')}>
-                                        “Wow wow chúc mừng sinh nhật anh cả của chúng ta Hôm nay và ngày mai hãy tận
-                                        hưởng thật vui vẻ nhé iu anh nhiều ạ Woa woa otp tui nè mọi người ơi, kakakakak.
-                                        Chúc mừng mà đăng ảnh như boyfriend dzị ó. Otp mãi keooooo Anw Yeonjun chúc mừng
-                                        sinh nhật zui zẻ nhaaaa, mãi iuuu.
-                                    </div>
-                                </Wrapper>
+                                        <div className={cx('post-content')}>{item.content}</div>
+                                    </Wrapper>
+                                ))}
                             </div>
                         </div>
                     </div>

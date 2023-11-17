@@ -12,6 +12,7 @@
         margin-right: 10px;
     }
 }
+
 .info-user {
     display: flex;
     flex-direction: column;
@@ -24,6 +25,11 @@
 .nickname {
     font-style: italic;
     text-align: left;
+}
+.time-post {
+    font-size: 13px;
+    margin-top: 5px;
+    font-style: italic;
 }
 .content {
     margin-top: 10px;

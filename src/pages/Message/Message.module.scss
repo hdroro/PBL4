@@ -100,11 +100,22 @@
             font-size: 17px;
         }
 
-        .online-user {
-            width: 10px;
-            height: 10px;
-            background-color: #31a24c;
-            border-radius: 50%;
+        .group-info-message {
+            display: flex;
+            align-items: center;
+
+            .online-user {
+                width: 10px;
+                height: 10px;
+                background-color: #31a24c;
+                border-radius: 50%;
+                margin-left: 10px;
+            }
+            .count-message {
+                font-weight: 600;
+                color: #ce0909;
+                font-size: 14px;
+            }
         }
     }
 
@@ -201,6 +212,9 @@
 .nickname-header {
     font-size: 1.6rem;
 }
+.link-to-profile {
+    display: flex;
+}
 
 .chat-main {
     display: flex;
@@ -230,6 +244,9 @@
             background: #fff;
             padding: 10px 15px;
             border-radius: 13px;
+            display: flex;
+            flex-direction: column;
+            // text-align: right;
         }
     }
 
@@ -240,8 +257,17 @@
             background: #fdbfec;
             padding: 10px 15px;
             border-radius: 13px;
+            display: flex;
+            flex-direction: column;
+            text-align: right;
         }
     }
+}
+
+.transfer-image {
+    width: 200px !important;
+    height: 200px !important;
+    border-radius: 0 !important ;
 }
 
 .time-send {
@@ -249,6 +275,7 @@
     font-style: italic;
     float: right;
     color: #a79b9b;
+    text-align: right;
     /* margin-right: -9px; */
 }
 
@@ -272,10 +299,38 @@
 
 .chat-send-bottom {
     display: flex;
+    flex-direction: column;
     align-items: center;
     width: 100%;
     padding: 13px 16px;
     border-top: 0.5px solid rgba(22, 24, 35, 0.12);
+
+    .image-alt {
+        .image-file {
+            width: 20%;
+            margin-left: 46px;
+        }
+
+        span {
+            position: absolute;
+            margin-top: -8px;
+            margin-left: -8px;
+            font-weight: 600;
+            color: #fc82f0;
+            cursor: pointer;
+        }
+    }
+
+    .chat-action {
+        display: flex;
+        width: 100%;
+
+        .btn-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
 
     .btn-image {
         margin-right: 10px;
@@ -347,25 +402,85 @@
             color: #000000;
         }
     }
+}
 
-    .setting-main {
-        .search-input {
-            background: #f0eeef;
+.setting-main,
+.search-action {
+    .search-input {
+        background: #f0eeef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 20px;
+        margin-bottom: 10px;
+
+        width: 100%;
+
+        .search-message {
+            padding: 5px 0px 5px 10px;
             display: flex;
-            align-items: center;
+            width: 33px;
+            cursor: pointer;
+        }
+
+        .search-results {
+            display: flex;
+            font-size: 13px;
+            padding-right: 10px;
+
+            span {
+                margin-left: 2px;
+            }
+        }
+        input {
+            padding: 10px;
+            background: #f0eeef;
             border-radius: 20px;
-            margin-bottom: 10px;
-            .search-message {
-                padding: 5px 0px 5px 10px;
-                display: flex;
-                width: 33px;
-                cursor: pointer;
+            width: 100%;
+        }
+    }
+}
+
+.highlighted {
+    background-color: #f6e2f1;
+}
+
+.search-action {
+    padding: 10px 23px;
+    padding-bottom: 2px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    .search-icon {
+        display: flex;
+        align-items: center;
+        margin-right: 15px;
+
+        .icon + .icon {
+            margin-left: 8px;
+        }
+        .icon {
+            cursor: pointer;
+
+            &:hover {
+                color: #b939ac;
             }
-            input {
-                padding: 10px;
-                background: #f0eeef;
-                border-radius: 20px;
-            }
+        }
+    }
+    .close-search {
+        /* background: transparent; */
+        margin-left: 10px;
+        margin-bottom: 11px;
+        padding: 10px;
+        border-radius: 10px;
+        color: #000;
+        font-weight: 600;
+        cursor: pointer;
+
+        &:hover {
+            opacity: 0.8;
         }
     }
 }

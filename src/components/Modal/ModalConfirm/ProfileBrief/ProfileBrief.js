@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 const cx = classNames.bind(styles);
 
-function ProfileBrief({ toggle }) {
+function ProfileBrief({ toggle, infoUser }) {
     const [username, setUsername] = useState('');
     const [name, setName] = useState('');
     const [bio, setBio] = useState('');
@@ -31,7 +31,13 @@ function ProfileBrief({ toggle }) {
                         <label for="avatar">Profile photo</label>
                     </div>
                     <div className={cx('avatar-container')}>
-                        <img name="avatar" id="avatar" className={cx('avatar-item')} src={images.cancer} alt="error" />
+                        <img
+                            name="avatar"
+                            id="avatar"
+                            className={cx('avatar-item')}
+                            src={images[infoUser.avatar]}
+                            alt="error"
+                        />
                     </div>
                 </div>
                 <div className={cx('form-item')}>
@@ -44,11 +50,12 @@ function ProfileBrief({ toggle }) {
                             name="username"
                             id="username"
                             className={cx('input-item')}
-                            placeholder="@yanni"
-                            value={username}
+                            placeholder={`@${infoUser.userName}`}
+                            value={`${infoUser.userName}`}
                             onChange={(e) => handleOnChangeUsername(e)}
+                            disabled
                         />
-                        <div className={cx('desc-item')}>www.website.com/@yanni</div>
+                        <div className={cx('desc-item')}>www.website.com/@{`${infoUser.userName}`}</div>
                         <div className={cx('desc-item')}>
                             Usernames can only contain letters, numbers, underscores, and periods. Changing your
                             username will also change your profile link.
@@ -65,8 +72,8 @@ function ProfileBrief({ toggle }) {
                             name="name"
                             id="name"
                             className={cx('input-item')}
-                            placeholder="Yen Nhi"
-                            value={name}
+                            placeholder={`${infoUser.fullName}`}
+                            value={`${infoUser.fullName}`}
                             onChange={(e) => handleOnChangeName(e)}
                         />
                     </div>
@@ -80,10 +87,10 @@ function ProfileBrief({ toggle }) {
                             name="bio"
                             id="bio"
                             className={cx('textarea-item')}
-                            placeholder="All love for Beomgyu"
+                            placeholder={`${infoUser.bio}`}
                             rows="4"
                             cols="50"
-                            value={bio}
+                            value={`${infoUser.bio}`}
                             onChange={(e) => handleOnChangeBio(e)}
                         />
                         <div className={cx('desc-item')}>allow 50 characters</div>

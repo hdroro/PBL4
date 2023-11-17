@@ -10,10 +10,12 @@ import NotiItem from '~/components/Popper/NotiItem';
 import { PopperWrapper } from '~/components/Popper';
 import { useModal } from '~/hooks';
 import { Link } from 'react-router-dom';
-import { handleLogoutApi } from '~/services/userService';
+import { handleGetInfoByID, handleLogoutApi } from '~/services/userService';
+import { useEffect, useState } from 'react';
 
 const cx = classNames.bind(styles);
 function Sidebar({ user }) {
+    const [infoUser, setInfoUser] = useState({});
     const { isShowing, toggle } = useModal();
     const renderPreview = () => {
         return (
@@ -25,9 +27,24 @@ function Sidebar({ user }) {
         );
     };
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await handleGetInfoByID(user.idUser);
+                setInfoUser(response.userData.user);
+            } catch (error) {
+                console.error('Error fetching user information: ' + error);
+            }
+        };
+
+        fetchData();
+    }, [user.idUser]);
+
     const handleLogoutAccout = async () => {
         await handleLogoutApi();
     };
+
+    console.log('user: ', user);
 
     return (
         <div className={cx('wrapper')}>
@@ -75,7 +92,7 @@ function Sidebar({ user }) {
                         <div className={cx('row')}>
                             <div className={cx('col l-12 m-12 c-12')}>
                                 <div className={cx('infor')}>
-                                    <img src={images.cancer} alt="Cancer" />
+                                    <img src={images[infoUser.avatar]} alt="Cancer" />
                                     <span className={cx('name')}>{user.fullName}</span>
                                     <span className={cx('nickname')}>@{user.userName}</span>
                                 </div>
