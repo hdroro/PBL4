@@ -22,7 +22,8 @@ const handleGetConversationByID = (idConversation) => {
     return axios.get('/api/get-conversation', { withCredentials: true, params: { idConversation } });
 };
 
-export { handlePutBlockConversation,
+export { 
+    handlePutBlockConversation,
     handleDeleteConversation,
     handleUpdateBlockStatusConversation,
     handleGetConversationByID,

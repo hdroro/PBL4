@@ -35,7 +35,7 @@ import {
 } from '~/services/conversationService';
 import { handlePostBlockInfo, handleGetBlockInfo, handleDeleteBlockInfo } from '~/services/blockService';
 import { handlePostFile } from '~/services/userService';
-import { handleGetDeleteInfo, handlePostDeleteInfo, handleDeleteInfoDeleted } from '~/services/deleteService';
+import {  handlePostDeleteInfo, handleUpdateDeleteInfo } from '~/services/deleteService';
 import { mydate, formatTime, isSameDay } from '~/utils/date';
 
 const cx = classNames.bind(styles);
@@ -80,8 +80,8 @@ function Message({ socket, onlineUsers, user }) {
     // const [unreadnotifications, setUnreadNotifications] = useState([]);
     const [currentConversation, setCurrentConversation] = useState(null);
     const [thisUserNotification, setThisUserNotification] = useState([]);
-    const [idConversationDeleted, setIdconversationDeleted] = useState([]);
     const [reLoadPage, setReloadPage] = useState(false);
+    const [idMessageLastest, setIdMessageLastest] = useState(1);
     //INITIAL SOCKET
     console.log('notification ', notifications);
 
@@ -141,25 +141,25 @@ function Message({ socket, onlineUsers, user }) {
             setIsDelete(false);
             setCurrentChatBlock(null);
             setCurrentConversation(idConversation);
-            markThisUserNotificationsAsRead(thisUserNotification, notifications);
+            markThisUserNotificationsAsRead(idConversation, thisUserNotification, notifications);
             console.log('idConversation_    ' + idConversation);
             console.log('idUser ' + idUser);
             const blockInfo = await handleGetBlockInfo(idConversation);
             console.log('blockInfo.blockDataInfo.blockDataInfo ' + blockInfo.blockDataInfo?.infoBlock[0]);
             setBlockInfo(blockInfo.blockDataInfo?.infoBlock[0]);
-
+            
             const blocked = await handleGetConversationByID(idConversation);
-
+            
             const _isBlocked = blocked.conversationData.newConversation[0].isBlocked;
             console.log('_isBlocked ' + _isBlocked);
-
+            
             if (_isBlocked === 1) setBlocked(true);
             else setBlocked(false);
 
             const response = await handleLoadMessage(idConversation, idUser);
             setLoadMessages(response.loadMessage);
-
             setIsShowMessage(true);
+            
 
             const re = await handleGetInfoByID(idUser);
             setLoadInfoChatSide(re.userData.user);
@@ -313,26 +313,37 @@ function Message({ socket, onlineUsers, user }) {
     //NOTIFI--- Can't fix
     useEffect(() => {
         console.log('idSession ' + idUser_);
-        const res = unreadNotificationsFuc(notifications)?.filter((n) => n.senderID === idUser_);
+        const res = unreadNotificationsFuc(notifications);
         setThisUserNotification(res);
-    }, [idUser_, notifications]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [notifications]);
 
-    const markThisUserNotificationsAsRead = useCallback((thisUserNotification, notifications) => {
+
+    const markThisUserNotificationsAsRead = useCallback((idConversation, thisUserNotification, notifications) => {
+        console.log("thisUserNotification ", thisUserNotification);
+        console.log("notifications ", notifications);
+    
         const mNotifications = notifications?.map((el) => {
-            let notification;
-            thisUserNotification?.forEach((n) => {
-                if (n.senderID === el.senderID) {
-                    console.log('vo day a????????');
-                    notification = { ...n, isRead: true };
+            if (idConversation === el?.idConversation) {
+                console.log("el?.idConversation ", el?.idConversation);
+                console.log("idConversation ", idConversation);
+    
+                const matchingNotification = thisUserNotification?.find((n) => n.senderID === el.senderID);
+    
+                if (matchingNotification) {
+                    return { ...matchingNotification, isRead: true };
                 } else {
-                    console.log('vo day a');
-                    notification = el;
+                    return el;
                 }
-            });
-            return notification;
+            } else {
+                return el;
+            }
         });
+    
         setNotifications(mNotifications);
     }, []);
+    
+    
 
     useEffect(() => {
         if (socket === null) return;
@@ -340,6 +351,19 @@ function Message({ socket, onlineUsers, user }) {
         socket.off('receive-notification');
 
         socket.on('receive-message', async (data) => {
+            const chatUserResponse = await handleFetchChatUser();
+            chatUserResponse.userChatData?.map(async (item) => {
+                if (item.idConversation === data.idConversation && item.infoUserDelete.length !== 0 && item.infoUserDelete[0].deleteAtId !== 1) {
+                    
+                    await handleUpdateDeleteInfo(item.infoUserDelete[0].idDelete, item.infoUserDelete[0].idDeleted, item.infoUserDelete[0].deleteAtId);
+                    // await handleDeleteInfoDeleted(item.infoUserDelete[0].idDelete, item.infoUserDelete[0].idDeleted);
+                    // setLoadMessages((prevLoadMessages) => ({
+                    //     chat: [data, ...(prevLoadMessages?.chat || [])],
+                    // }));
+                    // setReloadPage(!reLoadPage);
+                }
+            });
+
             if (data.idSession === idUser_ && data.idUser_ === idSession) {
                 data.direct = 0;
                 setLoadMessages((prevLoadMessages) => ({
@@ -347,16 +371,7 @@ function Message({ socket, onlineUsers, user }) {
                 }));
             }
             // chatRef.current.scrollTop = chatRef?.current?.scrollHeight;
-            const chatUserResponse = await handleFetchChatUser();
-            chatUserResponse.userChatData?.map(async (item) => {
-                if (item.idConversation === data.idConversation && item.infoUserDelete.length !== 0) {
-                    await handleDeleteInfoDeleted(item.infoUserDelete[0].idDelete, item.infoUserDelete[0].idDeleted);
-                    setLoadMessages((prevLoadMessages) => ({
-                        chat: [data, ...(prevLoadMessages?.chat || [])],
-                    }));
-                    setReloadPage(!reLoadPage);
-                }
-            });
+            
             setUserChat(chatUserResponse.userChatData);
             // setReloadPage(!reLoadPage);
         });
@@ -380,6 +395,7 @@ function Message({ socket, onlineUsers, user }) {
 
     useEffect(() => {
         if (socket === null) return;
+        socket.off('blocked-conversation');
         socket.on('blocked-conversation', async (data) => {
             const response = await handleGetAccById(data.idConversation_);
             const a2 = response.accountList.chat[0].idAcc2;
@@ -408,6 +424,7 @@ function Message({ socket, onlineUsers, user }) {
 
     useEffect(() => {
         if (socket === null) return;
+        socket.off('opened-block-conversation');
         socket.on('opened-block-conversation', async (data) => {
             setIsOpenBlock(false);
             setIsDisableBlock(false);
@@ -430,14 +447,20 @@ function Message({ socket, onlineUsers, user }) {
         // console.log('delete side: ', user.idUser);
         // console.log('delete side     aaaa: ', idUser_);
         // console.log('currentConversation: ', currentConversation);
+        const response = await handleLoadMessage(currentConversation, user.idUser);
+        setIdMessageLastest(response.loadMessage.chat[0].idMessage);
         setIsShowSetting(false);
         setIsShowingClear(false);
-        await handlePostDeleteInfo(user.idUser, idUser_, currentConversation);
+        await handlePostDeleteInfo(user.idUser, idUser_, currentConversation, response.loadMessage.chat[0].idMessage);
         await handleDeleteConversation(currentConversation);
         const newUserChat = userChat?.filter((u) => u.userInfo.idUser !== idUser_);
         setUserChat(newUserChat);
         setIsDelete(value);
+        setLoadMessages([]);
+        // setIdUser(0);
     };
+
+    console.log(idMessageLastest);
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
@@ -455,17 +478,26 @@ function Message({ socket, onlineUsers, user }) {
     const handleSearch = () => {
         setFirstVisit(true);
         setIsShowingDetailSearch(true);
+    
+        const removeDiacritics = (str) => {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        };
+    
         const foundIndexes = [];
+        const sanitizedSearch = removeDiacritics(inputSearch.toLowerCase());
+    
         loadMessages.chat.forEach((message, index) => {
-            if (message.messageText.includes(inputSearch)) {
+            const sanitizedMessage = removeDiacritics(message.messageText.toLowerCase());
+            if (sanitizedMessage.includes(sanitizedSearch)) {
                 foundIndexes.push(index);
             }
         });
+    
         setFilteredMessages(foundIndexes);
-        // setCurrentResultIndex(0);
         setCurrentResultIndexFounded(foundIndexes[0]);
         setIsShowingResultsSearch(foundIndexes.length);
     };
+
     const chatRef = useRef(null);
 
     const handleSearchDown = () => {
@@ -509,14 +541,13 @@ function Message({ socket, onlineUsers, user }) {
 
                 <div>
                     {userChat
-                        ?.filter(
-                            (item) =>
-                                item.isDelete !== 1 &&
-                                (item.infoUserDelete[0]?.idDelete !== idSession ||
-                                    item.infoUserDelete[1]?.idDeleted !== idSession) &&
-                                item.isDelete === 0 &&
-                                item.infoUserDelete[0]?.idDelete !== idSession,
-                        )
+                        // ?.filter(
+                        //     (item) =>
+                        //         // item.isDelete !== 1 &&
+                        //         // (item.infoUserDelete[0]?.idDelete !== idSession ||
+                        //         //     item.infoUserDelete[1]?.idDeleted !== idSession) &&
+                        //         item.isDelete === 0 
+                        // )
                         .map((item) => (
                             <div
                                 className={cx('message-another')}
@@ -658,7 +689,6 @@ function Message({ socket, onlineUsers, user }) {
                             </div>
                         )}
                         <div className={cx('chat-main')} ref={chatRef}>
-                            {console.log('firstVisit ' + firstVisit)}
                             {loadMessages?.chat.map((result, index) => (
                                 <div key={result.idMessage}>
                                     {result.direct === 0 ? (
@@ -716,7 +746,6 @@ function Message({ socket, onlineUsers, user }) {
                                 </div>
                             ))}
                         </div>
-                        {console.log('isBlocked ' + isBlocked + 'blocked ' + blocked)}
                         {isBlocked || blocked || currentChatBlock === currentConversation ? (
                             <div className={cx('block-container')}>
                                 <span className={cx('block-title')}>Cuộc trò chuyện đã bị chặn!</span>
@@ -758,7 +787,6 @@ function Message({ socket, onlineUsers, user }) {
                                                     (typeMessage !== '' && event.key === 'Enter') ||
                                                     event.key === 'NumpadEnter'
                                                 ) {
-                                                    console.log('Enter key pressed. Calling handleSendMessage.');
                                                     handleSendMessage();
                                                     handleSendFile();
                                                 }

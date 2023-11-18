@@ -2,14 +2,24 @@ import axios from '../axios';
 
 axios.defaults.withCredentials = true;
 
-const handlePostDeleteInfo = (idDelete, idDeleted, idConversation) => {
+const handlePostDeleteInfo = (idDelete, idDeleted, idConversation, deleteAtId) => {
     return axios.post('/api/delete-conversation', {
         withCredentials: true,
         idDelete,
         idDeleted,
         idConversation,
+        deleteAtId
     });
 };
+
+const handleUpdateDeleteInfo = (idDelete, idDeleted, deleteAtId) => {
+    return axios.put('/api/update-delete-conversation', {
+        withCredentials: true,
+        idDelete,
+        idDeleted,
+        deleteAtId
+    });
+}
 
 const handleGetDeleteInfo = (idConversation) => {
     return axios.get('/api/get-delete-conversation', {
@@ -32,4 +42,4 @@ const handleDeleteInfoDeleted = (idDelete, idDeleted) => {
     });
 };
 
-export { handlePostDeleteInfo, handleGetDeleteInfo, handleGetAllIdConversationDeleted, handleDeleteInfoDeleted };
+export { handlePostDeleteInfo, handleUpdateDeleteInfo, handleGetDeleteInfo, handleGetAllIdConversationDeleted, handleDeleteInfoDeleted };
