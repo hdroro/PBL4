@@ -264,10 +264,21 @@
     }
 }
 
+.container-file:hover {
+    text-shadow: 0.1px 0.1px 0px rgba(0, 0, 0, 0.5);
+}
+
 .transfer-image {
     width: 200px !important;
     height: 200px !important;
     border-radius: 0 !important ;
+}
+.file-message-icon {
+    margin-right: 5px;
+    align-items: center;
+    font-size: 16px;
+    margin-bottom: -1px;
+    color: #ee60cb;
 }
 
 .time-send {
@@ -306,18 +317,32 @@
     border-top: 0.5px solid rgba(22, 24, 35, 0.12);
 
     .image-alt {
+        /* display: flex; */
+        display: flex;
+        /* width: 100%; */
+        background: #f6e2f1;
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 5px;
+        align-self: start;
+        margin-left: 45px;
+
+        p {
+            margin-left: 5px;
+        }
+
         .image-file {
             width: 20%;
-            margin-left: 46px;
+            margin-left: 5px;
         }
 
         span {
-            position: absolute;
             margin-top: -8px;
-            margin-left: -8px;
-            font-weight: 600;
+            margin-left: 8px;
+            font-weight: 800;
             color: #fc82f0;
             cursor: pointer;
+            font-size: 22px;
         }
     }
 

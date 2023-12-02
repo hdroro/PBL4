@@ -11,12 +11,15 @@ import { PopperWrapper } from '~/components/Popper';
 import { useModal } from '~/hooks';
 import { Link } from 'react-router-dom';
 import { handleGetInfoByID, handleLogoutApi } from '~/services/userService';
+import { handleGetNotificationByReceiverId } from '~/services/notificationMessageService';
 import { useEffect, useState } from 'react';
 
 const cx = classNames.bind(styles);
 function Sidebar({ user }) {
     const [infoUser, setInfoUser] = useState({});
     const { isShowing, toggle } = useModal();
+    const [notificationCount, setNotificationCount] = useState('');
+
     const renderPreview = () => {
         return (
             <PopperWrapper className={cx('primary')}>
@@ -32,6 +35,10 @@ function Sidebar({ user }) {
             try {
                 const response = await handleGetInfoByID(user.idUser);
                 setInfoUser(response.userData.user);
+
+                console.log('user.idUser', user.idUser);
+                const notifications = await handleGetNotificationByReceiverId(user.idUser);
+                setNotificationCount(notifications?.notificationMessageInfo?.statusNotificationMessage);
             } catch (error) {
                 console.error('Error fetching user information: ' + error);
             }
@@ -39,6 +46,8 @@ function Sidebar({ user }) {
 
         fetchData();
     }, [user.idUser]);
+
+    console.log('notificationCount', notificationCount);
 
     const handleLogoutAccout = async () => {
         await handleLogoutApi();
@@ -107,8 +116,18 @@ function Sidebar({ user }) {
                                             Matching
                                         </Button>
 
-                                        <Button to={routes.messages} normal large text leftIcon={<Messenger />}>
+                                        <Button
+                                            to={routes.messages}
+                                            normal
+                                            large
+                                            text
+                                            leftIcon={<Messenger />}
+                                            // className={cx('btn-message')}
+                                        >
                                             Message
+                                            <span className={cx('notification-count')}>
+                                                {notificationCount != 0 && '(' + notificationCount + ')'}
+                                            </span>
                                         </Button>
 
                                         <Button

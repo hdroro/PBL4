@@ -5,6 +5,7 @@ import {
     BackIcon,
     BlockMessage,
     CloseIcon,
+    FileMessage,
     Images,
     NotBlockMessage,
     NotifIcon,
@@ -35,8 +36,13 @@ import {
 } from '~/services/conversationService';
 import { handlePostBlockInfo, handleGetBlockInfo, handleDeleteBlockInfo } from '~/services/blockService';
 import { handlePostFile } from '~/services/userService';
-import {  handlePostDeleteInfo, handleUpdateDeleteInfo } from '~/services/deleteService';
+import { handlePostDeleteInfo, handleUpdateDeleteInfo } from '~/services/deleteService';
 import { mydate, formatTime, isSameDay } from '~/utils/date';
+import {
+    handleDeleteNotificationMessageInfo,
+    handlePostNotificationMessageInfo,
+    handleGetAllNotificationMessageInfo,
+} from '~/services/notificationMessageService';
 
 const cx = classNames.bind(styles);
 
@@ -76,12 +82,16 @@ function Message({ socket, onlineUsers, user }) {
 
     const [selectedFile, setSelectedFile] = useState(null);
     const [newFile, setNewFile] = useState({});
+    const [fileName, setFileName] = useState('');
     const [notifications, setNotifications] = useState([]);
     // const [unreadnotifications, setUnreadNotifications] = useState([]);
     const [currentConversation, setCurrentConversation] = useState(null);
     const [thisUserNotification, setThisUserNotification] = useState([]);
     const [reLoadPage, setReloadPage] = useState(false);
     const [idMessageLastest, setIdMessageLastest] = useState(1);
+    const [senderID, setSenderID] = useState(null);
+    const [receiverID, setReceiveID] = useState(null);
+    const [listNotificationOfUser, setListNotificationOfUser] = useState([]);
     //INITIAL SOCKET
     console.log('notification ', notifications);
 
@@ -119,6 +129,9 @@ function Message({ socket, onlineUsers, user }) {
                 setUserChat(response.userChatData);
                 setIdSession(response.userChatData[0].idSession);
 
+                const listNotifications = await handleGetAllNotificationMessageInfo();
+                console.log(listNotifications);
+                setListNotificationOfUser(listNotifications?.notificationMessageInfo.statusNotificationMessage);
                 // const response_deleted = await handleGetDeleteInfo(response.userChatData[0])
             } catch (error) {
                 console.error(error);
@@ -127,6 +140,7 @@ function Message({ socket, onlineUsers, user }) {
         fetchUserChat();
     }, [reLoadPage]);
 
+    console.log('listNotificationOfUser', listNotificationOfUser);
     //GET MESSAGE
     const handleSetLoadMessage = async (idConversation, idUser) => {
         try {
@@ -141,25 +155,27 @@ function Message({ socket, onlineUsers, user }) {
             setIsDelete(false);
             setCurrentChatBlock(null);
             setCurrentConversation(idConversation);
+            console.log('senderID', senderID);
+            console.log('receiverID', receiverID);
+            console.log('idUser', idUser);
+            handleDeleteNotificationMessageInfo(idConversation, idUser);
             markThisUserNotificationsAsRead(idConversation, thisUserNotification, notifications);
-            console.log('idConversation_    ' + idConversation);
-            console.log('idUser ' + idUser);
             const blockInfo = await handleGetBlockInfo(idConversation);
+            setListNotificationOfUser([]);
             console.log('blockInfo.blockDataInfo.blockDataInfo ' + blockInfo.blockDataInfo?.infoBlock[0]);
             setBlockInfo(blockInfo.blockDataInfo?.infoBlock[0]);
-            
+
             const blocked = await handleGetConversationByID(idConversation);
-            
+
             const _isBlocked = blocked.conversationData.newConversation[0].isBlocked;
             console.log('_isBlocked ' + _isBlocked);
-            
+
             if (_isBlocked === 1) setBlocked(true);
             else setBlocked(false);
 
             const response = await handleLoadMessage(idConversation, idUser);
             setLoadMessages(response.loadMessage);
             setIsShowMessage(true);
-            
 
             const re = await handleGetInfoByID(idUser);
             setLoadInfoChatSide(re.userData.user);
@@ -203,7 +219,7 @@ function Message({ socket, onlineUsers, user }) {
                 messageText,
                 timeSend,
                 idConversation,
-                isImage: 0,
+                isFile: 0,
             };
 
             setNewMessage(newMessage);
@@ -211,7 +227,7 @@ function Message({ socket, onlineUsers, user }) {
             setLoadMessages((prevLoadMessages) => ({
                 chat: [newMessage, ...prevLoadMessages.chat],
             }));
-            handlePostMessage(direct, messageText, timeSend, idConversation);
+            handlePostMessage(direct, messageText, timeSend, idConversation, messageText);
             // const res = handlePostMessage(direct, messageText, timeSend, idConversation);
             // console.log(res);
             socket.emit('send-message', newMessage);
@@ -258,21 +274,22 @@ function Message({ socket, onlineUsers, user }) {
                 direct_,
                 avatar,
                 file,
+                fileName,
                 timeSend,
                 idConversation,
-                isImage: 1,
+                isFile: 1,
             };
             //Lúc load lại thì dĩm preview cái file ni ra ảnh nghen
             setNewFile(newFile);
             setLoad(!load);
             // truyền đi new file ni là dữ liệu mềm, chưa lưu => không lấy link được
-            await handlePostFile(direct, file, timeSend, idConversation).then((res) => {
+            await handlePostFile(direct, file, timeSend, idConversation, fileName).then((res) => {
                 newFile.messageText = res.saveMessage.chat;
             });
             setLoadMessages((prevLoadMessages) => ({
                 chat: [newFile, ...prevLoadMessages.chat],
             }));
-            socket.emit('send-file', newFile);
+            await socket.emit('send-file', newFile);
 
             // const response_ = await handleFetchChatUser();
             // setUserChat(response_.userChatData);
@@ -281,6 +298,17 @@ function Message({ socket, onlineUsers, user }) {
         } catch (error) {
             console.error('Error in handleSendFile:', error);
         }
+    };
+
+    const getFileExtension = (filename) => {
+        return filename.slice(((filename.lastIndexOf('.') - 1) >>> 0) + 2);
+    };
+
+    const isImageFile = (filename) => {
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp']; // Thêm các phần mở rộng ảnh khác nếu cần
+
+        const extension = getFileExtension(filename).toLowerCase();
+        return imageExtensions.includes(extension);
     };
 
     const handleOpenBlock = useCallback(async () => {
@@ -315,21 +343,20 @@ function Message({ socket, onlineUsers, user }) {
         console.log('idSession ' + idUser_);
         const res = unreadNotificationsFuc(notifications);
         setThisUserNotification(res);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [notifications]);
 
-
     const markThisUserNotificationsAsRead = useCallback((idConversation, thisUserNotification, notifications) => {
-        console.log("thisUserNotification ", thisUserNotification);
-        console.log("notifications ", notifications);
-    
+        console.log('thisUserNotification ', thisUserNotification);
+        console.log('notifications ', notifications);
+
         const mNotifications = notifications?.map((el) => {
             if (idConversation === el?.idConversation) {
-                console.log("el?.idConversation ", el?.idConversation);
-                console.log("idConversation ", idConversation);
-    
+                console.log('el?.idConversation ', el?.idConversation);
+                console.log('idConversation ', idConversation);
+
                 const matchingNotification = thisUserNotification?.find((n) => n.senderID === el.senderID);
-    
+
                 if (matchingNotification) {
                     return { ...matchingNotification, isRead: true };
                 } else {
@@ -339,11 +366,9 @@ function Message({ socket, onlineUsers, user }) {
                 return el;
             }
         });
-    
+
         setNotifications(mNotifications);
     }, []);
-    
-    
 
     useEffect(() => {
         if (socket === null) return;
@@ -353,9 +378,16 @@ function Message({ socket, onlineUsers, user }) {
         socket.on('receive-message', async (data) => {
             const chatUserResponse = await handleFetchChatUser();
             chatUserResponse.userChatData?.map(async (item) => {
-                if (item.idConversation === data.idConversation && item.infoUserDelete.length !== 0 && item.infoUserDelete[0].deleteAtId !== 1) {
-                    
-                    await handleUpdateDeleteInfo(item.infoUserDelete[0].idDelete, item.infoUserDelete[0].idDeleted, item.infoUserDelete[0].deleteAtId);
+                if (
+                    item.idConversation === data.idConversation &&
+                    item.infoUserDelete.length !== 0 &&
+                    item.infoUserDelete[0].deleteAtId !== 1
+                ) {
+                    await handleUpdateDeleteInfo(
+                        item.infoUserDelete[0].idDelete,
+                        item.infoUserDelete[0].idDeleted,
+                        item.infoUserDelete[0].deleteAtId,
+                    );
                     // await handleDeleteInfoDeleted(item.infoUserDelete[0].idDelete, item.infoUserDelete[0].idDeleted);
                     // setLoadMessages((prevLoadMessages) => ({
                     //     chat: [data, ...(prevLoadMessages?.chat || [])],
@@ -371,7 +403,7 @@ function Message({ socket, onlineUsers, user }) {
                 }));
             }
             // chatRef.current.scrollTop = chatRef?.current?.scrollHeight;
-            
+
             setUserChat(chatUserResponse.userChatData);
             // setReloadPage(!reLoadPage);
         });
@@ -381,12 +413,17 @@ function Message({ socket, onlineUsers, user }) {
             const idAcc1 = currentUser.accountList?.chat[0]?.idAcc1;
             const idAcc2 = currentUser.accountList?.chat[0]?.idAcc2;
             console.log('currenCOnver:' + currentConversation + ' ACC1 ' + idAcc1 + ' ACC2 ' + idAcc2);
+            setSenderID(data.senderID);
+            setReceiveID(data.receiverID);
             if (
                 (data.senderID === idAcc1 && data.receiverID === idAcc2) ||
                 (data.senderID === idAcc2 && data.receiverID === idAcc1)
             ) {
+                handleDeleteNotificationMessageInfo(data.idConversation, data.senderID);
                 setNotifications((prev) => prev && [{ ...data, isRead: true }, ...prev]);
             } else {
+                console.log('data', data);
+                handlePostNotificationMessageInfo(data.idConversation, data.senderID, data.receiverID, 1);
                 setNotifications((prev) => prev && [data, ...prev]);
             }
         });
@@ -447,11 +484,18 @@ function Message({ socket, onlineUsers, user }) {
         // console.log('delete side: ', user.idUser);
         // console.log('delete side     aaaa: ', idUser_);
         // console.log('currentConversation: ', currentConversation);
-        const response = await handleLoadMessage(currentConversation, user.idUser);
-        setIdMessageLastest(response.loadMessage.chat[0].idMessage);
+        const response = await handleLoadMessage(currentConversation, idUser_);
+        console.log('currentConversation', currentConversation);
+        console.log('idUser_', idUser_);
+        setIdMessageLastest(response.loadMessage?.chat[0]?.idMessage);
         setIsShowSetting(false);
         setIsShowingClear(false);
-        await handlePostDeleteInfo(user.idUser, idUser_, currentConversation, response.loadMessage.chat[0].idMessage);
+        await handlePostDeleteInfo(
+            user.idUser,
+            idUser_,
+            currentConversation,
+            response?.loadMessage?.chat[0]?.idMessage,
+        );
         await handleDeleteConversation(currentConversation);
         const newUserChat = userChat?.filter((u) => u.userInfo.idUser !== idUser_);
         setUserChat(newUserChat);
@@ -464,6 +508,8 @@ function Message({ socket, onlineUsers, user }) {
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
+        console.log(selectedFile);
+        setFileName(selectedFile?.name);
         setSelectedFile(selectedFile);
         setTypeMessage('');
         console.log('selectedFile', selectedFile);
@@ -478,21 +524,21 @@ function Message({ socket, onlineUsers, user }) {
     const handleSearch = () => {
         setFirstVisit(true);
         setIsShowingDetailSearch(true);
-    
+
         const removeDiacritics = (str) => {
             return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         };
-    
+
         const foundIndexes = [];
         const sanitizedSearch = removeDiacritics(inputSearch.toLowerCase());
-    
+
         loadMessages.chat.forEach((message, index) => {
             const sanitizedMessage = removeDiacritics(message.messageText.toLowerCase());
             if (sanitizedMessage.includes(sanitizedSearch)) {
                 foundIndexes.push(index);
             }
         });
-    
+
         setFilteredMessages(foundIndexes);
         setCurrentResultIndexFounded(foundIndexes[0]);
         setIsShowingResultsSearch(foundIndexes.length);
@@ -541,13 +587,13 @@ function Message({ socket, onlineUsers, user }) {
 
                 <div>
                     {userChat
-                        // ?.filter(
-                        //     (item) =>
-                        //         // item.isDelete !== 1 &&
-                        //         // (item.infoUserDelete[0]?.idDelete !== idSession ||
-                        //         //     item.infoUserDelete[1]?.idDeleted !== idSession) &&
-                        //         item.isDelete === 0 
-                        // )
+                        ?.filter(
+                            (item) =>
+                                (item.idSession === item.infoUserDelete[0]?.idDelete &&
+                                    item.idMessage > item.infoUserDelete[0]?.deleteAtId) ||
+                                (item.idSession === item.infoUserDelete[1]?.idDelete &&
+                                    item.idMessage > item.infoUserDelete[1]?.deleteAtId),
+                        )
                         .map((item) => (
                             <div
                                 className={cx('message-another')}
@@ -563,23 +609,47 @@ function Message({ socket, onlineUsers, user }) {
                                         <div className={cx('group-info-message')}>
                                             <span
                                                 className={cx(
-                                                    unreadNotificationsFuc(notifications)?.filter(
+                                                    (unreadNotificationsFuc(notifications)?.filter(
                                                         (n) => n.senderID === item.userInfo.idUser,
-                                                    )?.length > 0
-                                                        ? 'count-message'
-                                                        : '',
+                                                    )?.length > 0 ||
+                                                        listNotificationOfUser?.filter(
+                                                            (noti) =>
+                                                                noti.senderId === item.userInfo.idUser &&
+                                                                noti.idConversation === item.idConversation,
+                                                        ).length > 0) &&
+                                                        'count-message',
                                                 )}
                                             >
-                                                {unreadNotificationsFuc(notifications)?.filter(
+                                                {(unreadNotificationsFuc(notifications)?.filter(
                                                     (n) => n.senderID === item.userInfo.idUser,
-                                                )?.length > 0
-                                                    ? '(' +
-                                                      unreadNotificationsFuc(notifications)?.filter(
-                                                          (n) => n.senderID === item.userInfo.idUser,
-                                                      )?.length +
-                                                      ')'
+                                                )?.length || 0) +
+                                                    (listNotificationOfUser
+                                                        ?.filter(
+                                                            (noti) =>
+                                                                noti.senderId === item.userInfo.idUser &&
+                                                                noti.idConversation === item.idConversation,
+                                                        )
+                                                        .reduce((total, noti) => total + noti.notificationCount, 0) ||
+                                                        0) >
+                                                0
+                                                    ? `(${
+                                                          (unreadNotificationsFuc(notifications)?.filter(
+                                                              (n) => n.senderID === item.userInfo.idUser,
+                                                          )?.length || 0) +
+                                                          (listNotificationOfUser
+                                                              ?.filter(
+                                                                  (noti) =>
+                                                                      noti.senderId === item.userInfo.idUser &&
+                                                                      noti.idConversation === item.idConversation,
+                                                              )
+                                                              .reduce(
+                                                                  (total, noti) => total + noti.notificationCount,
+                                                                  0,
+                                                              ) || 0)
+                                                      })`
                                                     : ''}
                                             </span>
+
                                             <span
                                                 className={cx({
                                                     'online-user': onlineUsers.some(
@@ -592,7 +662,11 @@ function Message({ socket, onlineUsers, user }) {
                                     <div className={cx('message-info')}>
                                         <div className={cx('lastest-message')}>
                                             <span>{item.direct === 1 ? 'Bạn: ' : ''}</span>
-                                            {item.isImage === 0 ? item.messageText : 'Đã gửi 1 ảnh'}
+                                            {item.isFile === 0
+                                                ? item.messageText
+                                                : isImageFile(item.messageText)
+                                                ? 'Đã gửi 1 ảnh'
+                                                : 'Đã gửi 1 file'}
                                         </div>
                                         <div className={cx('curTime')}>
                                             {isSameDay(new Date(item.timeSend))
@@ -700,7 +774,7 @@ function Message({ socket, onlineUsers, user }) {
                                                 <img src={images[result.avatar]} alt="" />
                                             </Link>
                                             <div className={cx('message-detail')}>
-                                                {result.isImage === 0 ? (
+                                                {result.isFile === 0 ? (
                                                     <p
                                                         className={cx('message', {
                                                             highlighted:
@@ -709,21 +783,29 @@ function Message({ socket, onlineUsers, user }) {
                                                     >
                                                         {result.messageText}
                                                     </p>
-                                                ) : (
+                                                ) : isImageFile(result.messageText) ? (
                                                     <img
                                                         className={cx('transfer-image')}
-                                                        src={'http://localhost:8080/public/img/' + result.messageText}
+                                                        src={`http://localhost:8080/public/img/${result.messageText}`}
                                                         alt=""
                                                     />
+                                                ) : (
+                                                    <a
+                                                        href={`http://localhost:8080/public/img/${result.messageText}`}
+                                                        download={result.fileName}
+                                                        className={cx('container-file')}
+                                                    >
+                                                        <FileMessage className={cx('file-message-icon')} />{' '}
+                                                        {result.fileName}
+                                                    </a>
                                                 )}
-
                                                 <span className={cx('time-send')}>{formatTime(result.timeSend)}</span>
                                             </div>
                                         </div>
                                     ) : (
                                         <div className={cx('chat-item-user')} key={index}>
                                             <div className={cx('message-detail-user')}>
-                                                {result.isImage === 0 ? (
+                                                {result.isFile === 0 ? (
                                                     <p
                                                         className={cx('message', {
                                                             highlighted:
@@ -732,12 +814,21 @@ function Message({ socket, onlineUsers, user }) {
                                                     >
                                                         {result.messageText}
                                                     </p>
-                                                ) : (
+                                                ) : isImageFile(result.messageText) ? (
                                                     <img
                                                         className={cx('transfer-image')}
-                                                        src={'http://localhost:8080/public/img/' + result.messageText}
+                                                        src={`http://localhost:8080/public/img/${result.messageText}`}
                                                         alt=""
                                                     />
+                                                ) : (
+                                                    <a
+                                                        href={`http://localhost:8080/public/img/${result.messageText}`}
+                                                        download={result.fileName}
+                                                        className={cx('container-file')}
+                                                    >
+                                                        <FileMessage className={cx('file-message-icon')} />
+                                                        {result.fileName}
+                                                    </a>
                                                 )}
                                                 <span className={cx('time-send')}>{formatTime(result.timeSend)}</span>
                                             </div>
@@ -755,11 +846,15 @@ function Message({ socket, onlineUsers, user }) {
                             <div className={cx('chat-send-bottom')}>
                                 {selectedFile && (
                                     <div className={cx('image-alt')}>
-                                        <img
-                                            src={URL.createObjectURL(selectedFile)}
-                                            alt="Selected Image"
-                                            className={cx('image-file')}
-                                        />
+                                        {isImageFile(selectedFile.name) ? (
+                                            <img
+                                                src={URL.createObjectURL(selectedFile)}
+                                                alt="Selected Image"
+                                                className={cx('image-file')}
+                                            />
+                                        ) : (
+                                            <p>{selectedFile.name}</p>
+                                        )}
                                         <span onClick={handleDeletImageAlt}>×</span>
                                     </div>
                                 )}
@@ -771,7 +866,7 @@ function Message({ socket, onlineUsers, user }) {
                                     <input
                                         type="file"
                                         id="fileInput"
-                                        accept="image/*"
+                                        accept="image/*, application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.presentationml.presentation"
                                         onChange={handleFileChange}
                                         style={{ display: 'none' }}
                                     />

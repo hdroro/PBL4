@@ -32,14 +32,21 @@ const handleGetAccById = (idConversation) => {
     });
 };
 
-const handlePostMessage = (direct, messageText, timeSend, idConversation) => {
-    return axios.post('/api/save-message', { withCredentials: true, direct, messageText, timeSend, idConversation });
+const handlePostMessage = (direct, messageText, timeSend, idConversation, fileName) => {
+    return axios.post('/api/save-message', {
+        withCredentials: true,
+        direct,
+        messageText,
+        timeSend,
+        idConversation,
+        fileName,
+    });
 };
 
-const handlePostFile = (direct, file, timeSend, idConversation) => {
+const handlePostFile = (direct, file, timeSend, idConversation, fileName) => {
     return axios.post(
         '/api/save-file',
-        { withCredentials: true, direct, file, timeSend, idConversation },
+        { withCredentials: true, direct, file, timeSend, idConversation, fileName },
         {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -78,7 +85,7 @@ const getProfileSetting = () => {
     return axios.get('api/setting/editprofile', {
         withCredentials: true,
     });
-}
+};
 
 const handleChangePassword = (currentpassword, newpassword, retypepassword) => {
     return axios.post('api/setting/changepassword', {
@@ -87,21 +94,22 @@ const handleChangePassword = (currentpassword, newpassword, retypepassword) => {
         newpassword,
         retypepassword,
     });
-}
+};
 
 const handleCheckFriendRelation = (idAcc1, idAcc2) => {
     return axios.get('api/check-friend-relation', {
         withCredentials: true,
-        params: {idAcc1, idAcc2},
+        params: { idAcc1, idAcc2 },
     });
-}
+};
 
 const handleAddFriendRelation = (idAcc1, idAcc2) => {
     return axios.post('api/add-friend-relation', {
         withCredentials: true,
-        idAcc1, idAcc2
+        idAcc1,
+        idAcc2,
     });
-}
+};
 export {
     handleLoginApi,
     handleLogoutApi,

@@ -8,7 +8,7 @@ const handlePostDeleteInfo = (idDelete, idDeleted, idConversation, deleteAtId) =
         idDelete,
         idDeleted,
         idConversation,
-        deleteAtId
+        deleteAtId,
     });
 };
 
@@ -17,9 +17,9 @@ const handleUpdateDeleteInfo = (idDelete, idDeleted, deleteAtId) => {
         withCredentials: true,
         idDelete,
         idDeleted,
-        deleteAtId
+        deleteAtId,
     });
-}
+};
 
 const handleGetDeleteInfo = (idConversation) => {
     return axios.get('/api/get-delete-conversation', {
@@ -42,4 +42,10 @@ const handleDeleteInfoDeleted = (idDelete, idDeleted) => {
     });
 };
 
-export { handlePostDeleteInfo, handleUpdateDeleteInfo, handleGetDeleteInfo, handleGetAllIdConversationDeleted, handleDeleteInfoDeleted };
+export {
+    handlePostDeleteInfo,
+    handleUpdateDeleteInfo,
+    handleGetDeleteInfo,
+    handleGetAllIdConversationDeleted,
+    handleDeleteInfoDeleted,
+};
