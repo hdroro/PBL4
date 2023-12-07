@@ -13,6 +13,7 @@ import RequestFriend from '~/components/Modal/ModalConfirm/RequestFriend';
 import { UserGroup } from '~/components/Icon/Icon';
 import Message from '~/pages/Message';
 import ConfirmMatching from '~/components/Modal/ModalConfirm/ConfirmMatching';
+import { handlePostNotificationMessageInfo } from '~/services/notificationMessageService';
 
 const cx = classNames.bind(styles);
 
@@ -24,6 +25,7 @@ function TwoSideBar({ children, socket }) {
     const [matchId, setMatchId] = useState();
     const [isShowNotifMatching, setShowNotifMatching] = useState(false);
     // const [socket, setSocket] = useState(null);
+    const [reLoadPage, setReloadPage] = useState(false);
 
     useEffect(() => {
         const fetchUserInfo = async () => {
@@ -52,7 +54,7 @@ function TwoSideBar({ children, socket }) {
     useEffect(() => {
         if (socket === null) return;
         console.log(user);
-        if(user.idUser) {
+        if (user.idUser) {
             socket.emit('addNewUser', user.idUser);
             socket.on('getOnlineUsers', (response) => {
                 setOnlineUsers(response);
@@ -61,30 +63,39 @@ function TwoSideBar({ children, socket }) {
     }, [user]);
 
     useEffect(() => {
-        if(socket === null) return;
+        if (socket === null) return;
         socket.on('receive-request-matching', (response) => {
             console.log(response);
             setShowRequest(!isShowRequest);
             setFromId(response.fromId);
             setMatchId(response.matchId);
-        })
-    }, [])
+        });
+    }, []);
 
     useEffect(() => {
-        if(socket === null) return;
+        if (socket === null) return;
         socket.on('move-to-new-conversation', (data) => {
             console.log(data);
             setShowNotifMatching(true);
-        })
-    }, [])
+        });
+    }, []);
+
+    useEffect(() => {
+        if (socket === null) return;
+        socket.off('receive-notification');
+        socket.on('receive-notification', async (data) => {
+            handlePostNotificationMessageInfo(data.idConversation, data.senderID, data.receiverID, 1);
+            setReloadPage(!reLoadPage);
+        });
+    }, [socket, reLoadPage]);
 
     const handleToggleShowRequest = () => {
         setShowRequest(!isShowRequest);
-    }
+    };
 
     const handleToggleShowNotifMatching = () => {
         setShowNotifMatching(!isShowNotifMatching);
-    }
+    };
     console.log('OnlineUser', onlineUsers);
 
     const childrenWithProps = React.Children.map(children, (child) => {
@@ -101,7 +112,7 @@ function TwoSideBar({ children, socket }) {
                     <div className={cx('col l-12 m-12 c-12')}>
                         <div className={cx('row')}>
                             <div className={cx('col l-3 m-3 c-3')}>
-                                <Sidebar user={user} />
+                                <Sidebar user={user} socket={socket} />
                             </div>
                             <div className={cx('col l-2 m-2 c-2')}>
                                 <SubSidebar />
@@ -110,14 +121,38 @@ function TwoSideBar({ children, socket }) {
                         </div>
                         <div className={cx('matching')}>
                             {isShowRequest && (
-                                <Modal background leftIcon={<UserGroup/>} title={'Request matching'} isShowing={isShowRequest} hide={handleToggleShowRequest}>
-                                    <RequestFriend hide={handleToggleShowRequest} fromId={fromId && fromId} socket={socket} onlineUsers={onlineUsers} matchId={matchId && matchId}/>
+                                <Modal
+                                    background
+                                    leftIcon={<UserGroup />}
+                                    title={'Request matching'}
+                                    isShowing={isShowRequest}
+                                    hide={handleToggleShowRequest}
+                                >
+                                    <RequestFriend
+                                        hide={handleToggleShowRequest}
+                                        fromId={fromId && fromId}
+                                        socket={socket}
+                                        onlineUsers={onlineUsers}
+                                        matchId={matchId && matchId}
+                                    />
                                 </Modal>
                             )}
 
                             {isShowNotifMatching && (
-                                <Modal background leftIcon={<UserGroup/>} title={'Notification'} isShowing={isShowNotifMatching} hide={handleToggleShowNotifMatching}>
-                                    <ConfirmMatching hide={handleToggleShowNotifMatching} fromId={fromId && fromId} socket={socket} onlineUsers={onlineUsers} matchId={matchId && matchId}/>
+                                <Modal
+                                    background
+                                    leftIcon={<UserGroup />}
+                                    title={'Notification'}
+                                    isShowing={isShowNotifMatching}
+                                    hide={handleToggleShowNotifMatching}
+                                >
+                                    <ConfirmMatching
+                                        hide={handleToggleShowNotifMatching}
+                                        fromId={fromId && fromId}
+                                        socket={socket}
+                                        onlineUsers={onlineUsers}
+                                        matchId={matchId && matchId}
+                                    />
                                 </Modal>
                             )}
                         </div>

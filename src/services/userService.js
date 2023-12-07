@@ -14,6 +14,16 @@ const handleGetInfo = () => {
     return axios.get('api/matching', { withCredentials: true });
 };
 
+const handleGetUserBySearch = (idUser, nickname) => {
+    return axios.get('api/get-user-by-search', {
+        withCredentials: true,
+        params: {
+            idUser,
+            nickname,
+        },
+    });
+};
+
 const handleGetInfoByID = (idUser) => {
     return axios.get('api/get-user', { withCredentials: true, params: { idUser } });
 };
@@ -114,6 +124,7 @@ export {
     handleLoginApi,
     handleLogoutApi,
     handleGetInfo,
+    handleGetUserBySearch,
     handleGetInfoByID,
     handleGetInfoByUsername,
     handleFetchChatUser,

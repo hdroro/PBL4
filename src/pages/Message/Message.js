@@ -92,6 +92,7 @@ function Message({ socket, onlineUsers, user }) {
     const [senderID, setSenderID] = useState(null);
     const [receiverID, setReceiveID] = useState(null);
     const [listNotificationOfUser, setListNotificationOfUser] = useState([]);
+    const [activeChat, setActiveChat] = useState(null);
     //INITIAL SOCKET
     console.log('notification ', notifications);
 
@@ -138,12 +139,13 @@ function Message({ socket, onlineUsers, user }) {
             }
         };
         fetchUserChat();
-    }, [reLoadPage]);
+    }, [reLoadPage, notifications]);
 
     console.log('listNotificationOfUser', listNotificationOfUser);
     //GET MESSAGE
     const handleSetLoadMessage = async (idConversation, idUser) => {
         try {
+            setActiveChat(idConversation);
             setIdconversation(idConversation);
             setIdUser(idUser);
             setIsBlocked(false);
@@ -158,10 +160,24 @@ function Message({ socket, onlineUsers, user }) {
             console.log('senderID', senderID);
             console.log('receiverID', receiverID);
             console.log('idUser', idUser);
+            console.log('idConversation', idConversation);
             handleDeleteNotificationMessageInfo(idConversation, idUser);
-            markThisUserNotificationsAsRead(idConversation, thisUserNotification, notifications);
+
             const blockInfo = await handleGetBlockInfo(idConversation);
-            setListNotificationOfUser([]);
+            if (notifications.length === 0) {
+                if (
+                    listNotificationOfUser?.some(
+                        (item) =>
+                            item.idConversation === idConversation &&
+                            item.senderId === idUser &&
+                            item.receiverId === user.idUser,
+                    )
+                ) {
+                    setReloadPage(!reLoadPage);
+                }
+            } else {
+                markThisUserNotificationsAsRead(idConversation, thisUserNotification, notifications);
+            }
             console.log('blockInfo.blockDataInfo.blockDataInfo ' + blockInfo.blockDataInfo?.infoBlock[0]);
             setBlockInfo(blockInfo.blockDataInfo?.infoBlock[0]);
 
@@ -228,6 +244,8 @@ function Message({ socket, onlineUsers, user }) {
                 chat: [newMessage, ...prevLoadMessages.chat],
             }));
             handlePostMessage(direct, messageText, timeSend, idConversation, messageText);
+            handlePostNotificationMessageInfo(idConversation, idSession, _idSession, 1);
+
             // const res = handlePostMessage(direct, messageText, timeSend, idConversation);
             // console.log(res);
             socket.emit('send-message', newMessage);
@@ -286,6 +304,8 @@ function Message({ socket, onlineUsers, user }) {
             await handlePostFile(direct, file, timeSend, idConversation, fileName).then((res) => {
                 newFile.messageText = res.saveMessage.chat;
             });
+            handlePostNotificationMessageInfo(idConversation, idSession, _idSession, 1);
+
             setLoadMessages((prevLoadMessages) => ({
                 chat: [newFile, ...prevLoadMessages.chat],
             }));
@@ -340,7 +360,7 @@ function Message({ socket, onlineUsers, user }) {
 
     //NOTIFI--- Can't fix
     useEffect(() => {
-        console.log('idSession ' + idUser_);
+        // console.log('idSession ' + idUser_);
         const res = unreadNotificationsFuc(notifications);
         setThisUserNotification(res);
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -366,7 +386,7 @@ function Message({ socket, onlineUsers, user }) {
                 return el;
             }
         });
-
+        console.log('mNotifications', mNotifications);
         setNotifications(mNotifications);
     }, []);
 
@@ -415,15 +435,16 @@ function Message({ socket, onlineUsers, user }) {
             console.log('currenCOnver:' + currentConversation + ' ACC1 ' + idAcc1 + ' ACC2 ' + idAcc2);
             setSenderID(data.senderID);
             setReceiveID(data.receiverID);
+
             if (
                 (data.senderID === idAcc1 && data.receiverID === idAcc2) ||
                 (data.senderID === idAcc2 && data.receiverID === idAcc1)
             ) {
-                handleDeleteNotificationMessageInfo(data.idConversation, data.senderID);
                 setNotifications((prev) => prev && [{ ...data, isRead: true }, ...prev]);
+                handleDeleteNotificationMessageInfo(data.idConversation, data.senderID);
             } else {
                 console.log('data', data);
-                handlePostNotificationMessageInfo(data.idConversation, data.senderID, data.receiverID, 1);
+                // handlePostNotificationMessageInfo(data.idConversation, data.senderID, data.receiverID, 1);
                 setNotifications((prev) => prev && [data, ...prev]);
             }
         });
@@ -434,23 +455,23 @@ function Message({ socket, onlineUsers, user }) {
         if (socket === null) return;
         socket.off('blocked-conversation');
         socket.on('blocked-conversation', async (data) => {
-            const response = await handleGetAccById(data.idConversation_);
-            const a2 = response.accountList.chat[0].idAcc2;
-            const a1 = response.accountList.chat[0].idAcc1;
+            // const response = await handleGetAccById(data.idConversation_);
+            // const a2 = response.accountList.chat[0].idAcc2;
+            // const a1 = response.accountList.chat[0].idAcc1;
 
-            // console.log('data ' + data);
-            // console.log('a2 ' + a2 + 'a1 ' + a1 + 'idUser_ ' + idUser_);
-            let idBlock = null;
-            if (a2 === data.idUser_) {
-                setUserBlock(a1);
-                idBlock = a1;
-            } else if (a1 === data.idUser_) {
-                setUserBlock(a2);
-                idBlock = a2;
-            }
+            // // console.log('data ' + data);
+            // // console.log('a2 ' + a2 + 'a1 ' + a1 + 'idUser_ ' + idUser_);
+            // let idBlock = null;
+            // if (a2 === data.idUser_) {
+            //     setUserBlock(a1);
+            //     idBlock = a1;
+            // } else if (a1 === data.idUser_) {
+            //     setUserBlock(a2);
+            //     idBlock = a2;
+            // }
             // setBlocked(data.value);
             setCurrentChatBlock(data.idConversation_);
-            await handlePostBlockInfo(idBlock, data.idUser_, data.idConversation_);
+            // await handlePostBlockInfo(idBlock, data.idUser_, data.idConversation_);
 
             // setIsBlocked(data.value);
             setIsDisableBlock(true);
@@ -475,6 +496,22 @@ function Message({ socket, onlineUsers, user }) {
     const handleBlockConversationChange = async (value) => {
         setIsBlocked(value);
         await socket?.emit('block-conversation', { value, idUser_, idConversation_ });
+        const response = await handleGetAccById(idConversation_);
+        const a2 = response.accountList.chat[0].idAcc2;
+        const a1 = response.accountList.chat[0].idAcc1;
+
+        // console.log('data ' + data);
+        // console.log('a2 ' + a2 + 'a1 ' + a1 + 'idUser_ ' + idUser_);
+        let idBlock = null;
+        if (a2 === idUser_) {
+            setUserBlock(a1);
+            idBlock = a1;
+        } else if (a1 === idUser_) {
+            setUserBlock(a2);
+            idBlock = a2;
+        }
+        // setBlocked(data.value);
+        await handlePostBlockInfo(idBlock, idUser_, idConversation_);
         toggle(false);
         setIsOpenBlock(true);
     };
@@ -589,14 +626,21 @@ function Message({ socket, onlineUsers, user }) {
                     {userChat
                         ?.filter(
                             (item) =>
-                                (item.idSession === item.infoUserDelete[0]?.idDelete &&
+                                item.infoUserDelete.length === 0 ||
+                                (item.infoUserDelete.length === 1 &&
+                                    item.idSession !== item.infoUserDelete[0]?.idDelete) ||
+                                (item.infoUserDelete.length === 1 &&
+                                    item.idSession === item.infoUserDelete[0]?.idDelete &&
+                                    item.idMessage > item.infoUserDelete[0]?.deleteAtId) ||
+                                (item.infoUserDelete.length === 2 &&
+                                    item.idSession === item.infoUserDelete[0]?.idDelete &&
                                     item.idMessage > item.infoUserDelete[0]?.deleteAtId) ||
                                 (item.idSession === item.infoUserDelete[1]?.idDelete &&
                                     item.idMessage > item.infoUserDelete[1]?.deleteAtId),
                         )
                         .map((item) => (
                             <div
-                                className={cx('message-another')}
+                                className={cx('message-another', { active: item.idConversation === activeChat })}
                                 key={item.idConversation}
                                 onClick={() => {
                                     handleSetLoadMessage(item.idConversation, item.userInfo.idUser); // idConversation + id người được nhắn
@@ -609,34 +653,41 @@ function Message({ socket, onlineUsers, user }) {
                                         <div className={cx('group-info-message')}>
                                             <span
                                                 className={cx(
-                                                    (unreadNotificationsFuc(notifications)?.filter(
+                                                    unreadNotificationsFuc(notifications)?.filter(
                                                         (n) => n.senderID === item.userInfo.idUser,
                                                     )?.length > 0 ||
                                                         listNotificationOfUser?.filter(
                                                             (noti) =>
                                                                 noti.senderId === item.userInfo.idUser &&
                                                                 noti.idConversation === item.idConversation,
-                                                        ).length > 0) &&
-                                                        'count-message',
+                                                        ).length > 0
+                                                        ? 'count-message'
+                                                        : '',
                                                 )}
                                             >
-                                                {(unreadNotificationsFuc(notifications)?.filter(
-                                                    (n) => n.senderID === item.userInfo.idUser,
-                                                )?.length || 0) +
-                                                    (listNotificationOfUser
+                                                {/* {console.log('notifications________', notifications)} */}
+                                                {Math.max(
+                                                    unreadNotificationsFuc(notifications)?.filter(
+                                                        (n) =>
+                                                            n.senderID === item.userInfo.idUser &&
+                                                            n.receiverID === item.idSession,
+                                                    )?.length || 0,
+                                                    listNotificationOfUser
                                                         ?.filter(
                                                             (noti) =>
                                                                 noti.senderId === item.userInfo.idUser &&
                                                                 noti.idConversation === item.idConversation,
                                                         )
                                                         .reduce((total, noti) => total + noti.notificationCount, 0) ||
-                                                        0) >
-                                                0
-                                                    ? `(${
-                                                          (unreadNotificationsFuc(notifications)?.filter(
-                                                              (n) => n.senderID === item.userInfo.idUser,
-                                                          )?.length || 0) +
-                                                          (listNotificationOfUser
+                                                        0,
+                                                ) > 0
+                                                    ? `(${Math.max(
+                                                          unreadNotificationsFuc(notifications)?.filter(
+                                                              (n) =>
+                                                                  n.senderID === item.userInfo.idUser &&
+                                                                  n.receiverID === item.idSession,
+                                                          )?.length || 0,
+                                                          listNotificationOfUser
                                                               ?.filter(
                                                                   (noti) =>
                                                                       noti.senderId === item.userInfo.idUser &&
@@ -645,8 +696,8 @@ function Message({ socket, onlineUsers, user }) {
                                                               .reduce(
                                                                   (total, noti) => total + noti.notificationCount,
                                                                   0,
-                                                              ) || 0)
-                                                      })`
+                                                              ) || 0,
+                                                      )})`
                                                     : ''}
                                             </span>
 
@@ -660,7 +711,20 @@ function Message({ socket, onlineUsers, user }) {
                                         </div>
                                     </div>
                                     <div className={cx('message-info')}>
-                                        <div className={cx('lastest-message')}>
+                                        <div
+                                            className={cx(
+                                                unreadNotificationsFuc(notifications)?.filter(
+                                                    (n) => n.senderID === item.userInfo.idUser,
+                                                )?.length > 0 ||
+                                                    listNotificationOfUser?.filter(
+                                                        (noti) =>
+                                                            noti.senderId === item.userInfo.idUser &&
+                                                            noti.idConversation === item.idConversation,
+                                                    ).length > 0
+                                                    ? 'lastest-message-bold'
+                                                    : 'lastest-message',
+                                            )}
+                                        >
                                             <span>{item.direct === 1 ? 'Bạn: ' : ''}</span>
                                             {item.isFile === 0
                                                 ? item.messageText
@@ -941,7 +1005,6 @@ function Message({ socket, onlineUsers, user }) {
                                 'blockInfo?.idBlocked ' +
                                 blockInfo?.idBlocked,
                         )}
-
                         {(isOpenBlock || blockInfo?.idBlocked === idUser_) && (
                             <Button normal post leftIcon={<NotBlockMessage />} onClick={handleOpenBlock}>
                                 UnBlock

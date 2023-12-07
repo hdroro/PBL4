@@ -10,15 +10,19 @@ import NotiItem from '~/components/Popper/NotiItem';
 import { PopperWrapper } from '~/components/Popper';
 import { useModal } from '~/hooks';
 import { Link } from 'react-router-dom';
-import { handleGetInfoByID, handleLogoutApi } from '~/services/userService';
-import { handleGetNotificationByReceiverId } from '~/services/notificationMessageService';
+import { handleGetAccById, handleGetInfoByID, handleLogoutApi } from '~/services/userService';
+import {
+    handleGetNotificationByReceiverId,
+    handlePostNotificationMessageInfo,
+} from '~/services/notificationMessageService';
 import { useEffect, useState } from 'react';
 
 const cx = classNames.bind(styles);
-function Sidebar({ user }) {
+function Sidebar({ user, socket }) {
     const [infoUser, setInfoUser] = useState({});
     const { isShowing, toggle } = useModal();
     const [notificationCount, setNotificationCount] = useState('');
+    const [reLoadPage, setReloadPage] = useState(false);
 
     const renderPreview = () => {
         return (
@@ -33,10 +37,10 @@ function Sidebar({ user }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await handleGetInfoByID(user.idUser);
-                setInfoUser(response.userData.user);
+                // console.log('user?.idUser ', user?.idUser);
+                const response = await handleGetInfoByID(user?.idUser);
+                setInfoUser(response?.userData?.user);
 
-                console.log('user.idUser', user.idUser);
                 const notifications = await handleGetNotificationByReceiverId(user.idUser);
                 setNotificationCount(notifications?.notificationMessageInfo?.statusNotificationMessage);
             } catch (error) {
@@ -45,7 +49,16 @@ function Sidebar({ user }) {
         };
 
         fetchData();
-    }, [user.idUser]);
+    }, [user?.idUser, reLoadPage]);
+
+    useEffect(() => {
+        if (socket === null) return;
+        socket.off('receive-notification');
+        socket.on('receive-notification', async (data) => {
+            handlePostNotificationMessageInfo(data.idConversation, data.senderID, data.receiverID, 1);
+            setReloadPage(!reLoadPage);
+        });
+    }, [socket, reLoadPage]);
 
     console.log('notificationCount', notificationCount);
 
@@ -62,7 +75,7 @@ function Sidebar({ user }) {
                     <div className={cx('col l-12 m-12 c-12')}>
                         <div className={cx('row')}>
                             <div className={cx('col l-8 m-8 c-8')}>
-                                <Search />
+                                <Search user={user} />
                             </div>
                             <div className={cx('col l-2 m-2 c-2')}>
                                 <div className={cx('icon-header')}>
@@ -112,11 +125,12 @@ function Sidebar({ user }) {
                             <div className={cx('row')}>
                                 <div className={cx('col l-12 m-12 c-12')}>
                                     <div className={cx('button-action')}>
-                                        <Button to={routes.matching} normal large text leftIcon={<HandHeart />}>
+                                        <Button active to={routes.matching} normal large text leftIcon={<HandHeart />}>
                                             Matching
                                         </Button>
 
                                         <Button
+                                            active
                                             to={routes.messages}
                                             normal
                                             large
@@ -131,6 +145,7 @@ function Sidebar({ user }) {
                                         </Button>
 
                                         <Button
+                                            active
                                             to={`/api/profile/@${user.userName}`}
                                             normal
                                             large
@@ -140,7 +155,14 @@ function Sidebar({ user }) {
                                             My blog
                                         </Button>
 
-                                        <Button to={routes.settingProfile} normal large text leftIcon={<Setting />}>
+                                        <Button
+                                            active
+                                            to={routes.settingProfile}
+                                            normal
+                                            large
+                                            text
+                                            leftIcon={<Setting />}
+                                        >
                                             Settings
                                         </Button>
                                     </div>
