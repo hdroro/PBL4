@@ -32,6 +32,26 @@ export const formatTime = (timeSend) => {
     }
 };
 
+export const formatTimeMatching = (timeInput) => {
+    const currentTime = new Date();
+    const notifTime = new Date(timeInput);
+    console.log('current: ',currentTime);
+    console.log('notif: ',notifTime);
+    const timeDifference = (currentTime - notifTime) / 1000; // Chuyển đổi thành giây
+    console.log('difference: ', timeDifference);
+    if (Math.floor(timeDifference) <= 300) {
+        const timeLeft = 300 - Math.floor(timeDifference);
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = Math.floor(timeLeft - minutes * 60);
+        console.log('minute: ', minutes);
+        console.log('seconds: ', seconds);
+        return {minutes: minutes, seconds: seconds};
+    } 
+    else {
+        return {minutes: 0, seconds: 0}
+    }
+};
+
 export const isSameDay = (date) => {
     const currentDate = new Date();
     return (

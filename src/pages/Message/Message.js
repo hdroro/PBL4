@@ -589,7 +589,14 @@ function Message({ socket, onlineUsers, user }) {
                     {userChat
                         ?.filter(
                             (item) =>
-                                (item.idSession === item.infoUserDelete[0]?.idDelete &&
+                                item.infoUserDelete.length === 0 ||
+                                (item.infoUserDelete.length === 1 &&
+                                    item.idSession !== item.infoUserDelete[0]?.idDelete) ||
+                                (item.infoUserDelete.length === 1 &&
+                                    item.idSession === item.infoUserDelete[0]?.idDelete &&
+                                    item.idMessage > item.infoUserDelete[0]?.deleteAtId) ||
+                                (item.infoUserDelete.length === 2 &&
+                                    item.idSession === item.infoUserDelete[0]?.idDelete &&
                                     item.idMessage > item.infoUserDelete[0]?.deleteAtId) ||
                                 (item.idSession === item.infoUserDelete[1]?.idDelete &&
                                     item.idMessage > item.infoUserDelete[1]?.deleteAtId),

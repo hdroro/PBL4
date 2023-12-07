@@ -6,51 +6,50 @@ import Modal from '~/components/Modal/Modal';
 import Login from '~/components/Modal/Login';
 import { Fragment, useState } from 'react';
 import MatchingRandom from '~/components/Modal/ModalConfirm/MatchingRandom';
-import { handleCheckFriendRelation } from '~/services/userService';
+import { handleRandomMatching } from '~/services/userService';
+import NotificationMessage from '~/components/Modal/ModalConfirm/NotificationMessage';
+import { UserGroup } from '~/components/Icon/Icon';
+
 
 const cx = classNames.bind(styles);
 
 function BackGround({ isMatching, isShowing, toggle, socket, onlineUsers, user }) {
     const [isShowingMatching, setIsShowingMatching] = useState(false);
+    const [isShowNotifNoUserOnline, setShowNotifNoUserOnline] = useState(false);
     const [matchId, setMatchId] = useState();
     console.log(onlineUsers);
     const handleMatching = async () => {
-        // console.log(user);
-        // console.log('onlineuser length: ', onlineUsers.length);
-        let randomIndex;
-        // console.log('random:', randomIndex);
-        // console.log('id:', user.idUser);
-        // console.log('matching: ', onlineUsers[randomIndex].userID);
-
-        if(onlineUsers.length < 2) return;
-        let check;
-        // while() {
-            
-        // }
         try {
-            do {
-                randomIndex = Math.floor(Math.random() * onlineUsers.length);
-                if(onlineUsers[randomIndex].userID === user.idUser) continue;
-                const relation = await handleCheckFriendRelation(onlineUsers[randomIndex].userID, user.idUser)
-                if(relation.errCode === 0) check = true;
-                else if(relation.errCode === 1) check = false;
-                else {
-                    console.log(relation.errMessage);
-                }
-                console.log(relation);
-            } while(onlineUsers[randomIndex].userID === user.idUser || check)
+            const listOnlineUser = onlineUsers.filter(function(value, index, arr){
+                return value.userID !== user.idUser;
+            });
+            if(listOnlineUser.length === 0) {
+                setShowNotifNoUserOnline(!isShowNotifNoUserOnline);
+                return;
+            }
+            const randomUser = await handleRandomMatching(user.idUser, listOnlineUser);
+            console.log(randomUser);
+            if(randomUser.errCode === 0) {
+                console.log(randomUser);
+                setIsShowingMatching(!isShowingMatching);
+                setMatchId(randomUser.dataUser.idUser);
+            } else if(randomUser.errCode === 2) {
+                setShowNotifNoUserOnline(!isShowNotifNoUserOnline);
+            } else {
+                console.log(randomUser.errMessage);
+            }
+
         }
         catch(err) {
             console.log(err);
         }
-        const matchUser = onlineUsers[randomIndex];
-        console.log(matchUser);
-        setIsShowingMatching(!isShowingMatching);
-        setMatchId(matchUser.userID);
         
     };
     const handleToggleMatching = () => {
         setIsShowingMatching(!isShowingMatching);
+    }
+    const handleToggleNotif = () => {
+        setShowNotifNoUserOnline(!isShowNotifNoUserOnline);
     }
     return (
         <div className={cx('wrapper')}>
@@ -69,6 +68,11 @@ function BackGround({ isMatching, isShowing, toggle, socket, onlineUsers, user }
                             <MatchingRandom hide={handleToggleMatching} matchId={matchId} socket={socket} onlineUsers={onlineUsers} fromId={user.idUser}/>
                         </Modal>
                     </Fragment>
+                )}
+                {isShowNotifNoUserOnline && (
+                    <Modal background leftIcon={<UserGroup/>} title={'Notification'} isShowing={isShowNotifNoUserOnline} hide={handleToggleNotif}>
+                        <NotificationMessage hide={handleToggleNotif} socket={socket} onlineUsers={onlineUsers} title={'Hiện tại không có user đang online tương thích với bạn!'}/>
+                    </Modal>
                 )}
                 
             </div>

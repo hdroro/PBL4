@@ -12,6 +12,7 @@ import RequestFriend from '~/components/Modal/ModalConfirm/RequestFriend';
 import { UserGroup } from '~/components/Icon/Icon';
 import Message from '~/pages/Message';
 import ConfirmMatching from '~/components/Modal/ModalConfirm/ConfirmMatching';
+import NotificationMessage from '~/components/Modal/ModalConfirm/NotificationMessage';
 
 const cx = classNames.bind(styles);
 
@@ -22,6 +23,9 @@ function SidebarOnly({ children, socket }) {
     const [fromId, setFromId] = useState();
     const [matchId, setMatchId] = useState();
     const [isShowNotifMatching, setShowNotifMatching] = useState(false);
+    const [isShowDenyMatching, setShowDenyMatching] = useState(false);
+    const [countNotifMatching, setCountNotifMatching] = useState();
+    const [idNotificationMatching, setIdNotificationMatching] = useState();
     // const [isCreateConversation, setCreateConversation] = useState(false);
     // const [socket, setSocket] = useState(null);
 
@@ -62,6 +66,10 @@ function SidebarOnly({ children, socket }) {
 
     useEffect(() => {
         if(socket === null) return;
+        socket.on('receive-notif-matching', (response) => {
+            console.log('receiveeeeeeeeee', response);
+            setIdNotificationMatching(response.idNotificationMatching);
+        })
         socket.on('receive-request-matching', (response) => {
             console.log(response);
             setShowRequest(!isShowRequest);
@@ -86,12 +94,25 @@ function SidebarOnly({ children, socket }) {
         })
     }, [])
 
+    useEffect(() => {
+        if(socket === null) return;
+        socket.on('send-deny-matching', (data) => {
+            console.log(data);
+            setShowDenyMatching(true);
+        })
+    }, [])
+
+
     const handleToggleShowRequest = () => {
         setShowRequest(!isShowRequest);
     }
 
     const handleToggleShowNotifMatching = () => {
         setShowNotifMatching(!isShowNotifMatching);
+    }
+
+    const handleToggleShowDenyMatching = () => {
+        setShowDenyMatching(!isShowDenyMatching);
     }
 
     console.log('OnlineUser', onlineUsers);
@@ -110,20 +131,26 @@ function SidebarOnly({ children, socket }) {
                     <div className={cx('col l-12 m-12 c-12')}>
                         <div className={cx('row')}>
                             <div className={cx('col l-3 m-3 c-3')}>
-                                <Sidebar user={user} />
+                                <Sidebar socket={socket} onlineUsers={onlineUsers} user={user} />
                             </div>
                             <div className={cx('col l-9 m-9 c-9')}>{childrenWithProps}</div>
                         </div>
                         <div className={cx('matching')}>
                             {isShowRequest && (
                                 <Modal background leftIcon={<UserGroup/>} title={'Request matching'} isShowing={isShowRequest} hide={handleToggleShowRequest}>
-                                    <RequestFriend hide={handleToggleShowRequest} fromId={fromId && fromId} socket={socket} onlineUsers={onlineUsers} matchId={matchId && matchId}/>
+                                    <RequestFriend idNotificationMatching={idNotificationMatching && idNotificationMatching} timeData={{minutes: 5, seconds: 0}} hide={handleToggleShowRequest} fromId={fromId && fromId} socket={socket} onlineUsers={onlineUsers} matchId={matchId && matchId}/>
                                 </Modal>
                             )}
 
                             {isShowNotifMatching && (
                                 <Modal background leftIcon={<UserGroup/>} title={'Notification'} isShowing={isShowNotifMatching} hide={handleToggleShowNotifMatching}>
                                     <ConfirmMatching hide={handleToggleShowNotifMatching} fromId={fromId && fromId} socket={socket} onlineUsers={onlineUsers} matchId={matchId && matchId}/>
+                                </Modal>
+                            )}
+
+                            {isShowDenyMatching && (
+                                <Modal background leftIcon={<UserGroup/>} title={'Notification'} isShowing={isShowDenyMatching} hide={handleToggleShowDenyMatching}>
+                                    <NotificationMessage hide={handleToggleShowDenyMatching} socket={socket} onlineUsers={onlineUsers} title={'Rất tiếc! Bạn đã bị từ chối matching!'}/>
                                 </Modal>
                             )}
                         </div>

@@ -4,32 +4,108 @@ import images from '~/assets/images';
 import Modal from '~/components/Modal/Modal';
 import RequestFriend from '~/components/Modal/ModalConfirm/RequestFriend';
 import { UserGroup } from '~/components/Icon/Icon';
+import { useEffect, useState } from 'react';
+import { handleGetDetailNotificationMatching, handleGetInfoByID, handleSetReadNotificationMatching } from '~/services/userService';
+import { PopperWrapper } from '..';
+import { formatTime, formatTimeMatching } from '~/utils/date';
+import { useModal } from '~/hooks';
 
 const cx = classNames.bind(styles);
 
-function NotiItem({ isShowing, toggle }) {
+function NotiItem({ idNotificationMatching, idAcc1, idAcc2, handleReadNotificationMatching, socket }) {
+    const [user, setUser] = useState();
+    const [notifInfo, setNotifInfo] = useState();
+    const [timeLeft, setTimeLeft] = useState();
+    const { isShowing, toggle } = useModal();
+    useEffect(() => {
+        const fetchApi = async () => {
+            try {
+                let data = await handleGetInfoByID(idAcc2);
+                console.log('match randommmmmmmm');
+                // data = data.userData;
+                
+                if (data && data.userData.errCode === 0) {
+                    console.log('Get info user successfully');
+                    const temp = String(data.userData.user.birth);
+                    const tempDate = new Date(temp);
+                    const year = tempDate.getFullYear();
+                    data.userData.user.age = new Date().getFullYear() - year;
+
+                    let notifData = await handleGetDetailNotificationMatching(idNotificationMatching ,idAcc1, idAcc2);
+                    console.log(notifData);
+                    if(notifData.errCode == 0) {
+                        console.log('get detail notif matching success!');
+                        console.log(notifData);
+                        setUser(data.userData.user);
+                        setNotifInfo(notifData.data);
+                    }
+                    else {
+                        console.log(notifData.errMessage);
+                    }
+                    
+                } else {
+                    console.log('data.message ' + data.errMessage);
+                }
+            } catch (e) {
+                console.log('error message', e.response);
+            }
+        }
+        fetchApi();
+    }, [])
+
+    const handleReadNotif = async () => {
+        try {
+            if(notifInfo.isRead == 0) {
+                const check = await handleSetReadNotificationMatching(idNotificationMatching);
+                console.log(check);
+                handleReadNotificationMatching();
+                setNotifInfo(prev => {
+                    return {...prev, isRead: 1};
+                })
+            }
+            toggle();
+            
+        } catch(err) {
+            console.log(err);
+        }
+    }
+
+    const handleOnClick = () => {
+        const time = formatTimeMatching(notifInfo.timeCreated);
+        console.log('time data:');
+        console.log(time);
+        setTimeLeft(time);
+        toggle();
+    }
     return (
-        <div className={cx('wrapper')}>
-            <Modal
-                title={'Request'}
-                leftIcon={<UserGroup />}
-                primary
-                isShowing={isShowing}
-                hide={toggle}
-                background
-                className={cx('background-request')}
-            >
-                <RequestFriend hide={toggle} />
-            </Modal>
-            <img src={images.cancer} alt="" />
-            <div className={cx('noti-container')} onClick={toggle}>
-                <div>
-                    <span className={cx('nick-name')}>@xalozodiac</span>
-                    <span className={cx('noti-content')}>muốn kết nối với bạn</span>
-                    <div className={cx('time')}>12mins ago</div>
+        <PopperWrapper className={{
+            primary: notifInfo && notifInfo.isRead == 0 && true,
+            disable: notifInfo && notifInfo.isRead == 1 && true,
+        }}>
+            <div className={cx('wrapper', {
+                readNotif: notifInfo && notifInfo.isRead == 1 && true,
+            })}>
+                {timeLeft && <Modal
+                    title={'Request'}
+                    leftIcon={<UserGroup />}
+                    primary
+                    isShowing={isShowing}
+                    hide={handleReadNotif}
+                    background
+                >
+                    <RequestFriend idNotificationMatching={idNotificationMatching} timeData={timeLeft} isNotif={true} deny={notifInfo && notifInfo.isDeny} timeCreated={notifInfo && notifInfo.timeCreated} socket={socket} fromId={idAcc2} matchId={idAcc1} hide={handleReadNotif} />
+                </Modal>} 
+                <img src={user && images[user.avatar]} alt="" />
+                <div className={cx('noti-container')} onClick={handleOnClick}>
+                    <div>
+                        <span className={cx('nick-name')}>@{user && user.userName}</span>
+                        <span className={cx('noti-content')}>muốn kết nối với bạn</span>
+                        <div className={cx('time')}>{notifInfo && formatTime(notifInfo.timeCreated)}</div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </PopperWrapper>
+        
     );
 }
 
