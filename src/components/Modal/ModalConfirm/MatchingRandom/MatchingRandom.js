@@ -3,7 +3,7 @@ import styles from './MatchingRandom.module.scss';
 import images from '~/assets/images';
 import Button from '~/components/Button';
 import { Age, Female, FriendPlus, Zodiac } from '~/components/Icon/Icon';
-import { handleGetInfoByID } from '~/services/userService';
+import { handleCreateNotificationMatching, handleGetInfoByID } from '~/services/userService';
 import { useEffect, useState } from 'react';
 
 const cx = classNames.bind(styles);
@@ -34,15 +34,29 @@ function MatchingRandom({fromId, matchId, socket, onlineUsers, hide}) {
         fetchApi();
     }, [])
 
-    const handleRequestMatching = () => {
+    const handleRequestMatching = async () => {
         // console.log('requestttttttttt');
         // console.log(socket);
         // socket.emit("test", 'bicute');
-        socket.emit("send-request-matching", {
-            fromId: fromId,
-            matchId: matchId
-        });
-        hide();
+        const notifData = await handleCreateNotificationMatching(matchId, fromId);
+        console.log(notifData);
+        if(notifData.errCode == 0) {
+            console.log('add notif success!');
+            socket.emit("create-notif-matching", {
+                fromId: fromId,
+                matchId: matchId,
+                idNotificationMatching: notifData.data,
+            })
+            socket.emit("send-request-matching", {
+                fromId: fromId,
+                matchId: matchId
+            });
+            hide();
+        }
+        else {
+            console.log(notifData.errMessage);
+        }
+        
         // console.log('hihi');
         // socket.on('hello', (response) => {
         //     console.log(response);

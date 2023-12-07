@@ -7,13 +7,11 @@ import Sidebar from '../components/Sidebar';
 import SubSidebar from '../components/SubSidebar';
 import { useEffect, useState } from 'react';
 import { handleGetInfo } from '~/services/userService';
-import { io } from 'socket.io-client';
 import Modal from '~/components/Modal/Modal';
 import RequestFriend from '~/components/Modal/ModalConfirm/RequestFriend';
 import { UserGroup } from '~/components/Icon/Icon';
-import Message from '~/pages/Message';
 import ConfirmMatching from '~/components/Modal/ModalConfirm/ConfirmMatching';
-import { handlePostNotificationMessageInfo } from '~/services/notificationMessageService';
+import NotificationMessage from '~/components/Modal/ModalConfirm/NotificationMessage';
 
 const cx = classNames.bind(styles);
 
@@ -24,8 +22,8 @@ function TwoSideBar({ children, socket }) {
     const [fromId, setFromId] = useState();
     const [matchId, setMatchId] = useState();
     const [isShowNotifMatching, setShowNotifMatching] = useState(false);
+    const [isShowDenyMatching, setShowDenyMatching] = useState(false);
     // const [socket, setSocket] = useState(null);
-    const [reLoadPage, setReloadPage] = useState(false);
 
     useEffect(() => {
         const fetchUserInfo = async () => {
@@ -82,12 +80,11 @@ function TwoSideBar({ children, socket }) {
 
     useEffect(() => {
         if (socket === null) return;
-        socket.off('receive-notification');
-        socket.on('receive-notification', async (data) => {
-            handlePostNotificationMessageInfo(data.idConversation, data.senderID, data.receiverID, 1);
-            setReloadPage(!reLoadPage);
+        socket.on('send-deny-matching', (data) => {
+            console.log(data);
+            setShowDenyMatching(true);
         });
-    }, [socket, reLoadPage]);
+    }, []);
 
     const handleToggleShowRequest = () => {
         setShowRequest(!isShowRequest);
@@ -95,6 +92,10 @@ function TwoSideBar({ children, socket }) {
 
     const handleToggleShowNotifMatching = () => {
         setShowNotifMatching(!isShowNotifMatching);
+    };
+
+    const handleToggleShowDenyMatching = () => {
+        setShowDenyMatching(!isShowDenyMatching);
     };
     console.log('OnlineUser', onlineUsers);
 
@@ -112,7 +113,7 @@ function TwoSideBar({ children, socket }) {
                     <div className={cx('col l-12 m-12 c-12')}>
                         <div className={cx('row')}>
                             <div className={cx('col l-3 m-3 c-3')}>
-                                <Sidebar user={user} socket={socket} />
+                                <Sidebar socket={socket} onlineUsers={onlineUsers} user={user} />
                             </div>
                             <div className={cx('col l-2 m-2 c-2')}>
                                 <SubSidebar />
@@ -152,6 +153,23 @@ function TwoSideBar({ children, socket }) {
                                         socket={socket}
                                         onlineUsers={onlineUsers}
                                         matchId={matchId && matchId}
+                                    />
+                                </Modal>
+                            )}
+
+                            {isShowDenyMatching && (
+                                <Modal
+                                    background
+                                    leftIcon={<UserGroup />}
+                                    title={'Notification'}
+                                    isShowing={isShowDenyMatching}
+                                    hide={handleToggleShowDenyMatching}
+                                >
+                                    <NotificationMessage
+                                        hide={handleToggleShowDenyMatching}
+                                        socket={socket}
+                                        onlineUsers={onlineUsers}
+                                        title={'Rất tiếc! Bạn đã bị từ chối matching!'}
                                     />
                                 </Modal>
                             )}

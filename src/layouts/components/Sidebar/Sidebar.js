@@ -10,28 +10,106 @@ import NotiItem from '~/components/Popper/NotiItem';
 import { PopperWrapper } from '~/components/Popper';
 import { useModal } from '~/hooks';
 import { Link } from 'react-router-dom';
-import { handleGetAccById, handleGetInfoByID, handleLogoutApi } from '~/services/userService';
+import { handleGetCountNotReadNotificationMatching, handleGetInfoByID, handleLogoutApi } from '~/services/userService';
 import {
     handleGetNotificationByReceiverId,
     handlePostNotificationMessageInfo,
 } from '~/services/notificationMessageService';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
+import { handleGetNotificationMatching } from '~/services/userService';
 
 const cx = classNames.bind(styles);
-function Sidebar({ user, socket }) {
+function Sidebar({ user, socket, onlineUsers }) {
     const [infoUser, setInfoUser] = useState({});
-    const { isShowing, toggle } = useModal();
-    const [notificationCount, setNotificationCount] = useState('');
+    // const { isShowing, toggle } = useModal();
     const [reLoadPage, setReloadPage] = useState(false);
+    const [notificationCount, setNotificationCount] = useState('');
+    const [countNotificationMatching, setCountNotificationMatching] = useState();
+    const [notifList, setNotifList] = useState([]);
+    // const [isReadNotificationMatching, setReadNotificationMatching] = useState(true);
+
+    useEffect(() => {
+        const fetchApi = async () => {
+            let notifData = {};
+            try {
+                // handleGetNotificationMatching(user.idUser)
+                //     .then(data => {
+                //         console.log(data);
+                //         notifData = data;
+                //     });
+                notifData = await handleGetNotificationMatching(user.idUser);
+                console.log(notifData);
+                if (notifData.errCode == 0 && notifData.errMessage == 'OK') {
+                    // notifList = notifData.data;
+                    // console.log(notifList);
+                    setNotifList(notifData.data);
+                } else {
+                    console.log(notifData.errMessage);
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        };
+        fetchApi();
+    }, [countNotificationMatching, user.idUser]);
+
+    useEffect(() => {
+        const fetchApi = async () => {
+            try {
+                if (user.idUser) {
+                    const notifData = await handleGetCountNotReadNotificationMatching(user.idUser);
+                    console.log(notifData);
+                    console.log('check notif counttttttttttttt');
+                    console.log(notifData.data);
+                    if (notifData.errCode == 0) {
+                        setCountNotificationMatching(notifData.data);
+                    } else {
+                        console.log(notifData.errMessage);
+                    }
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        };
+        fetchApi();
+    }, [user.idUser]);
+
+    useEffect(() => {
+        if (socket === null) return;
+        socket.off('receive-notif-matching');
+        socket.on('receive-notif-matching', (data) => {
+            console.log('receive-notif-matchingggggggggggggggg');
+            console.log(data);
+            setCountNotificationMatching((prev) => prev + 1);
+        });
+    }, []);
 
     const renderPreview = () => {
+        // }
+        // catch(error) {
+        //     console.log(error);
+        // }
         return (
-            <PopperWrapper className={cx('primary')}>
-                <NotiItem isShowing={isShowing} toggle={toggle} />
-                <NotiItem />
-                <NotiItem />
-            </PopperWrapper>
+            <Fragment>
+                {notifList.map((item, index) => (
+                    <NotiItem
+                        socket={socket}
+                        idNotificationMatching={item.idNotificationMatching}
+                        idAcc1={item.idAcc1}
+                        idAcc2={item.idAcc2}
+                        handleReadNotificationMatching={handleReadNotificationMatching}
+                        key={index}
+                    />
+                ))}
+            </Fragment>
         );
+    };
+
+    const handleReadNotificationMatching = () => {
+        // setReadNotificationMatching(!isReadNotificationMatching);
+        if (countNotificationMatching > 0) {
+            setCountNotificationMatching((prev) => prev - 1);
+        }
     };
 
     useEffect(() => {
@@ -55,7 +133,7 @@ function Sidebar({ user, socket }) {
         if (socket === null) return;
         socket.off('receive-notification');
         socket.on('receive-notification', async (data) => {
-            handlePostNotificationMessageInfo(data.idConversation, data.senderID, data.receiverID, 1);
+            // handlePostNotificationMessageInfo(data.idConversation, data.senderID, data.receiverID, 1);
             setReloadPage(!reLoadPage);
         });
     }, [socket, reLoadPage]);
@@ -95,14 +173,12 @@ function Sidebar({ user, socket }) {
                             </div>
                             <div className={cx('col l-2 m-2 c-2')}>
                                 <div className={cx('icon-header')}>
-                                    <span className={cx('count-circle')}>2</span>
-                                    <Tippy
-                                        offset={[10, 9]}
-                                        interactive
-                                        // visible
-                                        placement="bottom"
-                                        content={renderPreview()}
-                                    >
+                                    {countNotificationMatching ? (
+                                        <span className={cx('count-circle')}>{countNotificationMatching}</span>
+                                    ) : (
+                                        ''
+                                    )}
+                                    <Tippy offset={[10, 9]} interactive placement="bottom" content={renderPreview()}>
                                         <div>
                                             <UserGroup />
                                         </div>
@@ -129,18 +205,10 @@ function Sidebar({ user, socket }) {
                                             Matching
                                         </Button>
 
-                                        <Button
-                                            active
-                                            to={routes.messages}
-                                            normal
-                                            large
-                                            text
-                                            leftIcon={<Messenger />}
-                                            // className={cx('btn-message')}
-                                        >
+                                        <Button active to={routes.messages} normal large text leftIcon={<Messenger />}>
                                             Message
                                             <span className={cx('notification-count')}>
-                                                {notificationCount != 0 && '(' + notificationCount + ')'}
+                                                {notificationCount === 0 ? '' : '(' + notificationCount + ')'}
                                             </span>
                                         </Button>
 

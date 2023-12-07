@@ -106,20 +106,56 @@ const handleChangePassword = (currentpassword, newpassword, retypepassword) => {
     });
 };
 
-const handleCheckFriendRelation = (idAcc1, idAcc2) => {
-    return axios.get('api/check-friend-relation', {
+const handleRandomMatching = (idUser, onlineUsers) => {
+    return axios.get('/api/random-matching', {
         withCredentials: true,
-        params: { idAcc1, idAcc2 },
+        params: {idUser, onlineUsers},
     });
-};
+}
 
-const handleAddFriendRelation = (idAcc1, idAcc2) => {
-    return axios.post('api/add-friend-relation', {
+const handleGetNotificationMatching = (idUser) => {
+    return axios.get('/api/get-notification-matching', {
+        withCredentials: true,
+        params: {idUser},
+    });
+}
+
+const handleCreateNotificationMatching = (idAcc1, idAcc2) => {
+    return axios.post('/api/create-notification-matching', {
         withCredentials: true,
         idAcc1,
-        idAcc2,
+        idAcc2
     });
-};
+}
+
+const handleSetDenyNotificationMatching = (idNotificationMatching) => {
+    return axios.post('/api/deny-notification-matching', {
+        withCredentials: true,
+        idNotificationMatching
+    });
+}
+
+const handleSetReadNotificationMatching = (idNotificationMatching) => {
+    return axios.post('/api/read-notification-matching', {
+        withCredentials: true,
+        idNotificationMatching
+    });
+}
+
+const handleGetCountNotReadNotificationMatching = (idAcc1) => {
+    return axios.get('/api/get-count-not-read-notification-matching', {
+        withCredentials: true,
+        params: {idAcc1},
+    });
+}
+
+const handleGetDetailNotificationMatching = (idNotificationMatching, idAcc1, idAcc2) => {
+    return axios.get('/api/get-detail-notification-matching', {
+        withCredentials: true,
+        params: {idNotificationMatching, idAcc1, idAcc2},
+    });
+}
+
 export {
     handleLoginApi,
     handleLogoutApi,
@@ -136,6 +172,11 @@ export {
     handleEditProfile,
     getProfileSetting,
     handleChangePassword,
-    handleAddFriendRelation,
-    handleCheckFriendRelation,
+    handleRandomMatching,
+    handleGetNotificationMatching,
+    handleCreateNotificationMatching,
+    handleSetDenyNotificationMatching,
+    handleSetReadNotificationMatching,
+    handleGetCountNotReadNotificationMatching,
+    handleGetDetailNotificationMatching,
 };
