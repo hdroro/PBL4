@@ -12,6 +12,15 @@ import Matching from '~/pages/Matching';
 import Call from '~/pages/Call';
 import SettingPassword from '~/pages/SettingPassword';
 import SettingProfile from '~/pages/SettingProfile';
+import AdminSidebarOnly from '~/layouts/AdminSidebarOnly';
+import A_ShowUser from '~/pages/A_ShowUser';
+import A_DelUser from '~/pages/A_DelUser';
+import A_ShowUserDetail from '~/pages/A_ShowUserDetail';
+import A_ShowZodiacMessage from '~/pages/A_ShowZodiacMessage';
+import A_CreateZodiacMessage from '~/pages/A_CreateZodiacMessage';
+import A_CreateDetailZodiacMessage from '~/pages/A_CreateDetailZodiacMessage';
+import A_ShowReport from '~/pages/A_ShowReport';
+import A_ShowDetailReport from '~/pages/A_ShowDetailReport';
 
 //public routes
 const publicRoutes = [
@@ -23,6 +32,15 @@ const publicRoutes = [
     { path: config.matching, component: Matching, layout: SidebarOnly },
     { path: config.settingProfile, component: SettingProfile, layout: TwoSideBar },
     { path: config.settingPassword, component: SettingPassword, layout: TwoSideBar },
+
+    { path: config.adminShowUser, component: A_ShowUser, layout: AdminSidebarOnly },
+    { path: config.adminDelUser, component: A_DelUser, layout: AdminSidebarOnly },
+    { path: config.adminShowDetailUser, component: A_ShowUserDetail, layout: AdminSidebarOnly },
+    { path: config.adminShowMessage, component: A_ShowZodiacMessage, layout: AdminSidebarOnly },
+    { path: config.adminCreateMessage, component: A_CreateZodiacMessage, layout: AdminSidebarOnly },
+    { path: config.adminCreateDetailMessage, component: A_CreateDetailZodiacMessage, layout: AdminSidebarOnly },
+    { path: config.adminShowReport, component: A_ShowReport, layout: AdminSidebarOnly },
+    { path: config.adminShowDetailReport, component: A_ShowDetailReport, layout: AdminSidebarOnly },
 ];
 
 //private routes

@@ -127,7 +127,24 @@
     padding: 10px 16px;
 }
 
+.transparent {
+    background-color: transparent;
+    color: #222;
+    font-weight: 500;
+    font-size: 17px;
+    border-radius: 0;
+
+    + .transparent {
+        margin-top: 0;
+    }
+}
+
 .active {
     background-color: rgba(188, 10, 70, 0.7215686275);
     color: #fff;
+}
+
+.activeAdmin {
+    color: #fff;
+    border-bottom: 1px solid;
 }

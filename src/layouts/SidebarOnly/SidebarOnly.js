@@ -11,6 +11,7 @@ import RequestFriend from '~/components/Modal/ModalConfirm/RequestFriend';
 import { UserGroup } from '~/components/Icon/Icon';
 import ConfirmMatching from '~/components/Modal/ModalConfirm/ConfirmMatching';
 import NotificationMessage from '~/components/Modal/ModalConfirm/NotificationMessage';
+import AdminSidebar from '../components/AdminSidebar';
 
 const cx = classNames.bind(styles);
 

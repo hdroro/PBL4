@@ -41,8 +41,8 @@ function Login() {
         try {
             let data = await handleLoginApi(username, password);
             if (data && data.errCode === 0) {
-                navigate('/api/matching', { state: { data } });
-                console.log('loging success');
+                if (data.user.idRole === 0) navigate('/api/matching', { state: { data } });
+                else navigate('/api/adminShowUser', { state: { data } });
             } else {
                 console.log('data.message ' + data.message);
                 setLoginError(data.message);

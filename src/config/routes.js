@@ -7,6 +7,15 @@ const routes = {
     matching: '/api/matching',
     settingProfile: '/api/setting/editprofile',
     settingPassword: '/api/setting/changepassword',
+
+    adminShowUser: '/api/adminShowUser',
+    adminDelUser: '/api/adminDelUser',
+    adminShowDetailUser: '/api/adminShowDetailUser',
+    adminShowMessage: '/api/adminShowMessage',
+    adminCreateMessage: '/api/adminCreateMessage',
+    adminCreateDetailMessage: '/api/adminCreateDetailMessage',
+    adminShowReport: '/api/adminShowReport',
+    adminShowDetailReport: '/api/adminShowDetailReport',
 };
 
 export default routes;

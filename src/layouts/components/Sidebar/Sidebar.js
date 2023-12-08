@@ -7,14 +7,9 @@ import Button from '~/components/Button';
 import routes from '~/config/routes';
 import Tippy from '@tippyjs/react';
 import NotiItem from '~/components/Popper/NotiItem';
-import { PopperWrapper } from '~/components/Popper';
-import { useModal } from '~/hooks';
 import { Link } from 'react-router-dom';
 import { handleGetCountNotReadNotificationMatching, handleGetInfoByID, handleLogoutApi } from '~/services/userService';
-import {
-    handleGetNotificationByReceiverId,
-    handlePostNotificationMessageInfo,
-} from '~/services/notificationMessageService';
+import { handleGetNotificationByReceiverId } from '~/services/notificationMessageService';
 import { Fragment, useEffect, useState } from 'react';
 import { handleGetNotificationMatching } from '~/services/userService';
 

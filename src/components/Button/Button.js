@@ -8,6 +8,7 @@ const cx = classNames.bind(styles);
 function Button({
     to,
     active,
+    activeAdmin,
     href,
     primary = false,
     normal = false,
@@ -27,6 +28,7 @@ function Button({
     leftIcon,
     rightIcon,
     onClick,
+    transparent,
     ...passProps
 }) {
     let Comp = 'button';
@@ -58,12 +60,16 @@ function Button({
         small,
         medium,
         large,
+        transparent,
     });
 
     if (to) {
         if (active) {
             Comp = NavLink;
             props.className = (nav) => cx(classes, 'wrapper-btn', { active: nav.isActive });
+        } else if (activeAdmin) {
+            Comp = NavLink;
+            props.className = (nav) => cx(classes, 'wrapper-btn', { activeAdmin: nav.isActive });
         } else {
             Comp = Link;
         }
