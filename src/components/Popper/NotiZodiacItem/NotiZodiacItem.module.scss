@@ -3,7 +3,7 @@
     background: #ffe6f7;
     border-radius: 5px;
     padding: 5px;
-    align-items: center;
+    // align-items: center;
 
     &:hover {
         background-color: #ffdaf1;
@@ -40,10 +40,16 @@
         color: #998391;
         font-weight: 300;
         float: right;
-        margin-top: 13px;
     }
 
     &.readNotif {
         background-color: #dbcbd6;
+    }
+}
+
+.asRead {
+    background-color: #dbcbd680;
+    &:hover {
+        background-color: rgb(219 203 214 / 29%);
     }
 }

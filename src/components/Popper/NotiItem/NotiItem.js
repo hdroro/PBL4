@@ -5,7 +5,11 @@ import Modal from '~/components/Modal/Modal';
 import RequestFriend from '~/components/Modal/ModalConfirm/RequestFriend';
 import { UserGroup } from '~/components/Icon/Icon';
 import { useEffect, useState } from 'react';
-import { handleGetDetailNotificationMatching, handleGetInfoByID, handleSetReadNotificationMatching } from '~/services/userService';
+import {
+    handleGetDetailNotificationMatching,
+    handleGetInfoByID,
+    handleSetReadNotificationMatching,
+} from '~/services/userService';
 import { PopperWrapper } from '..';
 import { formatTime, formatTimeMatching } from '~/utils/date';
 import { useModal } from '~/hooks';
@@ -27,43 +31,40 @@ function NotiItem({ idNotificationMatching, idAcc1, idAcc2, handleReadNotificati
                     const year = tempDate.getFullYear();
                     data.userData.user.age = new Date().getFullYear() - year;
 
-                    let notifData = await handleGetDetailNotificationMatching(idNotificationMatching ,idAcc1, idAcc2);
+                    let notifData = await handleGetDetailNotificationMatching(idNotificationMatching, idAcc1, idAcc2);
                     console.log(notifData);
-                    if(notifData.errCode == 0) {
+                    if (notifData.errCode == 0) {
                         console.log('get detail notif matching success!');
                         console.log(notifData);
                         setUser(data.userData.user);
                         setNotifInfo(notifData.data);
-                    }
-                    else {
+                    } else {
                         console.log(notifData.errMessage);
                     }
-                    
                 } else {
                     console.log('data.message ' + data.errMessage);
                 }
             } catch (e) {
                 console.log('error message', e.response);
             }
-        }
+        };
         fetchApi();
     }, [idAcc1, idAcc2, idNotificationMatching])
 
     const handleReadNotif = async () => {
         try {
-            if(notifInfo.isRead == 0) {
+            if (notifInfo.isRead == 0) {
                 const check = await handleSetReadNotificationMatching(idNotificationMatching);
                 handleReadNotificationMatching();
-                setNotifInfo(prev => {
-                    return {...prev, isRead: 1};
-                })
+                setNotifInfo((prev) => {
+                    return { ...prev, isRead: 1 };
+                });
             }
             toggle();
-            
-        } catch(err) {
+        } catch (err) {
             console.log(err);
         }
-    }
+    };
 
     const handleOnClick = () => {
         // const time = formatTimeMatching(notifInfo.timeCreated);
@@ -71,7 +72,7 @@ function NotiItem({ idNotificationMatching, idAcc1, idAcc2, handleReadNotificati
         // console.log(time);
         // setTimeLeft(time);
         toggle();
-    }
+    };
     return (
         <PopperWrapper className={{
             primary: notifInfo && notifInfo.isRead == 0 && true,
@@ -100,7 +101,6 @@ function NotiItem({ idNotificationMatching, idAcc1, idAcc2, handleReadNotificati
                 </div>
             </div>
         </PopperWrapper>
-        
     );
 }
 

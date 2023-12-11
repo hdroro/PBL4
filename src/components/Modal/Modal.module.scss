@@ -28,7 +28,8 @@
     border-bottom: 1px solid #f593b7;
     margin-bottom: 10px;
 
-    .header-title {
+    .header-title,
+    .header-title-admin {
         display: flex;
         align-items: center;
         text-align: start;
@@ -105,4 +106,8 @@
 
 .background {
     background-color: #f6e2f1;
+}
+
+.background_admin {
+    background-color: #fff;
 }

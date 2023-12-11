@@ -109,59 +109,68 @@ const handleChangePassword = (currentpassword, newpassword, retypepassword) => {
 const handleRandomMatching = (idUser, onlineUsers) => {
     return axios.get('/api/random-matching', {
         withCredentials: true,
-        params: {idUser, onlineUsers},
+        params: { idUser, onlineUsers },
     });
-}
+};
 
 const handleGetNotificationMatching = (idUser) => {
     return axios.get('/api/get-notification-matching', {
         withCredentials: true,
-        params: {idUser},
+        params: { idUser },
     });
-}
+};
 
 const handleCreateNotificationMatching = (idAcc1, idAcc2) => {
     return axios.post('/api/create-notification-matching', {
         withCredentials: true,
         idAcc1,
-        idAcc2
+        idAcc2,
     });
-}
+};
 
 const handleSetDenyNotificationMatching = (idNotificationMatching) => {
     return axios.post('/api/deny-notification-matching', {
         withCredentials: true,
-        idNotificationMatching
+        idNotificationMatching,
     });
-}
+};
 
 const handleSetReadNotificationMatching = (idNotificationMatching) => {
     return axios.post('/api/read-notification-matching', {
         withCredentials: true,
-        idNotificationMatching
+        idNotificationMatching,
     });
-}
-
-// const handleSetMatchNotificationMatching = (idAcc1, idAcc2) => {
-//     return axios.post('/api/set-match-notification-matching', {
-//         withCredentials: true,
-//         idAcc1, idAcc2
-//     });
-// }
+};
 
 const handleGetCountNotReadNotificationMatching = (idAcc1) => {
     return axios.get('/api/get-count-not-read-notification-matching', {
         withCredentials: true,
-        params: {idAcc1},
+        params: { idAcc1 },
     });
-}
+};
 
 const handleGetDetailNotificationMatching = (idNotificationMatching, idAcc1, idAcc2) => {
     return axios.get('/api/get-detail-notification-matching', {
         withCredentials: true,
-        params: {idNotificationMatching, idAcc1, idAcc2},
+        params: { idNotificationMatching, idAcc1, idAcc2 },
     });
-}
+};
+
+//ADMIN
+
+const handleGetAllUserByAdmin = (page) => {
+    return axios.get('/api/admin/get-list-user', {
+        withCredentials: true,
+        params: { page },
+    });
+};
+
+const handleDeleteUserByAdmin = (idUser) => {
+    return axios.post('/api/admin/delete-user', {
+        idUser,
+        withCredentials: true,
+    });
+};
 
 const handleCheckFriendRelation = (idAcc1, idAcc2) => {
     return axios.get('/api/check-friend-relation', {
@@ -201,6 +210,8 @@ export {
     // handleSetMatchNotificationMatching,
     handleGetCountNotReadNotificationMatching,
     handleGetDetailNotificationMatching,
+    handleGetAllUserByAdmin,
+    handleDeleteUserByAdmin,
     handleCheckFriendRelation,
     handleEditProfileBrief,
 };

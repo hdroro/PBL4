@@ -3,7 +3,7 @@ import axios from '../axios';
 axios.defaults.withCredentials = true;
 
 const handleCreateConversation = (idAcc1, idAcc2) => {
-    return axios.post('/api/create-conversation', {withCredentials: true, idAcc1, idAcc2});
+    return axios.post('/api/create-conversation', { withCredentials: true, idAcc1, idAcc2 });
 };
 
 const handlePutBlockConversation = (idConversation) => {
@@ -22,7 +22,7 @@ const handleGetConversationByID = (idConversation) => {
     return axios.get('/api/get-conversation', { withCredentials: true, params: { idConversation } });
 };
 
-export { 
+export {
     handlePutBlockConversation,
     handleDeleteConversation,
     handleUpdateBlockStatusConversation,

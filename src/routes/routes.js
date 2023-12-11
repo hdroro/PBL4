@@ -14,7 +14,6 @@ import SettingPassword from '~/pages/SettingPassword';
 import SettingProfile from '~/pages/SettingProfile';
 import AdminSidebarOnly from '~/layouts/AdminSidebarOnly';
 import A_ShowUser from '~/pages/A_ShowUser';
-import A_DelUser from '~/pages/A_DelUser';
 import A_ShowUserDetail from '~/pages/A_ShowUserDetail';
 import A_ShowZodiacMessage from '~/pages/A_ShowZodiacMessage';
 import A_CreateZodiacMessage from '~/pages/A_CreateZodiacMessage';
@@ -34,7 +33,6 @@ const publicRoutes = [
     { path: config.settingPassword, component: SettingPassword, layout: TwoSideBar },
 
     { path: config.adminShowUser, component: A_ShowUser, layout: AdminSidebarOnly },
-    { path: config.adminDelUser, component: A_DelUser, layout: AdminSidebarOnly },
     { path: config.adminShowDetailUser, component: A_ShowUserDetail, layout: AdminSidebarOnly },
     { path: config.adminShowMessage, component: A_ShowZodiacMessage, layout: AdminSidebarOnly },
     { path: config.adminCreateMessage, component: A_CreateZodiacMessage, layout: AdminSidebarOnly },

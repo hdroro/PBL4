@@ -1,15 +1,26 @@
 import classNames from 'classnames/bind';
 import styles from './AdminSidebarOnly.module.scss';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import AdminSidebar from '../components/AdminSidebar';
 
 const cx = classNames.bind(styles);
 
 function AdminSidebarOnly({ children, socket }) {
+    const [onlineUsers, setOnlineUsers] = useState([]);
+
+    useEffect(() => {
+        if (socket === null) return;
+        socket.emit('addNewUser', 0);
+        socket.on('getOnlineUsers', (response) => {
+            setOnlineUsers(response);
+        });
+    }, [socket]);
+    console.log('OnlineUser', onlineUsers);
+
     const childrenWithProps = React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
-            return React.cloneElement(child, { socket });
+            return React.cloneElement(child, { socket, onlineUsers });
         }
         return child;
     });
