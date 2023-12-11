@@ -38,6 +38,7 @@ function Block({
             console.log(error);
         }
     };
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('content')}>{children}</div>

@@ -12,17 +12,17 @@ import { handleGetCountNotReadNotificationMatching, handleGetInfoByID, handleLog
 import { handleGetNotificationByReceiverId } from '~/services/notificationMessageService';
 import { Fragment, useEffect, useState } from 'react';
 import { handleGetNotificationMatching } from '~/services/userService';
+import NotiZodiac from '~/components/Popper/NotiZodiac/NotiZodiac';
 
 const cx = classNames.bind(styles);
 function Sidebar({ user, socket, onlineUsers }) {
     const [infoUser, setInfoUser] = useState({});
     // const { isShowing, toggle } = useModal();
     const [reLoadPage, setReloadPage] = useState(false);
-    const [notificationCount, setNotificationCount] = useState('');
+    const [notificationCount, setNotificationCount] = useState(0);
     const [countNotificationMatching, setCountNotificationMatching] = useState();
     const [notifList, setNotifList] = useState([]);
     // const [isReadNotificationMatching, setReadNotificationMatching] = useState(true);
-
     useEffect(() => {
         const fetchApi = async () => {
             let notifData = {};
@@ -151,20 +151,7 @@ function Sidebar({ user, socket, onlineUsers }) {
                                 <Search user={user} />
                             </div>
                             <div className={cx('col l-2 m-2 c-2')}>
-                                <div className={cx('icon-header')}>
-                                    <span className={cx('count-circle')}>1</span>
-                                    <Tippy
-                                        offset={[10, 9]}
-                                        interactive
-                                        // visible
-                                        placement="bottom"
-                                        // content={renderPreview()}
-                                    >
-                                        <div>
-                                            <NotifIcon />
-                                        </div>
-                                    </Tippy>
-                                </div>
+                                <NotiZodiac user={user} socket={socket} />
                             </div>
                             <div className={cx('col l-2 m-2 c-2')}>
                                 <div className={cx('icon-header')}>
@@ -203,7 +190,7 @@ function Sidebar({ user, socket, onlineUsers }) {
                                         <Button active to={routes.messages} normal large text leftIcon={<Messenger />}>
                                             Message
                                             <span className={cx('notification-count')}>
-                                                {notificationCount === 0 ? '' : '(' + notificationCount + ')'}
+                                                {notificationCount !== 0 && '(' + notificationCount + ')'}
                                             </span>
                                         </Button>
 

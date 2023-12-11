@@ -675,3 +675,33 @@ export const Trash = ({ width = '1.5rem', height = '1.5rem', className }) => (
         </svg>
     </svg>
 );
+
+export const Plus = ({ width = '1.5rem', height = '1.5rem', className }) => (
+    <svg
+        className={className}
+        width={width}
+        height={height}
+        viewBox="0 0 512 512"
+        fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <svg>
+            <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z" />
+        </svg>
+    </svg>
+);
+
+export const ChevronRight = ({ width = '1.5rem', height = '1.5rem', className }) => (
+    <svg
+        className={className}
+        width={width}
+        height={height}
+        viewBox="0 0 512 512"
+        fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <svg>
+            <path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z" />
+        </svg>
+    </svg>
+);

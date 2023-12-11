@@ -13,7 +13,7 @@ const routes = {
     adminShowDetailUser: '/api/adminShowDetailUser',
     adminShowMessage: '/api/adminShowMessage',
     adminCreateMessage: '/api/adminCreateMessage',
-    adminCreateDetailMessage: '/api/adminCreateDetailMessage',
+    adminShowDetailMessage: '/api/adminShowDetailMessage',
     adminShowReport: '/api/adminShowReport',
     adminShowDetailReport: '/api/adminShowDetailReport',
 };

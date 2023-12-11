@@ -13,6 +13,7 @@ function Modal({
     leftIcon = false,
     rightIcon = false,
     background,
+    admin,
     texttype,
     className,
     ...passProps
@@ -28,8 +29,8 @@ function Modal({
                   <div className={classes} aria-modal aria-hidden tabIndex={-1} role="dialog">
                       <div className={classes_}>
                           {!!title && (
-                              <div className={cx('modal-header', { texttype })}>
-                                  <h2 className={cx('header-title')}>
+                              <div className={cx('modal-header', admin && 'modal-header-admin', { texttype })}>
+                                  <h2 className={cx('header-title', admin && 'header-title-admin')}>
                                       {leftIcon && <span className={cx('icon')}>{leftIcon}</span>}
                                       <span className={cx('title')}>{title}</span>
                                       {rightIcon && <span className={cx('icon')}>{rightIcon}</span>}
@@ -42,7 +43,7 @@ function Modal({
 
                           <button
                               type="button"
-                              className={cx('modal-close-button')}
+                              className={cx('modal-close-button', admin && 'modal-close-button-admin')}
                               data-dismiss="modal"
                               aria-label="Close"
                               onClick={hide}

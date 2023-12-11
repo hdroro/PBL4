@@ -11,6 +11,7 @@ function Button({
     activeAdmin,
     href,
     primary = false,
+    primary_admin = false,
     normal = false,
     home = false,
     outline = false,
@@ -49,6 +50,7 @@ function Button({
     const classes = cx('wrapper', {
         [className]: className,
         primary,
+        primary_admin,
         home,
         outline,
         normal,

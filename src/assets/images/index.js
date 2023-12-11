@@ -14,5 +14,7 @@ const images = {
     capricorn: require('~/assets/images/capricorn.jpg'),
     // aquarius: require('~/assets/images/aquarius.jpg'),
     pisces: require('~/assets/images/pisces.jpg'),
+
+    admin: require('~/assets/images/logo.jpg'),
 };
 export default images;

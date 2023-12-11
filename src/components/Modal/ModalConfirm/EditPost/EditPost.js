@@ -34,8 +34,6 @@ function EditPost({ infoUser, idPost, onChangeStatusEditPost }) {
     };
 
     const handleClickEditPost = () => {
-        console.log('infoUser.idUser ', infoUser.idUser);
-        console.log('content ', content);
         onChangeStatusEditPost(false);
         handleUpdatePost(infoUser.idUser, idPost, content);
     };

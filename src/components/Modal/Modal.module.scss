@@ -28,12 +28,21 @@
     border-bottom: 1px solid #f593b7;
     margin-bottom: 10px;
 
-    .header-title {
+    .header-title,
+    .header-title-admin {
         display: flex;
         align-items: center;
         text-align: start;
         color: #da0d58;
     }
+
+    .header-title-admin {
+        color: #7a0ad2;
+    }
+}
+
+.modal-header-admin {
+    border-color: #cc8dfe;
 }
 
 .texttype {
@@ -72,6 +81,10 @@
     cursor: pointer;
 }
 
+.modal-close-button-admin {
+    color: #881cdd;
+}
+
 .icon + .title,
 .title + .icon {
     margin-left: 8px;
@@ -89,4 +102,8 @@
 
 .background {
     background-color: #f6e2f1;
+}
+
+.background_admin {
+    background-color: #fff;
 }

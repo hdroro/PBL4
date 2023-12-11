@@ -35,8 +35,8 @@ export const formatTime = (timeSend) => {
 export const formatTimeMatching = (timeInput) => {
     const currentTime = new Date();
     const notifTime = new Date(timeInput);
-    console.log('current: ',currentTime);
-    console.log('notif: ',notifTime);
+    console.log('current: ', currentTime);
+    console.log('notif: ', notifTime);
     const timeDifference = (currentTime - notifTime) / 1000; // Chuyển đổi thành giây
     console.log('difference: ', timeDifference);
     if (Math.floor(timeDifference) <= 300) {
@@ -45,10 +45,38 @@ export const formatTimeMatching = (timeInput) => {
         const seconds = Math.floor(timeLeft - minutes * 60);
         console.log('minute: ', minutes);
         console.log('seconds: ', seconds);
-        return {minutes: minutes, seconds: seconds};
-    } 
-    else {
-        return {minutes: 0, seconds: 0}
+        return { minutes: minutes, seconds: seconds };
+    } else {
+        return { minutes: 0, seconds: 0 };
+    }
+};
+
+export const formatTimeNotiZodiacMessage = (timePost) => {
+    const currentTime = new Date();
+    const messageTime = new Date(timePost.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'));
+    const timeDifference = (currentTime - messageTime) / 1000;
+
+    if (timeDifference < 60) {
+        return 'just now';
+    } else if (timeDifference < 3600) {
+        const minutes = Math.floor(timeDifference / 60);
+        return `${minutes}m ago`;
+    } else if (timeDifference < 86400) {
+        const hours = Math.floor(timeDifference / 3600);
+        return `${hours}h ago`;
+    } else if (timeDifference < 2592000) {
+        const days = Math.floor(timeDifference / 86400);
+        return `${days}d ago`;
+    } else if (timeDifference < 31536000) {
+        const months = Math.floor(timeDifference / 2592000);
+        return `${months}mo ago`;
+    } else {
+        const year = messageTime.getFullYear();
+        const month = messageTime.getMonth() + 1;
+        const day = messageTime.getDate();
+        const hour = messageTime.getHours();
+        const minute = messageTime.getMinutes();
+        return `${day}/${month}/${year} ${hour}:${String(minute).padStart(2, '0')}`;
     }
 };
 
@@ -73,4 +101,14 @@ export const formatISODateToCustomFormat = (isoDateString) => {
     };
 
     return date.toLocaleString('en-US', options);
+};
+
+export const formatOnlyDate = (datetime) => {
+    const dateObject = new Date(datetime.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'));
+
+    const day = dateObject.getDate();
+    const month = dateObject.getMonth() + 1;
+    const year = dateObject.getFullYear();
+
+    return `${day}/${month}/${year}`;
 };

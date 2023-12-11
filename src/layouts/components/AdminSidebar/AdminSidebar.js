@@ -3,10 +3,18 @@ import styles from './AdminSidebar.module.scss';
 import { AdminAccount, Logout, Messenger, Report, UserGroup } from '~/components/Icon/Icon';
 import Button from '~/components/Button';
 import routes from '~/config/routes';
-import { Link } from 'react-router-dom';
+import { handleLogoutApi } from '~/services/userService';
 
 const cx = classNames.bind(styles);
-function AdminSidebar({ user }) {
+function AdminSidebar() {
+    const handleLogoutAccout = async () => {
+        try {
+            await handleLogoutApi();
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
+    };
+
     return (
         <div className={cx('wrapper')}>
             {/* <div className={cx('grid')}> */}
@@ -70,11 +78,11 @@ function AdminSidebar({ user }) {
 
                         <div className={cx('logout')}>
                             <div className={cx('row')}>
-                                {/* <Link to="/"> */}
-                                <div className={cx('col l-12 m-12 c-12')}>
-                                    <Logout />
-                                </div>
-                                {/* </Link> */}
+                                <a href="/">
+                                    <div className={cx('col l-12 m-12 c-12')}>
+                                        <Logout onClick={handleLogoutAccout} />
+                                    </div>
+                                </a>
                             </div>
                         </div>
                     </div>

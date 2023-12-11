@@ -32,8 +32,13 @@
                 font-weight: bold;
                 box-shadow: 0 4px 3px rgba(0, 0, 0, 0.1);
             }
-            tbody {
+            tr {
                 box-shadow: 0 4px 3px rgba(0, 0, 0, 0.1);
+
+                &:hover {
+                    background-color: rgb(232 221 241 / 29%);
+                    cursor: pointer;
+                }
             }
         }
 
@@ -55,6 +60,11 @@
                 &:hover {
                     opacity: 0.8;
                 }
+            }
+
+            .disabled {
+                opacity: 0.5;
+                pointer-events: none;
             }
 
             .current-page {
