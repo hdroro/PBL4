@@ -21,10 +21,10 @@
 }
 
 .content-container {
-    margin-top: 2.5rem;
+    margin-top: 4.5rem;
 }
 
-.form-detail {
+.wrapper-container {
     max-width: 450px;
     background-color: #F4E7FF;
     padding: 25px 50px 30px;
@@ -32,14 +32,14 @@
     margin: 0 auto;
 }
 
-.form-title {
+.content-header {
     color: #881CDD;
     font-size: 2.2rem;
     font-weight: 600;
     text-align: center;
 }
 
-.form-item {
+.item-field {
     margin-top: 1.5rem;
 }
 
@@ -51,30 +51,6 @@
 .item-input {
     padding: 10px;
     width: 100%;
-}
-
-.sub-container {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-    margin-top: 1.5rem;
-}
-
-.sub-item {
-    width: 47%;
-}
-
-input[type="radio"] {
-    margin-right: 1.5rem;
-}
-
-label {
-    &~ input {
-        margin-left: 0.4rem;
-    }
-}
-
-textarea, input {
-    border: none;
     outline: none;
+    border: none;
 }

@@ -172,6 +172,20 @@ const handleDeleteUserByAdmin = (idUser) => {
     });
 };
 
+const handleCheckFriendRelation = (idAcc1, idAcc2) => {
+    return axios.get('/api/check-friend-relation', {
+        withCredentials: true,
+        params: {idAcc1, idAcc2},
+    });
+}
+
+const handleEditProfileBrief = (username, fullname, bio) => {
+    return axios.post('/api/setting/editprofile-brief', {
+        withCredentials: true,
+        username, fullname, bio
+    });
+}
+
 export {
     handleLoginApi,
     handleLogoutApi,
@@ -193,8 +207,11 @@ export {
     handleCreateNotificationMatching,
     handleSetDenyNotificationMatching,
     handleSetReadNotificationMatching,
+    // handleSetMatchNotificationMatching,
     handleGetCountNotReadNotificationMatching,
     handleGetDetailNotificationMatching,
     handleGetAllUserByAdmin,
     handleDeleteUserByAdmin,
+    handleCheckFriendRelation,
+    handleEditProfileBrief,
 };

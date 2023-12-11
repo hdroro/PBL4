@@ -29,6 +29,19 @@ export const NotifIcon = ({ width = '2rem', height = '2rem', className, onClick 
     </svg>
 );
 
+export const PlusIcon = ({ width = '2rem', height = '2rem', className, onClick }) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        onClick={onClick}
+        className={className}
+        width={width}
+        height={height}
+        fill="currentColor"
+        viewBox="0 0 448 512">
+    <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"/>
+    </svg>
+);
+
 export const UserGroup = ({ width = '2rem', height = '2rem', className }) => (
     <svg
         className={className}
@@ -116,7 +129,7 @@ export const BackIcon = ({ width = '2rem', height = '2rem', className, onClick }
         width={width}
         height={height}
         viewBox="0 0 48 48"
-        fill="black"
+        fill="currentColor"
         xmlns="http://www.w3.org/2000/svg"
     >
         <path
@@ -384,6 +397,18 @@ export const ZoomOut = ({ width = '1em', height = '1em', className, onClick }) =
     </svg>
 );
 
+export const Check = ({ width = '1em', height = '1em', className, onClick }) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        height={height} 
+        width={width}
+        onClick={onClick}
+        fill="currentColor"
+        viewBox="0 0 448 512">
+        <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
+    </svg>
+);
+
 export const Mic = ({ width = '1.2em', height = '1.2em', className, onClick }) => (
     <svg
         onClick={onClick}
@@ -544,8 +569,8 @@ export const CloseIcon = ({ width = '1em', height = '1em', className, onClick })
         className={className}
         width={width}
         height={height}
-        viewBox="0 0 384 512"
         fill="currentColor"
+        viewBox="0 0 384 512"
         xmlns="http://www.w3.org/2000/svg"
     >
         <svg>

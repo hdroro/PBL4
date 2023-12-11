@@ -6,6 +6,8 @@ import ReactDOM from 'react-dom';
 const cx = classNames.bind(styles);
 
 function Modal({
+    closeAdmin,
+    adminColor,
     title,
     isShowing,
     hide,
@@ -37,11 +39,11 @@ function Modal({
                                   </h2>
                               </div>
                           )}
-                          <div className={cx('modal-content')}>
+                          <div className={cx('modal-content', {adminColor})}>
                               <div className={cx('wrapper')}>{children}</div>
                           </div>
 
-                          <button
+                          {!closeAdmin && <button
                               type="button"
                               className={cx('modal-close-button', admin && 'modal-close-button-admin')}
                               data-dismiss="modal"
@@ -49,7 +51,7 @@ function Modal({
                               onClick={hide}
                           >
                               <span aria-hidden="true">×</span>
-                          </button>
+                          </button>}
                       </div>
                   </div>
               </React.Fragment>,

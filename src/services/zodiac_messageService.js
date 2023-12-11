@@ -23,4 +23,19 @@ const handleFilterListZodiacMessage = async (timeFrom, timeTo, pageNumber) => {
     });
 };
 
-export { handleGetListZodiacMessage, handleFilterListZodiacMessage, handleGetListNotiZodiacMessage };
+const handleGetZodiacMessageDetail = (id) => {
+    return axios.get('/api/admin/get-detail-zodiac-message', {
+        withCredentials: true,
+        params: {id}
+    });
+};
+
+const handleCreateZodiacMessage = (idZodiac, content) => {
+    return axios.put('/api/admin/create-zodiac-message', {
+        withCredentials: true,
+        idZodiac,
+        content
+    });
+};
+
+export { handleGetListZodiacMessage, handleFilterListZodiacMessage, handleGetListNotiZodiacMessage, handleGetZodiacMessageDetail, handleCreateZodiacMessage  };

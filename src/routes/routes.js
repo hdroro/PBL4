@@ -17,9 +17,9 @@ import A_ShowUser from '~/pages/A_ShowUser';
 import A_ShowUserDetail from '~/pages/A_ShowUserDetail';
 import A_ShowZodiacMessage from '~/pages/A_ShowZodiacMessage';
 import A_CreateZodiacMessage from '~/pages/A_CreateZodiacMessage';
-import A_CreateDetailZodiacMessage from '~/pages/A_CreateDetailZodiacMessage';
 import A_ShowReport from '~/pages/A_ShowReport';
 import A_ShowDetailReport from '~/pages/A_ShowDetailReport';
+import A_ReadDetailZodiacMessage from '~/pages/A_CreateDetailZodiacMessage/A_ReadDetailZodiacMessage';
 
 //public routes
 const publicRoutes = [
@@ -36,7 +36,7 @@ const publicRoutes = [
     { path: config.adminShowDetailUser, component: A_ShowUserDetail, layout: AdminSidebarOnly },
     { path: config.adminShowMessage, component: A_ShowZodiacMessage, layout: AdminSidebarOnly },
     { path: config.adminCreateMessage, component: A_CreateZodiacMessage, layout: AdminSidebarOnly },
-    { path: config.adminCreateDetailMessage, component: A_CreateDetailZodiacMessage, layout: AdminSidebarOnly },
+    { path: config.adminReadDetailMessage, component: A_ReadDetailZodiacMessage, layout: AdminSidebarOnly },
     { path: config.adminShowReport, component: A_ShowReport, layout: AdminSidebarOnly },
     { path: config.adminShowDetailReport, component: A_ShowDetailReport, layout: AdminSidebarOnly },
 ];

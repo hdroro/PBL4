@@ -19,19 +19,13 @@ const cx = classNames.bind(styles);
 function NotiItem({ idNotificationMatching, idAcc1, idAcc2, handleReadNotificationMatching, socket }) {
     const [user, setUser] = useState();
     const [notifInfo, setNotifInfo] = useState();
-    const [timeLeft, setTimeLeft] = useState();
     const { isShowing, toggle } = useModal();
     useEffect(() => {
         const fetchApi = async () => {
             try {
-                let data;
-                console.log('idddddddđ', idAcc2);
-                if (idAcc2 != null) data = await handleGetInfoByID(idAcc2);
-                console.log('match randommmmmmmm');
-                // data = data.userData;
-
+                let data = await handleGetInfoByID(idAcc2);
+                
                 if (data && data.userData.errCode === 0) {
-                    console.log('Get info user successfully');
                     const temp = String(data.userData.user.birth);
                     const tempDate = new Date(temp);
                     const year = tempDate.getFullYear();
@@ -55,13 +49,12 @@ function NotiItem({ idNotificationMatching, idAcc1, idAcc2, handleReadNotificati
             }
         };
         fetchApi();
-    }, []);
+    }, [idAcc1, idAcc2, idNotificationMatching])
 
     const handleReadNotif = async () => {
         try {
             if (notifInfo.isRead == 0) {
                 const check = await handleSetReadNotificationMatching(idNotificationMatching);
-                console.log(check);
                 handleReadNotificationMatching();
                 setNotifInfo((prev) => {
                     return { ...prev, isRead: 1 };
@@ -74,46 +67,30 @@ function NotiItem({ idNotificationMatching, idAcc1, idAcc2, handleReadNotificati
     };
 
     const handleOnClick = () => {
-        const time = formatTimeMatching(notifInfo.timeCreated);
-        console.log('time data:');
-        console.log(time);
-        setTimeLeft(time);
+        // const time = formatTimeMatching(notifInfo.timeCreated);
+        // console.log('time data:');
+        // console.log(time);
+        // setTimeLeft(time);
         toggle();
     };
     return (
-        <PopperWrapper
-            className={{
-                primary: notifInfo && notifInfo.isRead == 0 && true,
-                disable: notifInfo && notifInfo.isRead == 1 && true,
-            }}
-        >
-            <div
-                className={cx('wrapper', {
-                    readNotif: notifInfo && notifInfo.isRead == 1 && true,
-                })}
-            >
-                {timeLeft && (
-                    <Modal
-                        title={'Request'}
-                        leftIcon={<UserGroup />}
-                        primary
-                        isShowing={isShowing}
-                        hide={handleReadNotif}
-                        background
-                    >
-                        <RequestFriend
-                            idNotificationMatching={idNotificationMatching}
-                            timeData={timeLeft}
-                            isNotif={true}
-                            deny={notifInfo && notifInfo.isDeny}
-                            timeCreated={notifInfo && notifInfo.timeCreated}
-                            socket={socket}
-                            fromId={idAcc2}
-                            matchId={idAcc1}
-                            hide={handleReadNotif}
-                        />
-                    </Modal>
-                )}
+        <PopperWrapper className={{
+            primary: notifInfo && notifInfo.isRead == 0 && true,
+            disable: notifInfo && notifInfo.isRead == 1 && true,
+        }}>
+            <div className={cx('wrapper', {
+                readNotif: notifInfo && notifInfo.isRead == 1 && true,
+            })}>
+                <Modal
+                    title={'Request'}
+                    leftIcon={<UserGroup />}
+                    primary
+                    isShowing={isShowing}
+                    hide={handleReadNotif}
+                    background
+                >
+                    <RequestFriend idNotificationMatching={idNotificationMatching} timeData={notifInfo && formatTimeMatching(notifInfo.timeCreated)} isNotif={true} deny={notifInfo && notifInfo.isDeny} socket={socket} fromId={idAcc2} matchId={idAcc1} hide={handleReadNotif} />
+                </Modal>
                 <img src={user && images[user.avatar]} alt="" />
                 <div className={cx('noti-container')} onClick={handleOnClick}>
                     <div>
