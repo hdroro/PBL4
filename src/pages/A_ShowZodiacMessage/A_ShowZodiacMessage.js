@@ -37,10 +37,17 @@ const A_ShowZodiacMessage = () => {
         try {
             setLoading(true);
 
-            const response =
-                startDate && endDate
-                    ? await handleFilterListZodiacMessage(startDate, endDate, page)
-                    : await handleGetListZodiacMessage(page);
+            let response;
+
+            if (startDate && endDate) {
+                // Add one day to the endDate to include messages on that day
+                const adjustedEndDate = new Date(endDate);
+                adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
+
+                response = await handleFilterListZodiacMessage(startDate, adjustedEndDate, page);
+            } else {
+                response = await handleGetListZodiacMessage(page);
+            }
 
             if (response?.listMessage?.length !== 0) {
                 setIsEmpty(false);
