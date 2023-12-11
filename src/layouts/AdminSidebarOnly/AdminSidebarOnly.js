@@ -7,6 +7,12 @@ import AdminSidebar from '../components/AdminSidebar';
 const cx = classNames.bind(styles);
 
 function AdminSidebarOnly({ children, socket }) {
+    const childrenWithProps = React.Children.map(children, (child) => {
+        if (React.isValidElement(child)) {
+            return React.cloneElement(child, { socket });
+        }
+        return child;
+    });
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container')}>
@@ -16,7 +22,7 @@ function AdminSidebarOnly({ children, socket }) {
                             <div className={cx('col l-3 m-3 c-3')}>
                                 <AdminSidebar />
                             </div>
-                            <div className={cx('col l-9 m-9 c-9')}>{children}</div>
+                            <div className={cx('col l-9 m-9 c-9')}>{childrenWithProps}</div>
                         </div>
                     </div>
                 </div>

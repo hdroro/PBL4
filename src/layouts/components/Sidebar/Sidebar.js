@@ -67,7 +67,7 @@ function Sidebar({ user, socket, onlineUsers }) {
             }
         };
         fetchApi();
-    }, [user.idUser]);
+    }, [user.idUser, countNotificationMatching]);
 
     useEffect(() => {
         if (socket === null) return;
@@ -85,16 +85,16 @@ function Sidebar({ user, socket, onlineUsers }) {
         //     console.log(error);
         // }
         return (
-            <Fragment>
+            <Fragment> 
                 {notifList.map((item, index) => (
-                    <NotiItem
+                        <NotiItem
                         socket={socket}
                         idNotificationMatching={item.idNotificationMatching}
                         idAcc1={item.idAcc1}
                         idAcc2={item.idAcc2}
                         handleReadNotificationMatching={handleReadNotificationMatching}
                         key={index}
-                    />
+                        />
                 ))}
             </Fragment>
         );

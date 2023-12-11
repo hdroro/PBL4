@@ -34,6 +34,14 @@
         text-align: start;
         color: #da0d58;
     }
+
+    .header-title-admin {
+        color: #7a0ad2;
+    }
+}
+
+.modal-header-admin {
+    border-color: #cc8dfe;
 }
 
 .texttype {
@@ -48,6 +56,10 @@
 
     .wrapper {
         padding-bottom: 20px;
+    }
+
+    &.adminColor {
+        background-color: #f4e7ff;
     }
 }
 
@@ -70,6 +82,10 @@
     background: transparent;
     color: #f51c6a;
     cursor: pointer;
+}
+
+.modal-close-button-admin {
+    color: #881cdd;
 }
 
 .icon + .title,

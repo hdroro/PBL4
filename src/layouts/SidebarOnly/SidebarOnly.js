@@ -139,7 +139,6 @@ function SidebarOnly({ children, socket }) {
                                         hide={handleToggleShowRequest}
                                         fromId={fromId && fromId}
                                         socket={socket}
-                                        onlineUsers={onlineUsers}
                                         matchId={matchId && matchId}
                                     />
                                 </Modal>

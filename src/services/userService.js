@@ -142,6 +142,13 @@ const handleSetReadNotificationMatching = (idNotificationMatching) => {
     });
 }
 
+// const handleSetMatchNotificationMatching = (idAcc1, idAcc2) => {
+//     return axios.post('/api/set-match-notification-matching', {
+//         withCredentials: true,
+//         idAcc1, idAcc2
+//     });
+// }
+
 const handleGetCountNotReadNotificationMatching = (idAcc1) => {
     return axios.get('/api/get-count-not-read-notification-matching', {
         withCredentials: true,
@@ -153,6 +160,20 @@ const handleGetDetailNotificationMatching = (idNotificationMatching, idAcc1, idA
     return axios.get('/api/get-detail-notification-matching', {
         withCredentials: true,
         params: {idNotificationMatching, idAcc1, idAcc2},
+    });
+}
+
+const handleCheckFriendRelation = (idAcc1, idAcc2) => {
+    return axios.get('/api/check-friend-relation', {
+        withCredentials: true,
+        params: {idAcc1, idAcc2},
+    });
+}
+
+const handleEditProfileBrief = (username, fullname, bio) => {
+    return axios.post('/api/setting/editprofile-brief', {
+        withCredentials: true,
+        username, fullname, bio
     });
 }
 
@@ -177,6 +198,9 @@ export {
     handleCreateNotificationMatching,
     handleSetDenyNotificationMatching,
     handleSetReadNotificationMatching,
+    // handleSetMatchNotificationMatching,
     handleGetCountNotReadNotificationMatching,
     handleGetDetailNotificationMatching,
+    handleCheckFriendRelation,
+    handleEditProfileBrief,
 };

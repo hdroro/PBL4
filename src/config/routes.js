@@ -10,12 +10,12 @@ const routes = {
 
     adminShowUser: '/api/adminShowUser',
     adminDelUser: '/api/adminDelUser',
-    adminShowDetailUser: '/api/adminShowDetailUser',
+    adminShowDetailUser: '/api/adminShowDetailUser/:id',
     adminShowMessage: '/api/adminShowMessage',
     adminCreateMessage: '/api/adminCreateMessage',
-    adminCreateDetailMessage: '/api/adminCreateDetailMessage',
+    adminReadDetailMessage: '/api/adminReadDetailMessage/:id',
     adminShowReport: '/api/adminShowReport',
-    adminShowDetailReport: '/api/adminShowDetailReport',
+    adminShowDetailReport: '/api/adminShowDetailReport/:id',
 };
 
 export default routes;

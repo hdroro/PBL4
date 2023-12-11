@@ -2,13 +2,14 @@ import classNames from 'classnames/bind';
 import styles from './ProfileBrief.module.scss';
 import images from '~/assets/images';
 import { useState } from 'react';
+import { handleEditProfileBrief } from '~/services/userService';
 
 const cx = classNames.bind(styles);
 
 function ProfileBrief({ toggle, infoUser }) {
-    const [username, setUsername] = useState('');
-    const [name, setName] = useState('');
-    const [bio, setBio] = useState('');
+    const [username, setUsername] = useState(infoUser.userName);
+    const [name, setName] = useState(infoUser.fullName);
+    const [bio, setBio] = useState(infoUser.bio);
 
     const handleOnChangeUsername = (event) => {
         setUsername(event.target.value);
@@ -22,6 +23,19 @@ function ProfileBrief({ toggle, infoUser }) {
         setBio(event.target.value);
         console.log(event.target.value);
     };
+
+    const handleOnSubmit = async() => {
+        try {
+            const check = await handleEditProfileBrief(username, name, bio);
+            if(check.errCode === 0) {
+                console.log(check);
+                toggle();
+            }
+        }
+        catch(err) {
+            console.log(err);
+        }
+    }
     return (
         <div className={cx('wrapper')}>
             <div className={cx('title')}>Edit profile</div>
@@ -55,7 +69,7 @@ function ProfileBrief({ toggle, infoUser }) {
                             onChange={(e) => handleOnChangeUsername(e)}
                             disabled
                         />
-                        <div className={cx('desc-item')}>www.website.com/@{`${infoUser.userName}`}</div>
+                        <div className={cx('desc-item')}>www.website.com/api/profile/@{`${infoUser.userName}`}</div>
                         <div className={cx('desc-item')}>
                             Usernames can only contain letters, numbers, underscores, and periods. Changing your
                             username will also change your profile link.
@@ -72,8 +86,9 @@ function ProfileBrief({ toggle, infoUser }) {
                             name="name"
                             id="name"
                             className={cx('input-item')}
-                            placeholder={`${infoUser.fullName}`}
-                            value={`${infoUser.fullName}`}
+                            // placeholder={`${infoUser.fullName}`}
+                            // value={`${infoUser.fullName}`}
+                            value={name && name}
                             onChange={(e) => handleOnChangeName(e)}
                         />
                     </div>
@@ -87,10 +102,11 @@ function ProfileBrief({ toggle, infoUser }) {
                             name="bio"
                             id="bio"
                             className={cx('textarea-item')}
-                            placeholder={`${infoUser.bio}`}
+                            // placeholder={`${infoUser.bio}`}
                             rows="4"
                             cols="50"
-                            value={`${infoUser.bio}`}
+                            // value={infoUser.bio && `${infoUser.bio}`}
+                            value={bio && bio}
                             onChange={(e) => handleOnChangeBio(e)}
                         />
                         <div className={cx('desc-item')}>allow 50 characters</div>
@@ -101,7 +117,7 @@ function ProfileBrief({ toggle, infoUser }) {
                     <button onClick={toggle} type="button" className={cx('cancel-btn')}>
                         Cancel
                     </button>
-                    <button type="submit" className={cx('submit-btn')}>
+                    <button type="button" onClick={handleOnSubmit} className={cx('submit-btn')}>
                         Save
                     </button>
                 </div>

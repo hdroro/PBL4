@@ -130,7 +130,7 @@ function SettingProfile() {
                                     value={infoUser.username}
                                     disabled
                                 />
-                                <div className={cx('desc-item')}>www.website.com/@yanni</div>
+                                <div className={cx('desc-item')}>www.website.com/api/profile/@{infoUser.username}</div>
                                 <div className={cx('desc-item')}>
                                     Usernames can only contain letters, numbers, underscores, and periods. Changing your
                                     username will also change your profile link.

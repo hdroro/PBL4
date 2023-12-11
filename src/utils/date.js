@@ -35,10 +35,7 @@ export const formatTime = (timeSend) => {
 export const formatTimeMatching = (timeInput) => {
     const currentTime = new Date();
     const notifTime = new Date(timeInput);
-    console.log('current: ',currentTime);
-    console.log('notif: ',notifTime);
     const timeDifference = (currentTime - notifTime) / 1000; // Chuyển đổi thành giây
-    console.log('difference: ', timeDifference);
     if (Math.floor(timeDifference) <= 300) {
         const timeLeft = 300 - Math.floor(timeDifference);
         const minutes = Math.floor(timeLeft / 60);

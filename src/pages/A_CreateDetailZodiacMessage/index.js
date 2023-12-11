@@ -1,1 +1,1 @@
-export { default } from './A_CreateDetailZodiacMessage';
+export { default } from './A_ReadDetailZodiacMessage';
