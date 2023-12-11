@@ -125,7 +125,7 @@ const A_ShowZodiacMessage = () => {
                                                 </div>
                                                 <div className={cx('content-value')}>{item.content}</div>
                                                 <div className={cx('birth')}>{formatOnlyDate(item.timePost)}</div>
-                                                <Link to={`/api/adminShowDetailMessage/${item.idZodiac_Message}`}>
+                                                <Link to={`/api/adminReadDetailMessage/${item.idZodiac_Message}`}>
                                                     <div className={cx('btn-action')}>
                                                         <ChevronRight />
                                                     </div>

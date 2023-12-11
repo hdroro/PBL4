@@ -50,7 +50,7 @@ export const formatTimeMatching = (timeInput) => {
 
 export const formatTimeNotiZodiacMessage = (timePost) => {
     const currentTime = new Date();
-    const messageTime = new Date(timePost.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'));
+    const messageTime = new Date(timePost?.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'));
     const timeDifference = (currentTime - messageTime) / 1000;
 
     if (timeDifference < 60) {
