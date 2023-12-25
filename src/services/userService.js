@@ -1,9 +1,14 @@
 import axios from '../axios';
 
 axios.defaults.withCredentials = true;
-
+const config = {
+    headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+    },
+};
 const handleLoginApi = (username, password) => {
-    return axios.post('api/login', { withCredentials: true, username, password });
+    return axios.post('api/login', { config, withCredentials: true, username, password });
 };
 
 const handleLogoutApi = () => {
