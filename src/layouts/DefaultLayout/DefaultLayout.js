@@ -27,7 +27,7 @@ function DefaultLayout({ children, socket }) {
         const fetchUserInfo = async () => {
             try {
                 const response = await handleGetInfo();
-                setUser(response.userData.user[0]);
+                setUser(response?.userData?.user[0]);
             } catch (error) {
                 console.error(error);
             }
@@ -39,7 +39,7 @@ function DefaultLayout({ children, socket }) {
     useEffect(() => {
         if (socket === null) return;
         console.log(user);
-        if(user.idUser) {
+        if (user?.idUser) {
             socket.emit('addNewUser', user.idUser);
             socket.on('getOnlineUsers', (response) => {
                 setOnlineUsers(response);
@@ -48,32 +48,32 @@ function DefaultLayout({ children, socket }) {
     }, [user]);
 
     useEffect(() => {
-        if(socket === null) return;
+        if (socket === null) return;
         socket.on('receive-request-matching', (response) => {
             console.log(response);
             setShowRequest(!isShowRequest);
             setFromId(response.fromId);
             setMatchId(response.matchId);
-        })
-    }, [])
+        });
+    }, []);
 
     useEffect(() => {
-        if(socket === null) return;
+        if (socket === null) return;
         socket.on('move-to-new-conversation', (data) => {
             console.log(data);
             setShowNotifMatching(true);
-        })
-    }, [])
+        });
+    }, []);
 
     console.log('OnlineUser', onlineUsers);
 
     const handleToggleShowRequest = () => {
         setShowRequest(!isShowRequest);
-    }
+    };
 
     const handleToggleShowNotifMatching = () => {
         setShowNotifMatching(!isShowNotifMatching);
-    }
+    };
 
     const childrenWithProps = React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
@@ -88,14 +88,38 @@ function DefaultLayout({ children, socket }) {
                     <div className={cx('content')}> {childrenWithProps}</div>
                     <div className={cx('matching')}>
                         {isShowRequest && (
-                            <Modal background leftIcon={<UserGroup/>} title={'Request matching'} isShowing={isShowRequest} hide={handleToggleShowRequest}>
-                                <RequestFriend hide={handleToggleShowRequest} fromId={fromId && fromId} socket={socket} onlineUsers={onlineUsers} matchId={matchId && matchId}/>
+                            <Modal
+                                background
+                                leftIcon={<UserGroup />}
+                                title={'Request matching'}
+                                isShowing={isShowRequest}
+                                hide={handleToggleShowRequest}
+                            >
+                                <RequestFriend
+                                    hide={handleToggleShowRequest}
+                                    fromId={fromId && fromId}
+                                    socket={socket}
+                                    onlineUsers={onlineUsers}
+                                    matchId={matchId && matchId}
+                                />
                             </Modal>
                         )}
 
                         {isShowNotifMatching && (
-                            <Modal background leftIcon={<UserGroup/>} title={'Notification'} isShowing={isShowNotifMatching} hide={handleToggleShowNotifMatching}>
-                                <ConfirmMatching hide={handleToggleShowNotifMatching} fromId={fromId && fromId} socket={socket} onlineUsers={onlineUsers} matchId={matchId && matchId}/>
+                            <Modal
+                                background
+                                leftIcon={<UserGroup />}
+                                title={'Notification'}
+                                isShowing={isShowNotifMatching}
+                                hide={handleToggleShowNotifMatching}
+                            >
+                                <ConfirmMatching
+                                    hide={handleToggleShowNotifMatching}
+                                    fromId={fromId && fromId}
+                                    socket={socket}
+                                    onlineUsers={onlineUsers}
+                                    matchId={matchId && matchId}
+                                />
                             </Modal>
                         )}
                     </div>

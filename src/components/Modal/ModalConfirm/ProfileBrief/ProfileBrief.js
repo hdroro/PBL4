@@ -3,6 +3,7 @@ import styles from './ProfileBrief.module.scss';
 import images from '~/assets/images';
 import { useState } from 'react';
 import { handleEditProfileBrief } from '~/services/userService';
+import { useAppContext } from '~/components/AppContext/AppContext';
 
 const cx = classNames.bind(styles);
 
@@ -24,18 +25,17 @@ function ProfileBrief({ toggle, infoUser }) {
         console.log(event.target.value);
     };
 
-    const handleOnSubmit = async() => {
+    const handleOnSubmit = async () => {
         try {
             const check = await handleEditProfileBrief(username, name, bio);
-            if(check.errCode === 0) {
+            if (check.errCode === 0) {
                 console.log(check);
                 toggle();
             }
-        }
-        catch(err) {
+        } catch (err) {
             console.log(err);
         }
-    }
+    };
     return (
         <div className={cx('wrapper')}>
             <div className={cx('title')}>Edit profile</div>

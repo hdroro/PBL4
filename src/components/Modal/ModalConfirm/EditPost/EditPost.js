@@ -47,7 +47,7 @@ function EditPost({ infoUser, idPost, onChangeStatusEditPost }) {
                 </div>
             </div>
             <span className={cx('time-post')}>
-                Posted at: {formatISODateToCustomFormat(infoDetailPost?.post?.timePost)}
+                Posted in: {formatISODateToCustomFormat(infoDetailPost?.post?.timePost)}
             </span>
             <div className={cx('content')}>
                 <textarea value={content} onChange={(value) => handleChangeContent(value)} />

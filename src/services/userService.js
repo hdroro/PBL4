@@ -69,7 +69,7 @@ const getFile = (filename) => {
     return axios.get('/api/get-file', { withCredentials: true, filename });
 };
 
-const handleSignupApi = (username, password, fullname, date, gender) => {
+const handleSignupApi = (username, password, fullname, date, gender, timeRegister) => {
     return axios.post('api/signup', {
         withCredentials: true,
         username,
@@ -77,6 +77,7 @@ const handleSignupApi = (username, password, fullname, date, gender) => {
         fullname,
         date,
         gender,
+        timeRegister,
     });
 };
 
@@ -158,6 +159,13 @@ const handleGetDetailNotificationMatching = (idNotificationMatching, idAcc1, idA
 
 //ADMIN
 
+const handleGetIdZodiac = (idUser) => {
+    return axios.get('/api/admin/get-idZodiac-by-idUser', {
+        withCredentials: true,
+        params: { idUser },
+    });
+};
+
 const handleGetAllUserByAdmin = (page) => {
     return axios.get('/api/admin/get-list-user', {
         withCredentials: true,
@@ -175,16 +183,18 @@ const handleDeleteUserByAdmin = (idUser) => {
 const handleCheckFriendRelation = (idAcc1, idAcc2) => {
     return axios.get('/api/check-friend-relation', {
         withCredentials: true,
-        params: {idAcc1, idAcc2},
+        params: { idAcc1, idAcc2 },
     });
-}
+};
 
 const handleEditProfileBrief = (username, fullname, bio) => {
     return axios.post('/api/setting/editprofile-brief', {
         withCredentials: true,
-        username, fullname, bio
+        username,
+        fullname,
+        bio,
     });
-}
+};
 
 export {
     handleLoginApi,
@@ -210,6 +220,7 @@ export {
     // handleSetMatchNotificationMatching,
     handleGetCountNotReadNotificationMatching,
     handleGetDetailNotificationMatching,
+    handleGetIdZodiac,
     handleGetAllUserByAdmin,
     handleDeleteUserByAdmin,
     handleCheckFriendRelation,

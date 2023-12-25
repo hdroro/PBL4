@@ -12,9 +12,12 @@ function ShowDetailZodiac({ idPostShowing }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await handleGetDetailNotiZodiacMessage(idPostShowing);
-                await handleReadNotiZodiacMessage(idPostShowing);
-                setShowMessageDetail(response.noti_zodiac[0]);
+                var response;
+                if (idPostShowing) {
+                    response = await handleGetDetailNotiZodiacMessage(idPostShowing);
+                    // await handleReadNotiZodiacMessage(idPostShowing);
+                    setShowMessageDetail(response.noti_zodiac[0]);
+                }
             } catch (error) {
                 console.error('Error fetching user information: ' + error);
             }
@@ -31,12 +34,12 @@ function ShowDetailZodiac({ idPostShowing }) {
         <div className={cx('wrapper')}>
             <div className={cx('header')}>
                 <span className={cx('name-zodiac')}>
-                    <b>Zodiac:</b> {capitalizeFirstLetter(messageDetail.nameZodiac)}
+                    <b>Zodiac:</b> {capitalizeFirstLetter(messageDetail?.nameZodiac)}
                 </span>
-                <span className={cx('time-send')}>{formatISODateToCustomFormat(messageDetail.timeSend)}</span>
+                <span className={cx('time-send')}>{formatISODateToCustomFormat(messageDetail?.timePost)}</span>
             </div>
             <div className={cx('content')}>
-                <textarea value={messageDetail.content} disabled />
+                <textarea value={messageDetail?.content} disabled />
             </div>
         </div>
     );

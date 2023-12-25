@@ -61,6 +61,10 @@ li {
     list-style: none;
 }
 
+textarea {
+    resize: vertical;
+}
+
 body {
     .tippy-box {
         border-radius: 8px;

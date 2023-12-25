@@ -13,6 +13,7 @@ import { handleGetNotificationByReceiverId } from '~/services/notificationMessag
 import { Fragment, useEffect, useState } from 'react';
 import { handleGetNotificationMatching } from '~/services/userService';
 import NotiZodiac from '~/components/Popper/NotiZodiac/NotiZodiac';
+import { useAppContext } from '~/components/AppContext/AppContext';
 
 const cx = classNames.bind(styles);
 function Sidebar({ user, socket, onlineUsers }) {
@@ -32,7 +33,7 @@ function Sidebar({ user, socket, onlineUsers }) {
                 //         console.log(data);
                 //         notifData = data;
                 //     });
-                notifData = await handleGetNotificationMatching(user.idUser);
+                notifData = await handleGetNotificationMatching(user?.idUser);
                 console.log(notifData);
                 if (notifData.errCode == 0 && notifData.errMessage == 'OK') {
                     // notifList = notifData.data;
@@ -52,7 +53,7 @@ function Sidebar({ user, socket, onlineUsers }) {
         const fetchApi = async () => {
             try {
                 if (user.idUser) {
-                    const notifData = await handleGetCountNotReadNotificationMatching(user.idUser);
+                    const notifData = await handleGetCountNotReadNotificationMatching(user?.idUser);
                     console.log(notifData);
                     console.log('check notif counttttttttttttt');
                     console.log(notifData.data);
@@ -85,16 +86,16 @@ function Sidebar({ user, socket, onlineUsers }) {
         //     console.log(error);
         // }
         return (
-            <Fragment> 
+            <Fragment>
                 {notifList.map((item, index) => (
-                        <NotiItem
+                    <NotiItem
                         socket={socket}
                         idNotificationMatching={item.idNotificationMatching}
                         idAcc1={item.idAcc1}
                         idAcc2={item.idAcc2}
                         handleReadNotificationMatching={handleReadNotificationMatching}
                         key={index}
-                        />
+                    />
                 ))}
             </Fragment>
         );
@@ -114,7 +115,7 @@ function Sidebar({ user, socket, onlineUsers }) {
                 const response = await handleGetInfoByID(user?.idUser);
                 setInfoUser(response?.userData?.user);
 
-                const notifications = await handleGetNotificationByReceiverId(user.idUser);
+                const notifications = await handleGetNotificationByReceiverId(user?.idUser);
                 setNotificationCount(notifications?.notificationMessageInfo?.statusNotificationMessage);
             } catch (error) {
                 console.error('Error fetching user information: ' + error);

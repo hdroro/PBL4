@@ -4,6 +4,9 @@
     z-index: -1;
     background: #ffebfa;
 }
+.profile-propper {
+    width: 100%;
+}
 
 .header {
     position: relative;
@@ -63,6 +66,7 @@
 .bio {
     color: #fff;
     margin-top: 10px;
+    white-space: pre-line;
 
     .title {
         font-weight: 600;

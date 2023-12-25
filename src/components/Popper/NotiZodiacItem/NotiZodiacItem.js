@@ -5,23 +5,31 @@ import { formatTimeNotiZodiacMessage } from '~/utils/date';
 import Modal from '~/components/Modal/Modal';
 import ShowDetailZodiac from '~/components/Modal/ModalConfirm/ShowDetailZodiac';
 import { useState } from 'react';
+import { handleReadNotiZodiacMessage } from '~/services/zodiac_notiService';
 
 const cx = classNames.bind(styles);
 
-function NotiZodiacItem({ listNotiZodiac, user }) {
+function NotiZodiacItem({ listNotiZodiac, user, onChangeStatusCreatePost }) {
     const [isShowing, setIsShowing] = useState(false);
     const [idPostShowing, setIdPostShowing] = useState('');
-    const handleToggleModel = (notiId) => {
-        setIsShowing(!isShowing);
-        console.log(`Notification with ID ${notiId} clicked`);
-        setIdPostShowing(notiId);
+
+    const handleToggleModel = async (notiId) => {
+        try {
+            setIsShowing(!isShowing);
+            if (!isShowing) handleReadNotiZodiacMessage(notiId);
+            setIdPostShowing(notiId);
+            onChangeStatusCreatePost(!isShowing, notiId);
+        } catch (error) {
+            console.console.log(error);
+        }
     };
+
     return (
         <>
-            {listNotiZodiac.map((item) => (
+            {listNotiZodiac.map((item, index) => (
                 <div
                     className={cx('wrapper', item.isRead && 'asRead')}
-                    key={item.id}
+                    key={index}
                     onClick={() => handleToggleModel(item.idNoti)}
                 >
                     <img alt="" src={images.admin} />
@@ -31,7 +39,7 @@ function NotiZodiacItem({ listNotiZodiac, user }) {
                             <span className={cx('noti-content')}>
                                 đã có thông điệp tuần mới rồi nè <b>{user}</b> ơi!
                             </span>
-                            <div className={cx('time')}>{formatTimeNotiZodiacMessage(item.timeSend)}</div>
+                            <div className={cx('time')}>{formatTimeNotiZodiacMessage(item.timePost)}</div>
                         </div>
                     </div>
                 </div>

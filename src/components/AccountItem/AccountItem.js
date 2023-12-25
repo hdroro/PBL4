@@ -1,13 +1,10 @@
 import classNames from 'classnames/bind';
 import styles from './AccountItem.module.scss';
-import Image from '../Image';
 import images from '~/assets/images';
 
 const cx = classNames.bind(styles);
 
 function AccountItem({ searchResult }) {
-    console.log('huhuhu');
-    console.log('result____', searchResult);
     return searchResult?.map((item) => (
         <a href={`/api/profile/@${item?.userName}`} className={cx('wrapper')} key={item.idUser}>
             <img src={images[item?.avatar]} alt="" className={cx('image-search')} />
