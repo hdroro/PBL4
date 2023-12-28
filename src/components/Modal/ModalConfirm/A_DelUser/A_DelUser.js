@@ -6,7 +6,6 @@ import { handleDeleteUserByAdmin } from '~/services/userService';
 const cx = classNames.bind(styles);
 
 function A_DelUser({ hide, children, user, onChangeStatusDeleteUser }) {
-    console.log('delete: ', user);
     const handleDeleteUser = () => {
         onChangeStatusDeleteUser(false);
         handleDeleteUserByAdmin(user);

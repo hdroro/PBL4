@@ -46,7 +46,7 @@ function AdminShowUser({ onlineUsers }) {
 
     useEffect(() => {
         fetchData(1);
-    }, [onlineUsers, reloadPage]);
+    }, [onlineUsers]);
 
     const handlePageChange = async (newPage) => {
         await fetchData(newPage);

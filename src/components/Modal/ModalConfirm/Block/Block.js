@@ -19,7 +19,6 @@ function Block({
     idPost,
     idAccPost,
 }) {
-    console.log('idConversation ' + idConversation);
     const [blockConversation, setBlockConversation] = useState(false);
     const handleYes = async () => {
         try {

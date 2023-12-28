@@ -9,10 +9,10 @@ const handleGetListZodiacMessage = (page) => {
     });
 };
 
-const handleGetListNotiZodiacMessage = (idUser) => {
+const handleGetListNotiZodiacMessage = (idUser, page) => {
     return axios.get('/api/get-list-zodiac-message', {
         withCredentials: true,
-        params: { idUser },
+        params: { idUser, page },
     });
 };
 
@@ -26,16 +26,31 @@ const handleFilterListZodiacMessage = async (timeFrom, timeTo, pageNumber) => {
 const handleGetZodiacMessageDetail = (id) => {
     return axios.get('/api/admin/get-detail-zodiac-message', {
         withCredentials: true,
-        params: {id}
+        params: { id },
     });
 };
 
-const handleCreateZodiacMessage = (idZodiac, content) => {
+const handleCreateZodiacMessage = (idZodiac, content, datetime) => {
     return axios.put('/api/admin/create-zodiac-message', {
         withCredentials: true,
         idZodiac,
-        content
+        content,
+        datetime,
     });
 };
 
-export { handleGetListZodiacMessage, handleFilterListZodiacMessage, handleGetListNotiZodiacMessage, handleGetZodiacMessageDetail, handleCreateZodiacMessage  };
+const handleGetIdZodiacMessage = (idZodiac, datetime, idUser) => {
+    return axios.get('/api/admin/get-id-zodiac-message', {
+        withCredentials: true,
+        params: { idZodiac, datetime, idUser },
+    });
+};
+
+export {
+    handleGetListZodiacMessage,
+    handleFilterListZodiacMessage,
+    handleGetListNotiZodiacMessage,
+    handleGetZodiacMessageDetail,
+    handleCreateZodiacMessage,
+    handleGetIdZodiacMessage,
+};

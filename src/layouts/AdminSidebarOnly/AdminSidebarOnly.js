@@ -16,7 +16,6 @@ function AdminSidebarOnly({ children, socket }) {
             setOnlineUsers(response);
         });
     }, [socket]);
-    console.log('OnlineUser', onlineUsers);
 
     const childrenWithProps = React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {

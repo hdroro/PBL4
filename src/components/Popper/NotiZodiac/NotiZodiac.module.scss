@@ -22,3 +22,22 @@
         color: #fff;
     }
 }
+
+.noti-footer {
+    padding-top: 5px;
+    display: flex;
+    justify-content: center;
+    background-color: transparent;
+    align-items: center;
+}
+
+.noti-btn-action {
+    background-color: transparent;
+    justify-content: left;
+    font-weight: 600;
+    color: rgba(188, 10, 70, 0.7215686275);
+    cursor: pointer;
+    .left {
+        padding-right: 5px;
+    }
+}

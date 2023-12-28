@@ -33,7 +33,7 @@ function DefaultLayout({ children, socket }) {
         const fetchUserInfo = async () => {
             try {
                 const response = await handleGetInfo();
-                setUser(response.userData.user[0]);
+                setUser(response?.userData?.user[0]);
             } catch (error) {
                 console.error(error);
             }
@@ -45,7 +45,7 @@ function DefaultLayout({ children, socket }) {
     useEffect(() => {
         if (socket === null) return;
         console.log(user);
-        if(user.idUser) {
+        if (user?.idUser) {
             socket.emit('addNewUser', user.idUser);
             socket.on('getOnlineUsers', (response) => {
                 setOnlineUsers(response);
@@ -109,11 +109,11 @@ function DefaultLayout({ children, socket }) {
 
     const handleToggleShowRequest = () => {
         setShowRequest(!isShowRequest);
-    }
+    };
 
     const handleToggleShowNotifMatching = () => {
         setShowNotifMatching(!isShowNotifMatching);
-    }
+    };
 
     const childrenWithProps = React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {

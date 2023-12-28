@@ -26,13 +26,11 @@ function Login() {
     const handleOnChangeUsername = (event) => {
         setUsername(event.target.value);
         setLoginError('');
-        console.log(event.target.value);
     };
 
     const handleOnChangePassword = (event) => {
         setPassword(event.target.value);
         setLoginError('');
-        console.log(event.target.value);
     };
 
     const handleLogin = async () => {
@@ -93,7 +91,7 @@ function Login() {
                             )}
                         </div>
                     </div>
-                    <span className={cx('forgot-password')}>Forgot password?</span>
+                    {/* <span className={cx('forgot-password')}>Forgot password?</span> */}
                     <div className={cx('login-error')}>
                         <span className={cx('login-error-message')}>{loginError}</span>
                     </div>
@@ -109,18 +107,6 @@ function Login() {
                             OK
                         </Button>
 
-                        <div className={cx('another-way')}>
-                            <span className={cx('title')}>or log in</span>
-                            <div className={cx('two-way')}>
-                                <div className={cx('facebook')}>
-                                    <Facebook />
-                                </div>
-
-                                <div className={cx('gmail')}>
-                                    <Gmail />
-                                </div>
-                            </div>
-                        </div>
                         <div className={cx('request')}>
                             Don’t have an account ?
                             <span className={cx('signup-request')} onClick={toggleSignUp}>

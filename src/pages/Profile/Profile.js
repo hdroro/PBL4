@@ -16,18 +16,24 @@ import { useParams } from 'react-router-dom';
 import { handleGetInfoByID, handleGetInfoByUsername } from '~/services/userService';
 import { handleGetPost } from '~/services/postService';
 import { formatISODateToCustomFormat } from '~/utils/date';
+import { useAppContext } from '~/components/AppContext/AppContext';
 
 const cx = classNames.bind(styles);
 
 function Profile({ user }) {
+    console.log('user', user);
     const [reloadProfile, setReloadProfile] = useState(false);
+    const [isReport, setIsReport] = useState(false);
 
-    const renderPreview = (idPost) => {
+    const renderPreview = (idPost, isReport) => {
+        console.log('isReport____', isReport);
         return (
-            <PopperWrapper>
+            <PopperWrapper className={cx('profile-propper')}>
                 <AdjustPost
+                    isReport={isReport}
                     idPost={idPost}
                     infoUser={infoUser}
+                    idUser={user.idUser}
                     reloadProfile={() => setReloadProfile(!reloadProfile)}
                 />
             </PopperWrapper>
@@ -60,13 +66,13 @@ function Profile({ user }) {
 
     useEffect(() => {
         fetchData();
-    }, [nickname, reloadProfile]);
+    }, [nickname, reloadProfile, isShowingProfile]);
 
     const handleChangeStatusCreatePost = async (value) => {
         toggle(value);
         setReloadProfile(!reloadProfile);
     };
-
+    console.log('idUser ' + idUser + ' user.idUser ' + user.idUser);
     return (
         <div className={cx('wrapper')}>
             <div className={cx('grid')}>
@@ -95,10 +101,12 @@ function Profile({ user }) {
                                         </Modal>
                                     </div>
                                 </div>
-                                <div className={cx('bio')}>
-                                    <span className={cx('title')}>Bio: </span>
-                                    <span className={cx('content')}>{infoUser.bio}</span>
-                                </div>
+                                {infoUser?.bio && (
+                                    <div className={cx('bio')}>
+                                        <span className={cx('title')}>Bio: </span>
+                                        <span className={cx('content')}>{infoUser.bio}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -150,13 +158,25 @@ function Profile({ user }) {
                                                 </div>
                                             </div>
 
-                                            {idUser === user.idUser && (
+                                            {idUser === user.idUser ? (
                                                 <Tippy
                                                     offset={[100, -30]}
                                                     interactive
                                                     delay={[0, 100]}
                                                     placement="bottom"
-                                                    content={renderPreview(item.idPost)}
+                                                    content={renderPreview(item.idPost, false)}
+                                                >
+                                                    <div>
+                                                        <ThreeDots className={cx('icon-dots')} />
+                                                    </div>
+                                                </Tippy>
+                                            ) : (
+                                                <Tippy
+                                                    offset={[100, -30]}
+                                                    interactive
+                                                    delay={[0, 100]}
+                                                    placement="bottom"
+                                                    content={renderPreview(item.idPost, true)}
                                                 >
                                                     <div>
                                                         <ThreeDots className={cx('icon-dots')} />

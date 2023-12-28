@@ -21,3 +21,8 @@
     border: 1px solid #ff97ce;
     width: 300px;
 }
+
+.noti-wrapper-scroll {
+    max-height: 300;
+    overflow-y: auto;
+}

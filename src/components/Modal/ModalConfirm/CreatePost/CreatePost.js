@@ -17,8 +17,6 @@ function CreatePost({ infoUser, onChangeStatusCreatePost }) {
         setContent(event.target.value);
     };
     const handleClickCreatePost = () => {
-        console.log('infoUser.idUser ', infoUser.idUser);
-        console.log('content ', content);
         handleCreatePost(infoUser.idUser, content);
         onChangeStatusCreatePost(false);
     };

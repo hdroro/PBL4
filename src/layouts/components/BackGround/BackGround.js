@@ -10,47 +10,42 @@ import { handleRandomMatching } from '~/services/userService';
 import NotificationMessage from '~/components/Modal/ModalConfirm/NotificationMessage';
 import { UserGroup } from '~/components/Icon/Icon';
 
-
 const cx = classNames.bind(styles);
 
 function BackGround({ isMatching, isShowing, toggle, socket, onlineUsers, user }) {
     const [isShowingMatching, setIsShowingMatching] = useState(false);
     const [isShowNotifNoUserOnline, setShowNotifNoUserOnline] = useState(false);
     const [matchId, setMatchId] = useState();
-    console.log(onlineUsers);
     const handleMatching = async () => {
         try {
-            const listOnlineUser = onlineUsers.filter(function(value, index, arr){
+            const listOnlineUser = onlineUsers.filter(function (value, index, arr) {
                 return value.userID !== user.idUser;
             });
-            if(listOnlineUser.length === 0) {
+            if (listOnlineUser.length === 0) {
                 setShowNotifNoUserOnline(!isShowNotifNoUserOnline);
                 return;
             }
             const randomUser = await handleRandomMatching(user.idUser, listOnlineUser);
             console.log(randomUser);
-            if(randomUser.errCode === 0) {
+            if (randomUser.errCode === 0) {
                 console.log(randomUser);
                 setIsShowingMatching(!isShowingMatching);
                 setMatchId(randomUser.dataUser.idUser);
-            } else if(randomUser.errCode === 2) {
+            } else if (randomUser.errCode === 2) {
                 setShowNotifNoUserOnline(!isShowNotifNoUserOnline);
             } else {
                 console.log(randomUser.errMessage);
             }
-
-        }
-        catch(err) {
+        } catch (err) {
             console.log(err);
         }
-        
     };
     const handleToggleMatching = () => {
         setIsShowingMatching(!isShowingMatching);
-    }
+    };
     const handleToggleNotif = () => {
         setShowNotifNoUserOnline(!isShowNotifNoUserOnline);
-    }
+    };
     return (
         <div className={cx('wrapper')}>
             <img className={cx('full-screen-image')} src={images.bgImg} alt="" />
@@ -65,16 +60,32 @@ function BackGround({ isMatching, isShowing, toggle, socket, onlineUsers, user }
                             Matching
                         </Button>
                         <Modal background isShowing={isShowingMatching} hide={handleToggleMatching}>
-                            <MatchingRandom hide={handleToggleMatching} matchId={matchId} socket={socket} onlineUsers={onlineUsers} fromId={user.idUser}/>
+                            <MatchingRandom
+                                hide={handleToggleMatching}
+                                matchId={matchId}
+                                socket={socket}
+                                onlineUsers={onlineUsers}
+                                fromId={user.idUser}
+                            />
                         </Modal>
                     </Fragment>
                 )}
                 {isShowNotifNoUserOnline && (
-                    <Modal background leftIcon={<UserGroup/>} title={'Notification'} isShowing={isShowNotifNoUserOnline} hide={handleToggleNotif}>
-                        <NotificationMessage hide={handleToggleNotif} socket={socket} onlineUsers={onlineUsers} title={'Hiện tại không có user đang online tương thích với bạn!'}/>
+                    <Modal
+                        background
+                        leftIcon={<UserGroup />}
+                        title={'Notification'}
+                        isShowing={isShowNotifNoUserOnline}
+                        hide={handleToggleNotif}
+                    >
+                        <NotificationMessage
+                            hide={handleToggleNotif}
+                            socket={socket}
+                            onlineUsers={onlineUsers}
+                            title={'Hiện tại không có user đang online tương thích với bạn!'}
+                        />
                     </Modal>
                 )}
-                
             </div>
         </div>
     );

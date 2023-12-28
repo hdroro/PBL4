@@ -7,6 +7,7 @@ import Login from '../Login';
 import reducer from './reducer';
 import { initialState } from './reducer';
 import { handleSignupApi } from '~/services/userService';
+import { mydate } from '~/utils/date';
 
 const cx = classNames.bind(styles);
 
@@ -30,7 +31,7 @@ function SignUp() {
     }
 
     const [state, dispatch] = useReducer(reducer, initialState);
-    const {username, password, repeatpassword, fullname, date, gender} = state;
+    const { username, password, repeatpassword, fullname, date, gender } = state;
     // Các hàm xử lý sự kiện
     const handleOnChangeUsername = (event) => {
         dispatch({ type: 'SET_USERNAME', payload: event.target.value });
@@ -59,7 +60,7 @@ function SignUp() {
     const [signupError, setSignupError] = useState('');
     const handleSignup = async () => {
         try {
-            let data = await handleSignupApi(username, password, fullname, date, gender);
+            let data = await handleSignupApi(username, password, fullname, date, gender, mydate(new Date()));
             console.log(data);
             if (data && data.errCode === 0) {
                 console.log('sign up success');
@@ -171,7 +172,7 @@ function SignUp() {
                                 </div>
                             </div>
                         </div>
-                    </div>  
+                    </div>
                     <div className={cx('signup-error')}>
                         <span className={cx('signup-error-message')}>{signupError}</span>
                     </div>
@@ -180,18 +181,6 @@ function SignUp() {
                             OK
                         </Button>
 
-                        <div className={cx('another-way')}>
-                            <span className={cx('title')}>or sign up</span>
-                            <div className={cx('two-way')}>
-                                <div className={cx('facebook')}>
-                                    <Facebook />
-                                </div>
-
-                                <div className={cx('gmail')}>
-                                    <Gmail />
-                                </div>
-                            </div>
-                        </div>
                         <div className={cx('request')}>
                             Have an account ?
                             <span className={cx('signup-request')} onClick={toggleLogin}>
