@@ -23,6 +23,7 @@ function TwoSideBar({ children, socket }) {
     const [matchId, setMatchId] = useState();
     const [isShowNotifMatching, setShowNotifMatching] = useState(false);
     const [isShowDenyMatching, setShowDenyMatching] = useState(false);
+    const [idNotificationMatching, setIdNotificationMatching] = useState();
     // const [socket, setSocket] = useState(null);
 
     useEffect(() => {
@@ -62,6 +63,10 @@ function TwoSideBar({ children, socket }) {
 
     useEffect(() => {
         if (socket === null) return;
+        socket.on('receive-notif-matching', (response) => {
+            console.log('receiveeeeeeeeee', response);
+            setIdNotificationMatching(response.idNotificationMatching);
+        });
         socket.on('receive-request-matching', (response) => {
             console.log(response);
             setShowRequest(!isShowRequest);
@@ -130,10 +135,11 @@ function TwoSideBar({ children, socket }) {
                                     hide={handleToggleShowRequest}
                                 >
                                     <RequestFriend
+                                        idNotificationMatching={idNotificationMatching && idNotificationMatching}
+                                        timeData={{ minutes: 5, seconds: 0 }}
                                         hide={handleToggleShowRequest}
                                         fromId={fromId && fromId}
                                         socket={socket}
-                                        onlineUsers={onlineUsers}
                                         matchId={matchId && matchId}
                                     />
                                 </Modal>

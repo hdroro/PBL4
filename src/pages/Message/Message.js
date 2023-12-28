@@ -782,7 +782,7 @@ function Message({ socket, onlineUsers, user }) {
                             )}
 
                             <div className={cx('action-group')}>
-                                <a href="/api/call/@hd.roro">
+                                <a href={`/api/call/${loadInfoChatSide.idUser}`}>
                                     <PhoneCall className={cx('phone-call')} />
                                 </a>
                                 <Setting className={cx('chat-setting')} onClick={() => handleToggleSetting()} />
