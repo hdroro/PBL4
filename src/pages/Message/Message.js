@@ -19,7 +19,7 @@ import {
     Setting,
     UserGroup,
 } from '~/components/Icon/Icon';
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import images from '~/assets/images';
 import routes from '~/config/routes';
 import Button from '~/components/Button';
@@ -608,6 +608,13 @@ function Message({ socket, onlineUsers, user }) {
         chatRef.current.scrollTop = chatRef.current.scrollHeight;
     };
 
+    const navigate = useNavigate();
+
+    const handleClickOnCall=()=>{
+        socket.emit("start-call", {from: user.idUser, to: loadInfoChatSide.idUser});
+        navigate(`/api/call/${loadInfoChatSide.idUser}`,{state:{from: true}});
+    }
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('messenger-user')}>
@@ -782,9 +789,12 @@ function Message({ socket, onlineUsers, user }) {
                             )}
 
                             <div className={cx('action-group')}>
-                                <a href={`/api/call/${loadInfoChatSide.idUser}`}>
+                                {/* <a href={`/api/call/${loadInfoChatSide.idUser}`}>
                                     <PhoneCall className={cx('phone-call')} />
-                                </a>
+                                </a> */}
+                                <div onClick={handleClickOnCall}>
+                                    <PhoneCall className={cx('phone-call')} />
+                                </div>
                                 <Setting className={cx('chat-setting')} onClick={() => handleToggleSetting()} />
                             </div>
                         </div>

@@ -14,10 +14,12 @@ import ToastMessage from '~/components/Modal/ModalConfirm/ToastMessage';
 
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
 function DefaultLayout({ children, socket }) {
+    const navigate = useNavigate();
     const count = useRef(0);
     const [user, setUser] = useState({});
     const [onlineUsers, setOnlineUsers] = useState([]);
@@ -95,6 +97,18 @@ function DefaultLayout({ children, socket }) {
                 {position: toast.POSITION.TOP_RIGHT, autoClose: 3000}
             )
         });
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (socket === null) return;
+        if(user) {
+            // socket.off('receive-call');
+            socket.on('receive-call', (data) => {
+                console.log('receive-call');
+                console.log(data);
+                navigate(`/api/call/${data.from}`,{state:{to: true}});
+            });
         }
     }, [user]);
 

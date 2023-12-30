@@ -1,5 +1,9 @@
+import { Socket } from "socket.io-client";
+
 class AVRC {
     constructor(io, fn, onCall, userID) {
+        this.iceCandidateEventListenerRegistered = false;
+        this.answerEventListenerRegistered = false;
         this.toUserID = userID;
         this.connection = new RTCPeerConnection({
             iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
@@ -8,21 +12,27 @@ class AVRC {
         this.io = io;
         this.remoteStream = new MediaStream();
 
-        io.on("answer", async (answer) => {
-            console.log("answer fe");
-            console.log(answer);
-            try {
-                let rtc_session_description = new RTCSessionDescription(answer.answer);
-                await this.connection?.setRemoteDescription(rtc_session_description);
-            } catch (error) {
-                throw error;
-            }
-        });
+        if(!this.answerEventListenerRegistered) {
+            io.off("answer");
+            io.on("answer", async (answer) => {
+                console.log("answer fe");
+                console.log(answer);
+                try {
+                    let rtc_session_description = new RTCSessionDescription(answer);
+                    await this.connection?.setRemoteDescription(rtc_session_description);
+                } catch (error) {
+                    throw error;
+                    // console.log(error);
+                }
+            });
+            this.answerEventListenerRegistered = true;
+        }
+        
 
         io.on("offer", async (offer) => {
             console.log("offer fe");
-            console.log(offer.offer);
-            this.offer = offer.offer;
+            console.log(offer);
+            this.offer = offer;
             onCall();
         });
 
@@ -40,25 +50,56 @@ class AVRC {
             }
         };
     }
+    
+    // async createOffer() {
+    //     try {
+    //         let offer = await this.connection?.createOffer();
+    //         await this.connection?.setLocalDescription(offer);
+    //         console.log(offer);
+
+    //         this.io && this.io.on("ice_candidate", async (ice_candidate) => {
+    //             console.log("ice_candidate fe");
+    //             console.log(ice_candidate);
+    //             try {
+    //                 await this.connection?.addIceCandidate(ice_candidate);
+    //             } catch (error) {
+    //                 throw error;
+    //             }
+    //         });
+
+    //         let toUserID = this.toUserID
+    //         console.log('fe: ', toUserID);
+    //         console.log(this.io);
+    //         this.io?.emit("offer", {offer, toUserID});
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // }
 
     async createOffer() {
         try {
             let offer = await this.connection?.createOffer();
             await this.connection?.setLocalDescription(offer);
             console.log(offer);
-
-            this.io && this.io.on("ice_candidate", async (ice_candidate) => {
-                console.log("ice_candidate fe");
-                console.log(ice_candidate);
-                try {
-                    await this.connection?.addIceCandidate(ice_candidate.ice_candidate);
-                } catch (error) {
-                    throw error;
-                }
-            });
-
-            let toUserID = this.toUserID
-            this.io?.emit("offer", {offer, toUserID});
+    
+            if (!this.iceCandidateEventListenerRegistered) {
+                // Đăng ký sự kiện "ice_candidate" chỉ một lần
+                this.io && this.io.on("ice_candidate", async (ice_candidate) => {
+                    console.log("ice_candidate fe");
+                    console.log(ice_candidate);
+                    try {
+                        await this.connection?.addIceCandidate(ice_candidate);
+                    } catch (error) {
+                        throw error;
+                    }
+                });
+                this.iceCandidateEventListenerRegistered = true;
+            }
+    
+            let toUserID = this.toUserID;
+            console.log('fe: ', toUserID);
+            console.log(this.io);
+            this.io?.emit("offer", { offer, toUserID });
         } catch (err) {
             throw err;
         }
