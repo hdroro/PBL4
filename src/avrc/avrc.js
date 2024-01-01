@@ -2,38 +2,43 @@ import { Socket } from "socket.io-client";
 
 class AVRC {
     constructor(io, fn, onCall, userID) {
-        this.iceCandidateEventListenerRegistered = false;
-        this.answerEventListenerRegistered = false;
+        // this.iceCandidateEventListenerRegistered = false;
+        // this.answerEventListenerRegistered = false;
         this.toUserID = userID;
         this.connection = new RTCPeerConnection({
             iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
         });
+        // this.connection.setConfiguration()
+        console.log('constructor');
+        console.log(this.connection)
 
         this.io = io;
         this.remoteStream = new MediaStream();
 
-        if(!this.answerEventListenerRegistered) {
-            io.off("answer");
+        // if(!this.answerEventListenerRegistered) {
+            // io.off("answer");
             io.on("answer", async (answer) => {
                 console.log("answer fe");
                 console.log(answer);
                 try {
+                    onCall();
                     let rtc_session_description = new RTCSessionDescription(answer);
+                    console.log(this.connection)
                     await this.connection?.setRemoteDescription(rtc_session_description);
                 } catch (error) {
-                    throw error;
-                    // console.log(error);
+                    // throw error;
+                    console.log(error);
                 }
             });
-            this.answerEventListenerRegistered = true;
-        }
+        //     this.answerEventListenerRegistered = true;
+        // }
         
 
         io.on("offer", async (offer) => {
             console.log("offer fe");
             console.log(offer);
             this.offer = offer;
-            onCall();
+            // onCall();
         });
 
         this.connection.ontrack = (ev) => {
@@ -82,7 +87,7 @@ class AVRC {
             await this.connection?.setLocalDescription(offer);
             console.log(offer);
     
-            if (!this.iceCandidateEventListenerRegistered) {
+            // if (!this.iceCandidateEventListenerRegistered) {
                 // Đăng ký sự kiện "ice_candidate" chỉ một lần
                 this.io && this.io.on("ice_candidate", async (ice_candidate) => {
                     console.log("ice_candidate fe");
@@ -90,11 +95,12 @@ class AVRC {
                     try {
                         await this.connection?.addIceCandidate(ice_candidate);
                     } catch (error) {
-                        throw error;
+                        // throw error;
+                        console.log(error);
                     }
                 });
-                this.iceCandidateEventListenerRegistered = true;
-            }
+                // this.iceCandidateEventListenerRegistered = true;
+            // }
     
             let toUserID = this.toUserID;
             console.log('fe: ', toUserID);
@@ -116,6 +122,26 @@ class AVRC {
             console.log("Some issue during starting the stream");
             throw err;
         }
+    }
+
+    muteMic() {
+        this.localStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+    }
+      
+    muteCam() {
+        this.localStream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
+    }
+
+    endCall() {
+        console.log('close-call avrc');
+        try {
+            this.localStream.getTracks().forEach(track => track.stop())
+            this.remoteStream.getTracks().forEach(track => track.stop())
+        }
+        catch(err) {
+            console.log(err);
+        }
+        // this.connection.close();
     }
 
     async getLocalStream() {

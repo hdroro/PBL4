@@ -32,7 +32,7 @@
         width: 100%;
         padding: 0px 0px 30px;
         background: #f6e2f1;
-        cursor: pointer;
+        // cursor: pointer;
 
         .body-call {
             position: relative;
@@ -49,25 +49,27 @@
         // }
 
         .local-video {
-            position: absolute;
-            right: 20px;
-            bottom: 0;
-            z-index: 10;
-            object-fit: fill;
+            // position: absolute;
+            // right: 20px;
+            // bottom: 0;
+            // z-index: 10;
+            // object-fit: fill;
+            position: fixed;
         }
 
         .remote-video {
-            object-fit: fill;
-            width: 50%;
-            // width: 100%;
-            // height: 100%;
+            // object-fit: fill;
+            // width: 50%;
+            // // width: 100%;
+            // // height: 100%;
+            position: fixed;
         }
 
-        .remote-video {
-            &.disconnected {
-                display: none;
-            }
-        }
+        // .remote-video {
+        //     &.disconnected {
+        //         display: none;
+        //     }
+        // }
 
         img {
             width: 150px;
@@ -87,14 +89,27 @@
     }
 
     .footer {
-        padding-bottom: 25px;
+        padding-bottom: 30px;
         display: flex;
         justify-content: center;
         align-items: center;
         background: #f6e2f1;
 
-        .icon {
-            margin-right: 15px;
+        .call-icon {
+            cursor: pointer;
+            &+ .call-icon {
+                margin-left: 25px;
+            }
+        }
+
+        .mic-call {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            background: #fff;
             cursor: pointer;
         }
 
@@ -103,8 +118,8 @@
             align-items: center;
             background: #ff443d;
             color: #fff;
-            width: 35px;
-            height: 35px;
+            width: 50px;
+            height: 50px;
             justify-content: center;
             border-radius: 50%;
             cursor: pointer;
@@ -115,8 +130,8 @@
             align-items: center;
             background: green;
             color: #fff;
-            width: 35px;
-            height: 35px;
+            width: 50px;
+            height: 50px;
             justify-content: center;
             border-radius: 50%;
             cursor: pointer;

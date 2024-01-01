@@ -612,7 +612,7 @@ function Message({ socket, onlineUsers, user }) {
 
     const handleClickOnCall=()=>{
         socket.emit("start-call", {from: user.idUser, to: loadInfoChatSide.idUser});
-        navigate(`/api/call/${loadInfoChatSide.idUser}`,{state:{from: true}});
+        // navigate(`/api/call/${loadInfoChatSide.idUser}`,{state:{from: true}});
     }
 
     return (
@@ -792,9 +792,9 @@ function Message({ socket, onlineUsers, user }) {
                                 {/* <a href={`/api/call/${loadInfoChatSide.idUser}`}>
                                     <PhoneCall className={cx('phone-call')} />
                                 </a> */}
-                                <div onClick={handleClickOnCall}>
+                                <Link to={`/api/call/${loadInfoChatSide.idUser}`} state={{from: true}} onClick={handleClickOnCall}>
                                     <PhoneCall className={cx('phone-call')} />
-                                </div>
+                                </Link>
                                 <Setting className={cx('chat-setting')} onClick={() => handleToggleSetting()} />
                             </div>
                         </div>
