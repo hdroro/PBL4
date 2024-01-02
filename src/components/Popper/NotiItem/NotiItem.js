@@ -93,11 +93,11 @@ function NotiItem({ idNotificationMatching, idAcc1, idAcc2, handleReadNotificati
                 </Modal>
                 <img src={user && images[user.avatar]} alt="" />
                 <div className={cx('noti-container')} onClick={handleOnClick}>
-                    <div>
+                    {/* <div> */}
                         <span className={cx('nick-name')}>@{user && user.userName}</span>
                         <span className={cx('noti-content')}>muốn kết nối với bạn</span>
                         <div className={cx('time')}>{notifInfo && formatTime(notifInfo.timeCreated)}</div>
-                    </div>
+                    {/* </div> */}
                 </div>
             </div>
         </PopperWrapper>

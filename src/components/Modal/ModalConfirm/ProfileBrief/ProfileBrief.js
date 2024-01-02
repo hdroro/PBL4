@@ -11,6 +11,7 @@ function ProfileBrief({ toggle, infoUser }) {
     const [username, setUsername] = useState(infoUser.userName);
     const [name, setName] = useState(infoUser.fullName);
     const [bio, setBio] = useState(infoUser.bio);
+    const [updateInfoError, setUpdateInfoError] = useState('');
 
     const handleOnChangeUsername = (event) => {
         setUsername(event.target.value);
@@ -31,6 +32,8 @@ function ProfileBrief({ toggle, infoUser }) {
             if (check.errCode === 0) {
                 console.log(check);
                 toggle();
+            } else {
+                setUpdateInfoError(check.message);
             }
         } catch (err) {
             console.log(err);
@@ -78,7 +81,9 @@ function ProfileBrief({ toggle, infoUser }) {
                 </div>
                 <div className={cx('form-item')}>
                     <div className={cx('name-item')}>
-                        <label for="name">Name</label>
+                        <label for="name">Name
+                            <span className={cx('required-input')}> *</span>
+                        </label>
                     </div>
                     <div className={cx('body-item')}>
                         <input
@@ -105,12 +110,17 @@ function ProfileBrief({ toggle, infoUser }) {
                             // placeholder={`${infoUser.bio}`}
                             rows="4"
                             cols="50"
+                            maxLength={200}
                             // value={infoUser.bio && `${infoUser.bio}`}
                             value={bio && bio}
                             onChange={(e) => handleOnChangeBio(e)}
                         />
-                        <div className={cx('desc-item')}>allow 50 characters</div>
+                        <div className={cx('desc-item')}>allow 200 characters</div>
                     </div>
+                </div>
+
+                <div className={cx('update-error')}>
+                    <span className={cx('update-error-message')}>{updateInfoError}</span>
                 </div>
 
                 <div className={cx('submit-contaniner')}>

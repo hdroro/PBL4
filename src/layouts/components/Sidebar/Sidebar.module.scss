@@ -97,3 +97,33 @@
     width: fit-content;
     cursor: pointer;
 }
+
+.more-notif {
+    padding: 4px;
+    background-color: #ffb0db;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.container-tippy {
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-color: red orange;
+    scrollbar-width: thin;
+    max-height: 450px;
+}
+
+.container-tippy::-webkit-scrollbar {
+    width: 10px;
+}
+  
+/* Track */
+.container-tippy::-webkit-scrollbar-track {
+    background: #f2eeee;
+}
+
+/* Handle */
+.container-tippy::-webkit-scrollbar-thumb {
+    background: #d0cdcf;
+}

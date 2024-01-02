@@ -140,7 +140,7 @@ function SettingProfile() {
                         <div className={cx('form-item')}>
                             <div className={cx('name-item')}>
                                 <label htmlFor="name">Name 
-                                    <span className={cx('required-input')}>*</span>
+                                    <span className={cx('required-input')}> *</span>
                                 </label>
                             </div>
                             <div className={cx('body-item')}>
@@ -167,16 +167,17 @@ function SettingProfile() {
                                     // placeholder="All love for Beomgyu"
                                     rows="4"
                                     cols="50"
+                                    maxLength={200}
                                     onChange={(e) => handleOnChangeBio(e)}
                                     value={infoUser.bio}
                                 />
-                                <div className={cx('desc-item')}>allow 50 characters</div>
+                                <div className={cx('desc-item')}>allow 200 characters</div>
                             </div>
                         </div>
                         <div className={cx('form-item')}>
                             <div className={cx('name-item')}>
                                 <label htmlFor="birthday">Date of birth 
-                                    <span className={cx('required-input')}>*</span>
+                                    <span className={cx('required-input')}> *</span>
                                 </label>
                             </div>
                             <div className={cx('body-item')}>
@@ -193,7 +194,7 @@ function SettingProfile() {
                         <div className={cx('form-item')}>
                             <div className={cx('name-item')}>
                                 <label htmlFor="gender">Gender 
-                                    <span className={cx('required-input')}>*</span>
+                                    <span className={cx('required-input')}> *</span>
                                 </label>
                             </div>
                             <div className={cx('body-item')}>

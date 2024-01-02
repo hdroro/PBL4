@@ -4,6 +4,7 @@
     border-radius: 5px;
     padding: 5px;
     align-items: center;
+    height: 65px;
 
     &:hover {
         background-color: #ffdaf1;
@@ -22,7 +23,10 @@
     }
 
     .noti-container {
-        display: flex;
+        // display: flex;
+        position: relative;
+        width: 100%;
+        height: 100%;
     }
 
     .nick-name {
@@ -39,8 +43,11 @@
         font-size: 10px;
         color: #998391;
         font-weight: 300;
-        float: right;
+        // float: right;
         margin-top: 13px;
+        position: absolute;
+        bottom: 0px;
+        right: 5px;
     }
 
     &.readNotif {

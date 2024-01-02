@@ -60,7 +60,7 @@ function SignUp() {
     const [signupError, setSignupError] = useState('');
     const handleSignup = async () => {
         try {
-            let data = await handleSignupApi(username, password, fullname, date, gender, mydate(new Date()));
+            let data = await handleSignupApi(username, password, repeatpassword, fullname, date, gender, mydate(new Date()));
             console.log(data);
             if (data && data.errCode === 0) {
                 console.log('sign up success');

@@ -23,6 +23,7 @@ function Sidebar({ user, socket, onlineUsers }) {
     const [notificationCount, setNotificationCount] = useState(0);
     const [countNotificationMatching, setCountNotificationMatching] = useState();
     const [notifList, setNotifList] = useState([]);
+    const [indexNotif, setIndexNotif] = useState(0);
     // const [isReadNotificationMatching, setReadNotificationMatching] = useState(true);
     useEffect(() => {
         const fetchApi = async () => {
@@ -86,8 +87,8 @@ function Sidebar({ user, socket, onlineUsers }) {
         //     console.log(error);
         // }
         return (
-            <Fragment>
-                {notifList.map((item, index) => (
+            <div class={cx('container-tippy')}>
+                {notifList.slice(0, 4 * indexNotif + 4).map((item, index) => (
                     <NotiItem
                         socket={socket}
                         idNotificationMatching={item.idNotificationMatching}
@@ -97,7 +98,8 @@ function Sidebar({ user, socket, onlineUsers }) {
                         key={index}
                     />
                 ))}
-            </Fragment>
+                {notifList.length > 4 && (notifList.length > 4 * indexNotif) ? <div className={cx('more-notif')} onClick={() => {setIndexNotif(prev => prev + 1)}}>Xem thêm</div> : ''}
+            </div>
         );
     };
 

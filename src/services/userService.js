@@ -74,11 +74,12 @@ const getFile = (filename) => {
     return axios.get('/api/get-file', { withCredentials: true, filename });
 };
 
-const handleSignupApi = (username, password, fullname, date, gender, timeRegister) => {
+const handleSignupApi = (username, password, repeatpassword, fullname, date, gender, timeRegister) => {
     return axios.post('api/signup', {
         withCredentials: true,
         username,
         password,
+        repeatpassword,
         fullname,
         date,
         gender,
