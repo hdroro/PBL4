@@ -43,10 +43,12 @@ import {
     handlePostNotificationMessageInfo,
     handleGetAllNotificationMessageInfo,
 } from '~/services/notificationMessageService';
+import { Resizable } from 'react-resizable';
 
 const cx = classNames.bind(styles);
 
 function Message({ socket, onlineUsers, user }) {
+    const baseUrl = `${process.env.REACT_APP_BACKEND_URL}/public/img`;
     const [isShowSetting, setIsShowSetting] = useState(false);
     const [typeMessage, setTypeMessage] = useState('');
     const [inputSearch, setInputSearch] = useState('');
@@ -157,10 +159,6 @@ function Message({ socket, onlineUsers, user }) {
             setIsDelete(false);
             setCurrentChatBlock(null);
             setCurrentConversation(idConversation);
-            console.log('senderID', senderID);
-            console.log('receiverID', receiverID);
-            console.log('idUser', idUser);
-            console.log('idConversation', idConversation);
             handleDeleteNotificationMessageInfo(idConversation, idUser);
 
             const blockInfo = await handleGetBlockInfo(idConversation);
@@ -243,7 +241,7 @@ function Message({ socket, onlineUsers, user }) {
             setLoadMessages((prevLoadMessages) => ({
                 chat: [newMessage, ...prevLoadMessages.chat],
             }));
-            handlePostMessage(direct, messageText, timeSend, idConversation, messageText);
+            handlePostMessage(direct, messageText, timeSend, idConversation, 0, messageText);
             handlePostNotificationMessageInfo(idConversation, idSession, _idSession, 1);
 
             // const res = handlePostMessage(direct, messageText, timeSend, idConversation);
@@ -283,8 +281,6 @@ function Message({ socket, onlineUsers, user }) {
             const avatar = re.userData.user.avatar;
 
             setIdUser(_idSession);
-            console.log('idUser_ ' + idUser_);
-            console.log('id ' + isBlocked);
             const newFile = {
                 _idSession,
                 idSession,
@@ -297,10 +293,8 @@ function Message({ socket, onlineUsers, user }) {
                 idConversation,
                 isFile: 1,
             };
-            //Lúc load lại thì dĩm preview cái file ni ra ảnh nghen
             setNewFile(newFile);
             setLoad(!load);
-            // truyền đi new file ni là dữ liệu mềm, chưa lưu => không lấy link được
             await handlePostFile(direct, file, timeSend, idConversation, fileName).then((res) => {
                 newFile.messageText = res.saveMessage.chat;
             });
@@ -310,9 +304,6 @@ function Message({ socket, onlineUsers, user }) {
                 chat: [newFile, ...prevLoadMessages.chat],
             }));
             await socket.emit('send-file', newFile);
-
-            // const response_ = await handleFetchChatUser();
-            // setUserChat(response_.userChatData);
             setReloadPage(!reLoadPage);
             setSelectedFile(null);
         } catch (error) {
@@ -433,8 +424,8 @@ function Message({ socket, onlineUsers, user }) {
             const idAcc1 = currentUser.accountList?.chat[0]?.idAcc1;
             const idAcc2 = currentUser.accountList?.chat[0]?.idAcc2;
             console.log('currenCOnver:' + currentConversation + ' ACC1 ' + idAcc1 + ' ACC2 ' + idAcc2);
-            setSenderID(data.senderID);
-            setReceiveID(data.receiverID);
+            setSenderID(data?.senderID);
+            setReceiveID(data?.receiverID);
 
             if (
                 (data.senderID === idAcc1 && data.receiverID === idAcc2) ||
@@ -448,6 +439,7 @@ function Message({ socket, onlineUsers, user }) {
                 setNotifications((prev) => prev && [data, ...prev]);
             }
         });
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [socket, newMessage, idUser_, currentConversation]);
 
@@ -608,57 +600,141 @@ function Message({ socket, onlineUsers, user }) {
         chatRef.current.scrollTop = chatRef.current.scrollHeight;
     };
 
-    const navigate = useNavigate();
+    const handleClickOnCall = async () => {
+        socket.emit('start-call', { idConver: idConversation_, from: user.idUser, to: loadInfoChatSide.idUser });
 
-    const handleClickOnCall=()=>{
-        socket.emit("start-call", {from: user.idUser, to: loadInfoChatSide.idUser});
+        const response = await handleGetAccById(idConversation_);
+        const a1 = response.accountList.chat[0].idAcc1;
+        const a2 = response.accountList.chat[0].idAcc2;
+        let direct, _idSession;
+        if (user.idUser == a1) {
+            direct = 1;
+            _idSession = a2;
+        } else {
+            direct = 0;
+            _idSession = a1;
+        }
+        console.log('_idSession', _idSession);
+        console.log('idSession', idSession);
+        handlePostMessage(direct, 'Cuộc gọi thoại', mydate(new Date()), idConversation_, 2, 'Cuộc gọi thoại');
+        const newMessage = {
+            _idSession,
+            idSession,
+            idUser_,
+            idConversation: idConversation_,
+        };
+
+        socket.emit('send-message', newMessage);
         // navigate(`/api/call/${loadInfoChatSide.idUser}`,{state:{from: true}});
-    }
+    };
 
     return (
         <div className={cx('wrapper')}>
-            <div className={cx('messenger-user')}>
-                <div className={cx('messenges')}>
-                    <Link to={routes.matching} className={cx('back-icon')}>
-                        <BackIcon />
-                    </Link>
-                    <h1 className={cx('messenges-title')}>Messages</h1>
-                    <div className={cx('icon-noti')}>
-                        <NotifIcon className={cx('noti')} />
-                        <UserGroup className={cx('connect-friend')} />
+            <Resizable className={cx('resizable-sidebar')}>
+                <div className={cx('messenger-user')}>
+                    <div className={cx('messenges')}>
+                        <Link to={routes.matching} className={cx('back-icon')}>
+                            <BackIcon />
+                        </Link>
+                        <h1 className={cx('messenges-title')}>Messages</h1>
+                        {/* <div className={cx('icon-noti')}>
+                            <NotifIcon className={cx('noti')} />
+                            <UserGroup className={cx('connect-friend')} />
+                        </div> */}
                     </div>
-                </div>
 
-                <div>
-                    {userChat
-                        ?.filter(
-                            (item) =>
-                                item.infoUserDelete.length === 0 ||
-                                (item.infoUserDelete.length === 1 &&
-                                    item.idSession !== item.infoUserDelete[0]?.idDelete) ||
-                                (item.infoUserDelete.length === 1 &&
-                                    item.idSession === item.infoUserDelete[0]?.idDelete &&
-                                    item.idMessage > item.infoUserDelete[0]?.deleteAtId) ||
-                                (item.infoUserDelete.length === 2 &&
-                                    item.idSession === item.infoUserDelete[0]?.idDelete &&
-                                    item.idMessage > item.infoUserDelete[0]?.deleteAtId) ||
-                                (item.idSession === item.infoUserDelete[1]?.idDelete &&
-                                    item.idMessage > item.infoUserDelete[1]?.deleteAtId),
-                        )
-                        .map((item) => (
-                            <div
-                                className={cx('message-another', { active: item.idConversation === activeChat })}
-                                key={item.idConversation}
-                                onClick={() => {
-                                    handleSetLoadMessage(item.idConversation, item.userInfo.idUser); // idConversation + id người được nhắn
-                                }}
-                            >
-                                <img className={cx('avatar')} src={images[item.avatar]} alt="" />
-                                <div className={cx('info-user')}>
-                                    <div className={cx('name-active')}>
-                                        <div className={cx('fullname')}>{item.userInfo.userName}</div>
-                                        <div className={cx('group-info-message')}>
-                                            <span
+                    <div>
+                        {userChat
+                            ?.filter(
+                                (item) =>
+                                    item.infoUserDelete.length === 0 ||
+                                    (item.infoUserDelete.length === 1 &&
+                                        item.idSession !== item.infoUserDelete[0]?.idDelete) ||
+                                    (item.infoUserDelete.length === 1 &&
+                                        item.idSession === item.infoUserDelete[0]?.idDelete &&
+                                        item.idMessage > item.infoUserDelete[0]?.deleteAtId) ||
+                                    (item.infoUserDelete.length === 2 &&
+                                        item.idSession === item.infoUserDelete[0]?.idDelete &&
+                                        item.idMessage > item.infoUserDelete[0]?.deleteAtId) ||
+                                    (item.idSession === item.infoUserDelete[1]?.idDelete &&
+                                        item.idMessage > item.infoUserDelete[1]?.deleteAtId),
+                            )
+                            .map((item) => (
+                                <div
+                                    className={cx('message-another', { active: item.idConversation === activeChat })}
+                                    key={item.idConversation}
+                                    onClick={() => {
+                                        handleSetLoadMessage(item.idConversation, item.userInfo.idUser); // idConversation + id người được nhắn
+                                    }}
+                                >
+                                    <img className={cx('avatar')} src={images[item.avatar]} alt="" />
+                                    <div className={cx('info-user')}>
+                                        <div className={cx('name-active')}>
+                                            <div className={cx('fullname')}>{item.userInfo.userName}</div>
+                                            <div className={cx('group-info-message')}>
+                                                <span
+                                                    className={cx(
+                                                        unreadNotificationsFuc(notifications)?.filter(
+                                                            (n) => n.senderID === item.userInfo.idUser,
+                                                        )?.length > 0 ||
+                                                            listNotificationOfUser?.filter(
+                                                                (noti) =>
+                                                                    noti.senderId === item.userInfo.idUser &&
+                                                                    noti.idConversation === item.idConversation,
+                                                            ).length > 0
+                                                            ? 'count-message'
+                                                            : '',
+                                                    )}
+                                                >
+                                                    {/* {console.log('notifications________', notifications)} */}
+                                                    {Math.max(
+                                                        unreadNotificationsFuc(notifications)?.filter(
+                                                            (n) =>
+                                                                n.senderID === item.userInfo.idUser &&
+                                                                n.receiverID === item.idSession,
+                                                        )?.length || 0,
+                                                        listNotificationOfUser
+                                                            ?.filter(
+                                                                (noti) =>
+                                                                    noti.senderId === item.userInfo.idUser &&
+                                                                    noti.idConversation === item.idConversation,
+                                                            )
+                                                            .reduce(
+                                                                (total, noti) => total + noti.notificationCount,
+                                                                0,
+                                                            ) || 0,
+                                                    ) > 0
+                                                        ? `(${Math.max(
+                                                              unreadNotificationsFuc(notifications)?.filter(
+                                                                  (n) =>
+                                                                      n.senderID === item.userInfo.idUser &&
+                                                                      n.receiverID === item.idSession,
+                                                              )?.length || 0,
+                                                              listNotificationOfUser
+                                                                  ?.filter(
+                                                                      (noti) =>
+                                                                          noti.senderId === item.userInfo.idUser &&
+                                                                          noti.idConversation === item.idConversation,
+                                                                  )
+                                                                  .reduce(
+                                                                      (total, noti) => total + noti.notificationCount,
+                                                                      0,
+                                                                  ) || 0,
+                                                          )})`
+                                                        : ''}
+                                                </span>
+
+                                                <span
+                                                    className={cx({
+                                                        'online-user': onlineUsers.some(
+                                                            (user) => user?.userID === item.userInfo.idUser,
+                                                        ),
+                                                    })}
+                                                ></span>
+                                            </div>
+                                        </div>
+                                        <div className={cx('message-info')}>
+                                            <div
                                                 className={cx(
                                                     unreadNotificationsFuc(notifications)?.filter(
                                                         (n) => n.senderID === item.userInfo.idUser,
@@ -668,94 +744,35 @@ function Message({ socket, onlineUsers, user }) {
                                                                 noti.senderId === item.userInfo.idUser &&
                                                                 noti.idConversation === item.idConversation,
                                                         ).length > 0
-                                                        ? 'count-message'
-                                                        : '',
+                                                        ? 'lastest-message-bold'
+                                                        : 'lastest-message',
                                                 )}
                                             >
-                                                {/* {console.log('notifications________', notifications)} */}
-                                                {Math.max(
-                                                    unreadNotificationsFuc(notifications)?.filter(
-                                                        (n) =>
-                                                            n.senderID === item.userInfo.idUser &&
-                                                            n.receiverID === item.idSession,
-                                                    )?.length || 0,
-                                                    listNotificationOfUser
-                                                        ?.filter(
-                                                            (noti) =>
-                                                                noti.senderId === item.userInfo.idUser &&
-                                                                noti.idConversation === item.idConversation,
-                                                        )
-                                                        .reduce((total, noti) => total + noti.notificationCount, 0) ||
-                                                        0,
-                                                ) > 0
-                                                    ? `(${Math.max(
-                                                          unreadNotificationsFuc(notifications)?.filter(
-                                                              (n) =>
-                                                                  n.senderID === item.userInfo.idUser &&
-                                                                  n.receiverID === item.idSession,
-                                                          )?.length || 0,
-                                                          listNotificationOfUser
-                                                              ?.filter(
-                                                                  (noti) =>
-                                                                      noti.senderId === item.userInfo.idUser &&
-                                                                      noti.idConversation === item.idConversation,
-                                                              )
-                                                              .reduce(
-                                                                  (total, noti) => total + noti.notificationCount,
-                                                                  0,
-                                                              ) || 0,
-                                                      )})`
-                                                    : ''}
-                                            </span>
-
-                                            <span
-                                                className={cx({
-                                                    'online-user': onlineUsers.some(
-                                                        (user) => user?.userID === item.userInfo.idUser,
-                                                    ),
-                                                })}
-                                            ></span>
-                                        </div>
-                                    </div>
-                                    <div className={cx('message-info')}>
-                                        <div
-                                            className={cx(
-                                                unreadNotificationsFuc(notifications)?.filter(
-                                                    (n) => n.senderID === item.userInfo.idUser,
-                                                )?.length > 0 ||
-                                                    listNotificationOfUser?.filter(
-                                                        (noti) =>
-                                                            noti.senderId === item.userInfo.idUser &&
-                                                            noti.idConversation === item.idConversation,
-                                                    ).length > 0
-                                                    ? 'lastest-message-bold'
-                                                    : 'lastest-message',
-                                            )}
-                                        >
-                                            <span>{item.direct === 1 ? 'Bạn: ' : ''}</span>
-                                            {item.isFile === 0
-                                                ? item.messageText
-                                                : isImageFile(item.messageText)
-                                                ? 'Đã gửi 1 ảnh'
-                                                : 'Đã gửi 1 file'}
-                                        </div>
-                                        <div className={cx('curTime')}>
-                                            {isSameDay(new Date(item.timeSend))
-                                                ? `${new Date(item.timeSend).getHours()}:${String(
-                                                      new Date(item.timeSend).getMinutes(),
-                                                  ).padStart(2, '0')}${
-                                                      new Date(item.timeSend).getHours() < 12 ? ' AM' : ' PM'
-                                                  }`
-                                                : `${new Date(item.timeSend).getDate()}/${
-                                                      new Date(item.timeSend).getMonth() + 1
-                                                  }`}
+                                                <span>{item.direct === 1 ? 'Bạn: ' : ''}</span>
+                                                {item.isFile === 0 || item.isFile === 2
+                                                    ? item.messageText
+                                                    : isImageFile(item.messageText)
+                                                    ? 'Đã gửi 1 ảnh'
+                                                    : 'Đã gửi 1 file'}
+                                            </div>
+                                            <div className={cx('curTime')}>
+                                                {isSameDay(new Date(item.timeSend))
+                                                    ? `${new Date(item.timeSend).getHours()}:${String(
+                                                          new Date(item.timeSend).getMinutes(),
+                                                      ).padStart(2, '0')}${
+                                                          new Date(item.timeSend).getHours() < 12 ? ' AM' : ' PM'
+                                                      }`
+                                                    : `${new Date(item.timeSend).getDate()}/${
+                                                          new Date(item.timeSend).getMonth() + 1
+                                                      }`}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                    </div>
                 </div>
-            </div>
+            </Resizable>
 
             <div className={cx('messenger-content')}>
                 {isShowMessage && !isDelete ? (
@@ -792,7 +809,11 @@ function Message({ socket, onlineUsers, user }) {
                                 {/* <a href={`/api/call/${loadInfoChatSide.idUser}`}>
                                     <PhoneCall className={cx('phone-call')} />
                                 </a> */}
-                                <Link to={`/api/call/${loadInfoChatSide.idUser}`} state={{from: true}} onClick={handleClickOnCall}>
+                                <Link
+                                    to={`/api/call/${idConversation_}/${loadInfoChatSide.idUser}`}
+                                    state={{ from: true }}
+                                    onClick={handleClickOnCall}
+                                >
                                     <PhoneCall className={cx('phone-call')} />
                                 </Link>
                                 <Setting className={cx('chat-setting')} onClick={() => handleToggleSetting()} />
@@ -857,15 +878,43 @@ function Message({ socket, onlineUsers, user }) {
                                                     >
                                                         {result.messageText}
                                                     </p>
+                                                ) : result.isFile === 2 ? (
+                                                    <p
+                                                        className={cx('message-call', {
+                                                            highlighted:
+                                                                firstVisit && index === currentResultIndexFounded,
+                                                        })}
+                                                    >
+                                                        <div className={cx('message-call-group')}>
+                                                            <span className={cx('icon-call')}>
+                                                                <PhoneCall />
+                                                            </span>
+                                                            {result.messageText}
+                                                        </div>
+                                                        <Link
+                                                            to={`/api/call/${idConversation_}/${loadInfoChatSide.idUser}`}
+                                                            state={{ from: true }}
+                                                            className={cx(
+                                                                'button-call',
+                                                                (isBlocked ||
+                                                                    blocked ||
+                                                                    currentChatBlock === currentConversation) &&
+                                                                    'disabled-button-call',
+                                                            )}
+                                                            onClick={handleClickOnCall}
+                                                        >
+                                                            Gọi lại
+                                                        </Link>
+                                                    </p>
                                                 ) : isImageFile(result.messageText) ? (
                                                     <img
                                                         className={cx('transfer-image')}
-                                                        src={`http://localhost:8080/public/img/${result.messageText}`}
+                                                        src={`${baseUrl}/${result.messageText}`}
                                                         alt=""
                                                     />
                                                 ) : (
                                                     <a
-                                                        href={`http://localhost:8080/public/img/${result.messageText}`}
+                                                        href={`${baseUrl}/${result.messageText}`}
                                                         download={result.fileName}
                                                         className={cx('container-file')}
                                                     >
@@ -888,15 +937,43 @@ function Message({ socket, onlineUsers, user }) {
                                                     >
                                                         {result.messageText}
                                                     </p>
+                                                ) : result.isFile === 2 ? (
+                                                    <p
+                                                        className={cx('message-call', {
+                                                            highlighted:
+                                                                firstVisit && index === currentResultIndexFounded,
+                                                        })}
+                                                    >
+                                                        <div className={cx('message-call-group')}>
+                                                            <span className={cx('icon-call')}>
+                                                                <PhoneCall />
+                                                            </span>
+                                                            {result.messageText}
+                                                        </div>
+                                                        <Link
+                                                            to={`/api/call/${idConversation_}/${loadInfoChatSide.idUser}`}
+                                                            state={{ from: true }}
+                                                            className={cx(
+                                                                'button-call',
+                                                                (isBlocked ||
+                                                                    blocked ||
+                                                                    currentChatBlock === currentConversation) &&
+                                                                    'disabled-button-call',
+                                                            )}
+                                                            onClick={handleClickOnCall}
+                                                        >
+                                                            Gọi lại
+                                                        </Link>
+                                                    </p>
                                                 ) : isImageFile(result.messageText) ? (
                                                     <img
                                                         className={cx('transfer-image')}
-                                                        src={`http://localhost:8080/public/img/${result.messageText}`}
+                                                        src={`${baseUrl}/${result.messageText}`}
                                                         alt=""
                                                     />
                                                 ) : (
                                                     <a
-                                                        href={`http://localhost:8080/public/img/${result.messageText}`}
+                                                        href={`${baseUrl}/${result.messageText}`}
                                                         download={result.fileName}
                                                         className={cx('container-file')}
                                                     >

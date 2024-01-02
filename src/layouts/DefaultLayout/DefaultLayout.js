@@ -12,7 +12,7 @@ import Message from '~/pages/Message';
 import ConfirmMatching from '~/components/Modal/ModalConfirm/ConfirmMatching';
 import ToastMessage from '~/components/Modal/ModalConfirm/ToastMessage';
 
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -56,9 +56,9 @@ function DefaultLayout({ children, socket }) {
     }, [user]);
 
     useEffect(() => {
-        if(socket === null) return;
-        if(user) {
-            console.log('check counttttttttttttttt: ', count.current)
+        if (socket === null) return;
+        if (user) {
+            console.log('check counttttttttttttttt: ', count.current);
             socket.off('receive-request-matching');
             socket.on('receive-request-matching', (response) => {
                 console.log(response);
@@ -66,58 +66,59 @@ function DefaultLayout({ children, socket }) {
                 // setShowRequest(!isShowRequest);
                 // setFromId(response.fromId);
                 // setMatchId(response.matchId);
-                toast.info(<ContentToastMessage title={'Thông báo'} content={'Bạn vừa có yêu cầu matching!'}/>,
-                    {position: toast.POSITION.TOP_RIGHT}
-                )
-                
-            })
-        }
-    }, [user])
-
-    useEffect(() => {
-        if(socket === null) return;
-        socket.off('move-to-new-conversation');
-        socket.on('move-to-new-conversation', (data) => {
-            console.log(data);
-            // setShowNotifMatching(true);
-            toast.success(<ContentToastMessage title={'Thông báo'} content={'Bạn đã được matching thành công!'}/>,
-                {position: toast.POSITION.TOP_RIGHT, autoClose: 3000}
-            )
-        })
-    }, [user])
-
-    useEffect(() => {
-        if (socket === null) return;
-        if(user) {
-            socket.off('send-deny-matching');
-            socket.on('send-deny-matching', (data) => {
-            console.log(data);
-            // setShowDenyMatching(true);
-            toast.error(<ContentToastMessage title={'Thông báo'} content={'Rất tiếc! Bạn đã bị từ chối matching!'}/>,
-                {position: toast.POSITION.TOP_RIGHT, autoClose: 3000}
-            )
-        });
+                toast.info(<ContentToastMessage title={'Thông báo'} content={'Bạn vừa có yêu cầu matching!'} />, {
+                    position: toast.POSITION.TOP_RIGHT,
+                });
+            });
         }
     }, [user]);
 
     useEffect(() => {
         if (socket === null) return;
-        if(user) {
+        socket.off('move-to-new-conversation');
+        socket.on('move-to-new-conversation', (data) => {
+            console.log(data);
+            // setShowNotifMatching(true);
+            toast.success(<ContentToastMessage title={'Thông báo'} content={'Bạn đã được matching thành công!'} />, {
+                position: toast.POSITION.TOP_RIGHT,
+                autoClose: 3000,
+            });
+        });
+    }, [user]);
+
+    useEffect(() => {
+        if (socket === null) return;
+        if (user) {
+            socket.off('send-deny-matching');
+            socket.on('send-deny-matching', (data) => {
+                console.log(data);
+                // setShowDenyMatching(true);
+                toast.error(
+                    <ContentToastMessage title={'Thông báo'} content={'Rất tiếc! Bạn đã bị từ chối matching!'} />,
+                    { position: toast.POSITION.TOP_RIGHT, autoClose: 3000 },
+                );
+            });
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (socket === null) return;
+        if (user) {
             // socket.off('receive-call');
             socket.on('receive-call', (data) => {
                 console.log('receive-call');
                 console.log(data);
-                navigate(`/api/call/${data.from}`,{state:{to: true}});
+                navigate(`/api/call/${data.idConver}/${data.from}`, { state: { to: true } });
             });
         }
     }, [user]);
 
     const ContentToastMessage = ({ title, content }) => (
         <div>
-            <div style={{fontWeight: 600, color: 'black', fontSize: 16}}>{title}</div>
-            <div style={{fontSize: 14, marginTop: 3}}>{content}</div>
+            <div style={{ fontWeight: 600, color: 'black', fontSize: 16 }}>{title}</div>
+            <div style={{ fontSize: 14, marginTop: 3 }}>{content}</div>
         </div>
-    )
+    );
 
     console.log('OnlineUser', onlineUsers);
 
@@ -157,7 +158,7 @@ function DefaultLayout({ children, socket }) {
                     </div>
                 </div>
             </div>
-            <ToastContainer/>
+            <ToastContainer />
         </Fragment>
     );
 }

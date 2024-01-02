@@ -9,13 +9,14 @@ const handleLoadMessage = (idConversation, idUser) => {
     });
 };
 
-const handlePostMessage = (direct, messageText, timeSend, idConversation, fileName) => {
+const handlePostMessage = (direct, messageText, timeSend, idConversation, isFile, fileName) => {
     return axios.post('/api/save-message', {
         withCredentials: true,
         direct,
         messageText,
         timeSend,
         idConversation,
+        isFile,
         fileName,
     });
 };

@@ -47,21 +47,21 @@ const handleGetAccById = (idConversation) => {
     });
 };
 
-const handlePostMessage = (direct, messageText, timeSend, idConversation, fileName) => {
-    return axios.post('/api/save-message', {
-        withCredentials: true,
-        direct,
-        messageText,
-        timeSend,
-        idConversation,
-        fileName,
-    });
-};
+// const handlePostMessage = (direct, messageText, timeSend, idConversation, fileName) => {
+//     return axios.post('/api/save-message', {
+//         withCredentials: true,
+//         direct,
+//         messageText,
+//         timeSend,
+//         idConversation,
+//         fileName,
+//     });
+// };
 
-const handlePostFile = (direct, file, timeSend, idConversation, fileName) => {
+const handlePostFile = (direct, file, timeSend, idConversation, isFile, fileName) => {
     return axios.post(
         '/api/save-file',
-        { withCredentials: true, direct, file, timeSend, idConversation, fileName },
+        { withCredentials: true, direct, file, timeSend, idConversation, isFile, fileName },
         {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -211,7 +211,7 @@ export {
     handleGetInfoByUsername,
     handleFetchChatUser,
     handleGetAccById,
-    handlePostMessage,
+    // handlePostMessage,
     handlePostFile,
     handleSignupApi,
     getFile,

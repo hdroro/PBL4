@@ -1,6 +1,6 @@
 const routes = {
     home: '/',
-    call: '/api/call/:id',
+    call: '/api/call/:idConver/:id',
     profile: '/api/profile/:nickname',
     search: '/api/search',
     messages: '/api/messages',

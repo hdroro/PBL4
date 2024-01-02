@@ -4,9 +4,10 @@ import images from '~/assets/images';
 import Button from '~/components/Button';
 import { Heart, HeartCrack } from '~/components/Icon/Icon';
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { handleCheckFriendRelation, handleGetDetailNotificationMatching, handleGetInfoByID, handlePostMessage, handleSetDenyNotificationMatching, handleSetMatchNotificationMatching } from '~/services/userService';
+import { handleCheckFriendRelation, handleGetDetailNotificationMatching, handleGetInfoByID, handleSetDenyNotificationMatching, handleSetMatchNotificationMatching } from '~/services/userService';
 import { handleCreateConversation } from '~/services/conversationService';
 import { mydate } from '~/utils/date';
+import { handlePostMessage } from '~/services/messageService';
 
 const cx = classNames.bind(styles);
 
@@ -94,7 +95,7 @@ function RequestFriend({
                 const currentDate = new Date();
                 const timeSend = mydate(currentDate);
                 const text = 'Bạn đã bắt đầu cuộc trò chuyện này!';
-                await handlePostMessage(1, text, timeSend, data.idConversation, text);
+                await handlePostMessage(1, text, timeSend, data.idConversation, 0, text);
                 socket.emit('accept-request-matching', {
                     idConversation: data.idConversation,
                     fromId: fromId,
@@ -149,7 +150,7 @@ function RequestFriend({
                 Bio: <span className={cx('bio-content')}>{user && user.bio}</span>
             </div>
             <div className={cx('footer')}>
-                {(isDeny !== 1 && isMatch !== 1) ? (
+                {(isDeny !== 1 && isMatch !== 1 && remainingMinutes !== 0 && remainingSeconds !== 0) ? (
                     <Fragment>
                         <Button medium leftIcon={<Heart />} className={cx('btn-accept', 'btn')} onClick={handleAddConversation}>
                             Accept
