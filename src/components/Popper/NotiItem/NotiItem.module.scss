@@ -51,6 +51,10 @@
     }
 
     &.readNotif {
-        background-color: #dbcbd6;
+        // background-color: #dbcbd6;
+        background-color: #dbcbd680;
+        &:hover {
+            background-color: rgb(219 203 214 / 29%);
+        }
     }
 }

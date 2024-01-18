@@ -46,7 +46,7 @@ function NotiZodiac({ user, socket }) {
     const fetchCurrentData = async (currentNoti) => {
         try {
             setLisOldtNotiZodiac((prev) =>
-                prev.map((notification) =>
+                prev?.map((notification) =>
                     notification.idNoti === currentNoti ? { ...notification, isRead: 1 } : notification,
                 ),
             );
@@ -88,7 +88,7 @@ function NotiZodiac({ user, socket }) {
     const fetchLittleData = async (page) => {
         try {
             const resListNoti = await handleGetListNotiZodiacMessage(user?.idUser, page);
-            if (resListNoti.errCode === 0) {
+            if (resListNoti?.errCode === 0) {
                 setLisOldtNotiZodiac(resListNoti.listMessage);
 
                 setDataOfRequest({
@@ -116,8 +116,8 @@ function NotiZodiac({ user, socket }) {
         socket.on('receive-zodiac-message', (data) => {
             data?.forEach((item) => {
                 if (item.zodiac === user.idZodiac && item.idUser === user.idUser) {
-                    setLisOldtNotiZodiac((prev) => [item, ...prev]);
-                    setListNotiZodiac((prev) => [item, ...prev]);
+                    setLisOldtNotiZodiac((prev) => [item, ...(prev || [])]);
+                    setListNotiZodiac((prev) => [item, ...(prev || [])]);
                 }
             });
         });
@@ -126,7 +126,7 @@ function NotiZodiac({ user, socket }) {
     const renderPreview = () => {
         return (
             <>
-                {lisOldtNotiZodiac?.length !== 0 && (
+                {lisOldtNotiZodiac?.length && (
                     <PopperWrapper className={cx('noti-wrapper-scroll')}>
                         <NotiZodiacItem
                             onChangeStatusCreatePost={handleReload}
@@ -156,8 +156,8 @@ function NotiZodiac({ user, socket }) {
 
     return (
         <div className={cx('icon-header')}>
-            {listNotiZodiac.filter((item) => item.isRead === 0).length !== 0 && (
-                <span className={cx('count-circle')}>{listNotiZodiac.filter((item) => item.isRead === 0).length}</span>
+            {listNotiZodiac?.filter((item) => item.isRead === 0).length !== 0 && (
+                <span className={cx('count-circle')}>{listNotiZodiac?.filter((item) => item.isRead === 0).length}</span>
             )}
             <Tippy offset={[10, 9]} interactive placement="bottom" content={renderPreview()}>
                 <div>

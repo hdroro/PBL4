@@ -58,7 +58,7 @@ function DefaultLayout({ children, socket }) {
     useEffect(() => {
         if (socket === null) return;
         if (user) {
-            console.log('check counttttttttttttttt: ', count.current);
+            // console.log('check counttttttttttttttt: ', count.current);
             socket.off('receive-request-matching');
             socket.on('receive-request-matching', (response) => {
                 console.log(response);
@@ -66,11 +66,16 @@ function DefaultLayout({ children, socket }) {
                 // setShowRequest(!isShowRequest);
                 // setFromId(response.fromId);
                 // setMatchId(response.matchId);
-                toast.info(<ContentToastMessage title={'Thông báo'} content={'Bạn vừa có yêu cầu matching!'} />, {
-                    position: toast.POSITION.TOP_RIGHT,
-                });
+                if (user) {
+                    toast.info(<ContentToastMessage title={'Thông báo'} content={'Bạn vừa có yêu cầu matching!'} />, {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
+                }
             });
         }
+        return () => {
+            socket.off('receive-request-matching');
+        };
     }, [user]);
 
     useEffect(() => {
@@ -79,11 +84,19 @@ function DefaultLayout({ children, socket }) {
         socket.on('move-to-new-conversation', (data) => {
             console.log(data);
             // setShowNotifMatching(true);
-            toast.success(<ContentToastMessage title={'Thông báo'} content={'Bạn đã được matching thành công!'} />, {
-                position: toast.POSITION.TOP_RIGHT,
-                autoClose: 3000,
-            });
+            if (user) {
+                toast.success(
+                    <ContentToastMessage title={'Thông báo'} content={'Bạn đã được matching thành công!'} />,
+                    {
+                        position: toast.POSITION.TOP_RIGHT,
+                        autoClose: 3000,
+                    },
+                );
+            }
         });
+        return () => {
+            socket.off('move-to-new-conversation');
+        };
     }, [user]);
 
     useEffect(() => {
@@ -93,12 +106,17 @@ function DefaultLayout({ children, socket }) {
             socket.on('send-deny-matching', (data) => {
                 console.log(data);
                 // setShowDenyMatching(true);
-                toast.error(
-                    <ContentToastMessage title={'Thông báo'} content={'Rất tiếc! Bạn đã bị từ chối matching!'} />,
-                    { position: toast.POSITION.TOP_RIGHT, autoClose: 3000 },
-                );
+                if (user) {
+                    toast.error(
+                        <ContentToastMessage title={'Thông báo'} content={'Rất tiếc! Bạn đã bị từ chối matching!'} />,
+                        { position: toast.POSITION.TOP_RIGHT, autoClose: 3000 },
+                    );
+                }
             });
         }
+        return () => {
+            socket.off('send-deny-matching');
+        };
     }, [user]);
 
     useEffect(() => {

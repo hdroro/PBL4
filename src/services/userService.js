@@ -1,6 +1,7 @@
 import axios from '../axios';
 
 axios.defaults.withCredentials = true;
+console.log('hahah');
 const config = {
     headers: {
         'Access-Control-Allow-Origin': '*',
@@ -16,12 +17,13 @@ const handleLogoutApi = () => {
 };
 
 const handleGetInfo = () => {
-    return axios.get('api/matching', { withCredentials: true });
+    return axios.get('api/matching', { config, withCredentials: true });
 };
 
 const handleGetUserBySearch = (idUser, nickname) => {
     return axios.get('api/get-user-by-search', {
         withCredentials: true,
+        config,
         params: {
             idUser,
             nickname,
@@ -30,37 +32,28 @@ const handleGetUserBySearch = (idUser, nickname) => {
 };
 
 const handleGetInfoByID = (idUser) => {
-    return axios.get('api/get-user', { withCredentials: true, params: { idUser } });
+    return axios.get('api/get-user', { config, withCredentials: true, params: { idUser } });
 };
 
 const handleGetInfoByUsername = (nickname) => {
-    return axios.get('api/get-user-by-username', { withCredentials: true, params: { nickname } });
+    return axios.get('api/get-user-by-username', { config, withCredentials: true, params: { nickname } });
 };
 const handleFetchChatUser = () => {
-    return axios.get('api/user-chat', { withCredentials: true });
+    return axios.get('api/user-chat', { config, withCredentials: true });
 };
 
 const handleGetAccById = (idConversation) => {
     return axios.get('/api/user-list', {
+        config,
         withCredentials: true,
-        params: { idConversation },
+        params: { config, idConversation },
     });
 };
-
-// const handlePostMessage = (direct, messageText, timeSend, idConversation, fileName) => {
-//     return axios.post('/api/save-message', {
-//         withCredentials: true,
-//         direct,
-//         messageText,
-//         timeSend,
-//         idConversation,
-//         fileName,
-//     });
-// };
 
 const handlePostFile = (direct, file, timeSend, idConversation, isFile, fileName) => {
     return axios.post(
         '/api/save-file',
+
         { withCredentials: true, direct, file, timeSend, idConversation, isFile, fileName },
         {
             headers: {
@@ -71,11 +64,12 @@ const handlePostFile = (direct, file, timeSend, idConversation, isFile, fileName
 };
 
 const getFile = (filename) => {
-    return axios.get('/api/get-file', { withCredentials: true, filename });
+    return axios.get('/api/get-file', { config, withCredentials: true, filename });
 };
 
 const handleSignupApi = (username, password, repeatpassword, fullname, date, gender, timeRegister) => {
     return axios.post('api/signup', {
+        config,
         withCredentials: true,
         username,
         password,
@@ -89,6 +83,7 @@ const handleSignupApi = (username, password, repeatpassword, fullname, date, gen
 
 const handleEditProfile = (username, fullname, bio, birth, gender) => {
     return axios.post('api/setting/editprofile', {
+        config,
         withCredentials: true,
         username,
         fullname,
@@ -99,13 +94,12 @@ const handleEditProfile = (username, fullname, bio, birth, gender) => {
 };
 
 const getProfileSetting = () => {
-    return axios.get('api/setting/editprofile', {
-        withCredentials: true,
-    });
+    return axios.get('api/setting/editprofile', { config, withCredentials: true });
 };
 
 const handleChangePassword = (currentpassword, newpassword, retypepassword) => {
     return axios.post('api/setting/changepassword', {
+        config,
         withCredentials: true,
         currentpassword,
         newpassword,
@@ -114,25 +108,15 @@ const handleChangePassword = (currentpassword, newpassword, retypepassword) => {
 };
 
 const handleRandomMatching = (idUser, onlineUsers) => {
-    return axios.get('/api/random-matching', {
-        withCredentials: true,
-        params: { idUser, onlineUsers },
-    });
+    return axios.get('/api/random-matching', { config, withCredentials: true, params: { idUser, onlineUsers } });
 };
 
 const handleGetNotificationMatching = (idUser) => {
-    return axios.get('/api/get-notification-matching', {
-        withCredentials: true,
-        params: { idUser },
-    });
+    return axios.get('/api/get-notification-matching', { config, withCredentials: true, params: { idUser } });
 };
 
 const handleCreateNotificationMatching = (idAcc1, idAcc2) => {
-    return axios.post('/api/create-notification-matching', {
-        withCredentials: true,
-        idAcc1,
-        idAcc2,
-    });
+    return axios.post('/api/create-notification-matching', { config, withCredentials: true, idAcc1, idAcc2 });
 };
 
 const handleSetDenyNotificationMatching = (idNotificationMatching) => {
@@ -151,6 +135,7 @@ const handleSetReadNotificationMatching = (idNotificationMatching) => {
 
 const handleGetCountNotReadNotificationMatching = (idAcc1) => {
     return axios.get('/api/get-count-not-read-notification-matching', {
+        config,
         withCredentials: true,
         params: { idAcc1 },
     });
@@ -158,6 +143,7 @@ const handleGetCountNotReadNotificationMatching = (idAcc1) => {
 
 const handleGetDetailNotificationMatching = (idNotificationMatching, idAcc1, idAcc2) => {
     return axios.get('/api/get-detail-notification-matching', {
+        config,
         withCredentials: true,
         params: { idNotificationMatching, idAcc1, idAcc2 },
     });
@@ -166,17 +152,11 @@ const handleGetDetailNotificationMatching = (idNotificationMatching, idAcc1, idA
 //ADMIN
 
 const handleGetIdZodiac = (idUser) => {
-    return axios.get('/api/admin/get-idZodiac-by-idUser', {
-        withCredentials: true,
-        params: { idUser },
-    });
+    return axios.get('/api/admin/get-idZodiac-by-idUser', { config, withCredentials: true, params: { idUser } });
 };
 
 const handleGetAllUserByAdmin = (page) => {
-    return axios.get('/api/admin/get-list-user', {
-        withCredentials: true,
-        params: { page },
-    });
+    return axios.get('/api/admin/get-list-user', { config, withCredentials: true, params: { page } });
 };
 
 const handleDeleteUserByAdmin = (idUser) => {

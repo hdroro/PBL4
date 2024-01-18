@@ -12,6 +12,7 @@ import RequestFriend from '~/components/Modal/ModalConfirm/RequestFriend';
 import { UserGroup } from '~/components/Icon/Icon';
 import ConfirmMatching from '~/components/Modal/ModalConfirm/ConfirmMatching';
 import NotificationMessage from '~/components/Modal/ModalConfirm/NotificationMessage';
+import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
@@ -24,6 +25,7 @@ function TwoSideBar({ children, socket }) {
     const [isShowNotifMatching, setShowNotifMatching] = useState(false);
     const [isShowDenyMatching, setShowDenyMatching] = useState(false);
     const [idNotificationMatching, setIdNotificationMatching] = useState();
+    const navigate = useNavigate();
     // const [socket, setSocket] = useState(null);
 
     useEffect(() => {
@@ -68,12 +70,25 @@ function TwoSideBar({ children, socket }) {
             setIdNotificationMatching(response.idNotificationMatching);
         });
         socket.on('receive-request-matching', (response) => {
+            console.log('receive-request matching');
             console.log(response);
             setShowRequest(!isShowRequest);
             setFromId(response.fromId);
             setMatchId(response.matchId);
         });
     }, []);
+
+    useEffect(() => {
+        if (socket === null) return;
+        if (user) {
+            // socket.off('receive-call');
+            socket.on('receive-call', (data) => {
+                console.log('receive-call');
+                console.log(data);
+                navigate(`/api/call/${data.idConver}/${data.from}`, { state: { to: true } });
+            });
+        }
+    }, [user]);
 
     useEffect(() => {
         if (socket === null) return;

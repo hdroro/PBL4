@@ -11,7 +11,7 @@ import RequestFriend from '~/components/Modal/ModalConfirm/RequestFriend';
 import { UserGroup } from '~/components/Icon/Icon';
 import ConfirmMatching from '~/components/Modal/ModalConfirm/ConfirmMatching';
 import NotificationMessage from '~/components/Modal/ModalConfirm/NotificationMessage';
-import AdminSidebar from '../components/AdminSidebar';
+import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
@@ -23,8 +23,8 @@ function SidebarOnly({ children, socket }) {
     const [matchId, setMatchId] = useState();
     const [isShowNotifMatching, setShowNotifMatching] = useState(false);
     const [isShowDenyMatching, setShowDenyMatching] = useState(false);
-    const [countNotifMatching, setCountNotifMatching] = useState();
     const [idNotificationMatching, setIdNotificationMatching] = useState();
+    const navigate = useNavigate();
     // const [isCreateConversation, setCreateConversation] = useState(false);
     // const [socket, setSocket] = useState(null);
 
@@ -67,6 +67,18 @@ function SidebarOnly({ children, socket }) {
             setMatchId(response.matchId);
         });
     }, []);
+
+    useEffect(() => {
+        if (socket === null) return;
+        if (user) {
+            // socket.off('receive-call');
+            socket.on('receive-call', (data) => {
+                console.log('receive-call');
+                console.log(data);
+                navigate(`/api/call/${data.idConver}/${data.from}`, { state: { to: true } });
+            });
+        }
+    }, [user]);
 
     // if(socket != null) {
     //     socket.on('receive-request-matching', (response) => {

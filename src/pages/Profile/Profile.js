@@ -120,6 +120,7 @@ function Profile({ user }) {
                                     <input
                                         className={cx('thinking')}
                                         placeholder={`${infoUser.fullName} ơi, bạn đang nghĩ gì ?`}
+                                        value={''}
                                         onClick={toggle}
                                     />
                                 </div>

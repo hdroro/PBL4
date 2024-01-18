@@ -100,10 +100,11 @@
 
 .more-notif {
     padding: 4px;
-    background-color: #ffb0db;
+    background-color: #fff;
     text-align: center;
     font-size: 13px;
-    font-weight: 400;
+    font-weight: 600;
+    color: rgba(188, 10, 70, 0.7215686275);
 }
 
 .container-tippy {
@@ -117,7 +118,7 @@
 .container-tippy::-webkit-scrollbar {
     width: 10px;
 }
-  
+
 /* Track */
 .container-tippy::-webkit-scrollbar-track {
     background: #f2eeee;

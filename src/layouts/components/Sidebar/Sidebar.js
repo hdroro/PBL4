@@ -98,7 +98,18 @@ function Sidebar({ user, socket, onlineUsers }) {
                         key={index}
                     />
                 ))}
-                {notifList.length > 4 && (notifList.length > 4 * indexNotif) ? <div className={cx('more-notif')} onClick={() => {setIndexNotif(prev => prev + 1)}}>Xem thêm</div> : ''}
+                {notifList.length > 4 && notifList.length > 4 * indexNotif ? (
+                    <div
+                        className={cx('more-notif')}
+                        onClick={() => {
+                            setIndexNotif((prev) => prev + 1);
+                        }}
+                    >
+                        Xem thêm
+                    </div>
+                ) : (
+                    ''
+                )}
             </div>
         );
     };
@@ -163,7 +174,13 @@ function Sidebar({ user, socket, onlineUsers }) {
                                     ) : (
                                         ''
                                     )}
-                                    <Tippy offset={[10, 9]} interactive placement="bottom" content={renderPreview()}>
+                                    <Tippy
+                                        offset={[10, 9]}
+                                        // visible
+                                        interactive
+                                        placement="bottom"
+                                        content={renderPreview()}
+                                    >
                                         <div>
                                             <UserGroup />
                                         </div>

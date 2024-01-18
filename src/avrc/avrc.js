@@ -1,4 +1,4 @@
-import { Socket } from "socket.io-client";
+import { Socket } from 'socket.io-client';
 
 class AVRC {
     constructor(io, fn, onCall, userID) {
@@ -6,36 +6,35 @@ class AVRC {
         // this.answerEventListenerRegistered = false;
         this.toUserID = userID;
         this.connection = new RTCPeerConnection({
-            iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
         });
         // this.connection.setConfiguration()
         console.log('constructor');
-        console.log(this.connection)
+        console.log(this.connection);
 
         this.io = io;
         this.remoteStream = new MediaStream();
 
         // if(!this.answerEventListenerRegistered) {
-            // io.off("answer");
-            io.on("answer", async (answer) => {
-                console.log("answer fe");
-                console.log(answer);
-                try {
-                    onCall();
-                    let rtc_session_description = new RTCSessionDescription(answer);
-                    console.log(this.connection)
-                    await this.connection?.setRemoteDescription(rtc_session_description);
-                } catch (error) {
-                    // throw error;
-                    console.log(error);
-                }
-            });
+        // io.off("answer");
+        io.on('answer', async (answer) => {
+            console.log('answer fe');
+            console.log(answer);
+            try {
+                onCall();
+                let rtc_session_description = new RTCSessionDescription(answer);
+                console.log(this.connection);
+                await this.connection?.setRemoteDescription(rtc_session_description);
+            } catch (error) {
+                // throw error;
+                console.log(error);
+            }
+        });
         //     this.answerEventListenerRegistered = true;
         // }
-        
 
-        io.on("offer", async (offer) => {
-            console.log("offer fe");
+        io.on('offer', async (offer) => {
+            console.log('offer fe');
             console.log(offer);
             this.offer = offer;
             // onCall();
@@ -47,15 +46,15 @@ class AVRC {
             }
         };
 
-        let toUserID = this.toUserID
+        let toUserID = this.toUserID;
         this.connection.onicecandidate = (e) => {
             if (e.candidate) {
                 let candidate = e.candidate;
-                io.emit("ice_candidate", {candidate, toUserID});
+                io.emit('ice_candidate', { candidate, toUserID });
             }
         };
     }
-    
+
     // async createOffer() {
     //     try {
     //         let offer = await this.connection?.createOffer();
@@ -86,11 +85,12 @@ class AVRC {
             let offer = await this.connection?.createOffer();
             await this.connection?.setLocalDescription(offer);
             console.log(offer);
-    
+
             // if (!this.iceCandidateEventListenerRegistered) {
-                // Đăng ký sự kiện "ice_candidate" chỉ một lần
-                this.io && this.io.on("ice_candidate", async (ice_candidate) => {
-                    console.log("ice_candidate fe");
+            // Đăng ký sự kiện "ice_candidate" chỉ một lần
+            this.io &&
+                this.io.on('ice_candidate', async (ice_candidate) => {
+                    console.log('ice_candidate fe');
                     console.log(ice_candidate);
                     try {
                         await this.connection?.addIceCandidate(ice_candidate);
@@ -99,13 +99,13 @@ class AVRC {
                         console.log(error);
                     }
                 });
-                // this.iceCandidateEventListenerRegistered = true;
+            // this.iceCandidateEventListenerRegistered = true;
             // }
-    
+
             let toUserID = this.toUserID;
             console.log('fe: ', toUserID);
             console.log(this.io);
-            this.io?.emit("offer", { offer, toUserID });
+            this.io?.emit('offer', { offer, toUserID });
         } catch (err) {
             throw err;
         }
@@ -119,29 +119,29 @@ class AVRC {
             });
             return this.localStream;
         } catch (err) {
-            console.log("Some issue during starting the stream");
+            console.log('Some issue during starting the stream');
             throw err;
         }
     }
 
     muteMic() {
-        this.localStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+        this.localStream.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
     }
-      
+
     muteCam() {
-        this.localStream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
+        this.localStream.getVideoTracks().forEach((track) => (track.enabled = !track.enabled));
     }
 
     endCall() {
         console.log('close-call avrc');
         try {
-            this.localStream.getTracks().forEach(track => track.stop())
-            this.remoteStream.getTracks().forEach(track => track.stop())
-        }
-        catch(err) {
+            this.localStream.getTracks().forEach((track) => track.stop());
+            this.remoteStream.getTracks().forEach((track) => track.stop());
+        } catch (err) {
             console.log(err);
         }
         // this.connection.close();
+        this.connection = null;
     }
 
     async getLocalStream() {
@@ -151,7 +151,7 @@ class AVRC {
     async getConnectionStateChange(fn) {
         if (this.connection) {
             this.connection.onconnectionstatechange = () => {
-                fn(this.connection?.connectionState === "connected");
+                fn(this.connection?.connectionState === 'connected');
             };
         }
     }
@@ -162,7 +162,7 @@ class AVRC {
 
     async answerPhone() {
         if (!this.offer) {
-            console.log("there is a phone call");
+            console.log('there is a phone call');
             return;
         }
 
@@ -173,8 +173,8 @@ class AVRC {
             let answer = await this.connection?.createAnswer();
             await this.connection?.setLocalDescription(answer);
 
-            let toUserID = this.toUserID
-            this.io && this.io.emit("answer", {answer, toUserID});
+            let toUserID = this.toUserID;
+            this.io && this.io.emit('answer', { answer, toUserID });
         } catch (err) {
             throw err;
         }

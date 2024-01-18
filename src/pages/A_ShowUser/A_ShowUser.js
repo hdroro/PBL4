@@ -18,6 +18,7 @@ function AdminShowUser({ onlineUsers }) {
     const [reloadPage, setReloadPage] = useState(false);
 
     const [dataOfRequest, setDataOfRequest] = useState({
+        size: 0,
         prev: false,
         next: false,
         lastPage: 1,
@@ -30,12 +31,14 @@ function AdminShowUser({ onlineUsers }) {
     const fetchData = async (page) => {
         try {
             setLoading(true);
-            const response = await handleGetAllUserByAdmin();
+            const response = await handleGetAllUserByAdmin(page);
             setDataOfRequest({
+                size: response.size,
                 prev: response.prev,
                 next: response.next,
                 lastPage: page,
             });
+            console.log('response.listUser', response.listUser);
             setListUser(response.listUser);
             const userIds = onlineUsers.map((user) => user.userID);
             setUserIdsOnline(userIds);
@@ -46,9 +49,10 @@ function AdminShowUser({ onlineUsers }) {
 
     useEffect(() => {
         fetchData(1);
-    }, [onlineUsers, reloadPage]);
+    }, [onlineUsers, isShowing]);
 
     const handlePageChange = async (newPage) => {
+        console.log('newPage', newPage);
         await fetchData(newPage);
     };
 
@@ -62,6 +66,8 @@ function AdminShowUser({ onlineUsers }) {
         setReloadPage(!reloadPage);
     };
 
+    console.log('listUser', listUser);
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('grid')}>
@@ -74,9 +80,9 @@ function AdminShowUser({ onlineUsers }) {
                         <div className={cx('container')}>
                             <div className={cx('title-container')}>
                                 <p className={cx('total-user-title')}>
-                                    {listUser.length !== 0 && (
+                                    {dataOfRequest.size !== 0 && (
                                         <>
-                                            Tổng số user: <span>{listUser.length}</span>
+                                            Tổng số user: <span>{dataOfRequest.size}</span>
                                         </>
                                     )}
                                 </p>

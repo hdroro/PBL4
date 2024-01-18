@@ -28,7 +28,7 @@ import { useModal } from '~/hooks';
 import Modal from '~/components/Modal/Modal';
 import Block from '~/components/Modal/ModalConfirm/Block/Block';
 import { handleFetchChatUser, handleGetAccById, handleGetInfoByID } from '~/services/userService';
-import { handleLoadMessage, handlePostMessage } from '~/services/messageService';
+import { handleGetIdMaxMessage, handleLoadMessage, handlePostMessage } from '~/services/messageService';
 import {
     handleDeleteConversation,
     handleGetConversationByID,
@@ -44,6 +44,7 @@ import {
     handleGetAllNotificationMessageInfo,
 } from '~/services/notificationMessageService';
 import { Resizable } from 'react-resizable';
+import PreviewImage from '~/components/Modal/ModalConfirm/PreviewImage';
 
 const cx = classNames.bind(styles);
 
@@ -54,6 +55,7 @@ function Message({ socket, onlineUsers, user }) {
     const [inputSearch, setInputSearch] = useState('');
     const { isShowing, toggle } = useModal();
     const [isShowingClear, setIsShowingClear] = useState(false);
+    const [isShowingPreviewImage, setIsShowingPreviewImage] = useState(false);
     //FETCH USER CHAT
     const [userChat, setUserChat] = useState([]);
     const [idSession, setIdSession] = useState(null);
@@ -95,6 +97,8 @@ function Message({ socket, onlineUsers, user }) {
     const [receiverID, setReceiveID] = useState(null);
     const [listNotificationOfUser, setListNotificationOfUser] = useState([]);
     const [activeChat, setActiveChat] = useState(null);
+
+    const [idMessagePreview, setIdMessagePreview] = useState(null);
     //INITIAL SOCKET
     console.log('notification ', notifications);
 
@@ -281,6 +285,7 @@ function Message({ socket, onlineUsers, user }) {
             const avatar = re.userData.user.avatar;
 
             setIdUser(_idSession);
+            const fileName = selectedFile?.name;
             const newFile = {
                 _idSession,
                 idSession,
@@ -295,9 +300,15 @@ function Message({ socket, onlineUsers, user }) {
             };
             setNewFile(newFile);
             setLoad(!load);
-            await handlePostFile(direct, file, timeSend, idConversation, fileName).then((res) => {
+            console.log('fileName', fileName);
+            await handlePostFile(direct, file, timeSend, idConversation, 1, fileName).then((res) => {
                 newFile.messageText = res.saveMessage.chat;
             });
+            const idMaxMessage = await handleGetIdMaxMessage();
+            console.log('resss', await handleGetIdMaxMessage());
+            console.log('idMaxMessageidMaxMessage', idMaxMessage);
+            // setIdMessagePreview(idMaxMessage);
+            newFile.idMessage = idMaxMessage.idMessageMax?.idMessage;
             handlePostNotificationMessageInfo(idConversation, idSession, _idSession, 1);
 
             setLoadMessages((prevLoadMessages) => ({
@@ -316,10 +327,15 @@ function Message({ socket, onlineUsers, user }) {
     };
 
     const isImageFile = (filename) => {
-        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp']; // Thêm các phần mở rộng ảnh khác nếu cần
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
 
         const extension = getFileExtension(filename).toLowerCase();
         return imageExtensions.includes(extension);
+    };
+
+    const handleTogglePreviewImage = async (idMessage) => {
+        setIsShowingPreviewImage(!isShowingPreviewImage);
+        setIdMessagePreview(idMessage);
     };
 
     const handleOpenBlock = useCallback(async () => {
@@ -399,11 +415,6 @@ function Message({ socket, onlineUsers, user }) {
                         item.infoUserDelete[0].idDeleted,
                         item.infoUserDelete[0].deleteAtId,
                     );
-                    // await handleDeleteInfoDeleted(item.infoUserDelete[0].idDelete, item.infoUserDelete[0].idDeleted);
-                    // setLoadMessages((prevLoadMessages) => ({
-                    //     chat: [data, ...(prevLoadMessages?.chat || [])],
-                    // }));
-                    // setReloadPage(!reLoadPage);
                 }
             });
 
@@ -413,10 +424,8 @@ function Message({ socket, onlineUsers, user }) {
                     chat: [data, ...(prevLoadMessages?.chat || [])],
                 }));
             }
-            // chatRef.current.scrollTop = chatRef?.current?.scrollHeight;
 
             setUserChat(chatUserResponse.userChatData);
-            // setReloadPage(!reLoadPage);
         });
 
         socket.on('receive-notification', async (data) => {
@@ -447,28 +456,10 @@ function Message({ socket, onlineUsers, user }) {
         if (socket === null) return;
         socket.off('blocked-conversation');
         socket.on('blocked-conversation', async (data) => {
-            // const response = await handleGetAccById(data.idConversation_);
-            // const a2 = response.accountList.chat[0].idAcc2;
-            // const a1 = response.accountList.chat[0].idAcc1;
-
-            // // console.log('data ' + data);
-            // // console.log('a2 ' + a2 + 'a1 ' + a1 + 'idUser_ ' + idUser_);
-            // let idBlock = null;
-            // if (a2 === data.idUser_) {
-            //     setUserBlock(a1);
-            //     idBlock = a1;
-            // } else if (a1 === data.idUser_) {
-            //     setUserBlock(a2);
-            //     idBlock = a2;
-            // }
-            // setBlocked(data.value);
             setCurrentChatBlock(data.idConversation_);
-            // await handlePostBlockInfo(idBlock, data.idUser_, data.idConversation_);
 
-            // setIsBlocked(data.value);
             setIsDisableBlock(true);
             setIsOpenBlock(false);
-            // console.log('block: ' + idBlock + ' blocked: ' + data.idUser_);
         });
     }, [socket]);
 
@@ -509,10 +500,6 @@ function Message({ socket, onlineUsers, user }) {
     };
 
     const handleDeleteConversationChange = async (value) => {
-        // console.log('value of delete: ', value);
-        // console.log('delete side: ', user.idUser);
-        // console.log('delete side     aaaa: ', idUser_);
-        // console.log('currentConversation: ', currentConversation);
         const response = await handleLoadMessage(currentConversation, idUser_);
         console.log('currentConversation', currentConversation);
         console.log('idUser_', idUser_);
@@ -530,7 +517,6 @@ function Message({ socket, onlineUsers, user }) {
         setUserChat(newUserChat);
         setIsDelete(value);
         setLoadMessages([]);
-        // setIdUser(0);
     };
 
     console.log(idMessageLastest);
@@ -551,26 +537,28 @@ function Message({ socket, onlineUsers, user }) {
 
     const [filteredMessages, setFilteredMessages] = useState([]);
     const handleSearch = () => {
-        setFirstVisit(true);
-        setIsShowingDetailSearch(true);
+        if (inputSearch !== '') {
+            setFirstVisit(true);
+            setIsShowingDetailSearch(true);
 
-        const removeDiacritics = (str) => {
-            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        };
+            const removeDiacritics = (str) => {
+                return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            };
 
-        const foundIndexes = [];
-        const sanitizedSearch = removeDiacritics(inputSearch.toLowerCase());
+            const foundIndexes = [];
+            const sanitizedSearch = removeDiacritics(inputSearch.toLowerCase());
 
-        loadMessages.chat.forEach((message, index) => {
-            const sanitizedMessage = removeDiacritics(message.messageText.toLowerCase());
-            if (sanitizedMessage.includes(sanitizedSearch)) {
-                foundIndexes.push(index);
-            }
-        });
+            loadMessages.chat.forEach((message, index) => {
+                const sanitizedMessage = removeDiacritics(message.messageText.toLowerCase());
+                if (sanitizedMessage.includes(sanitizedSearch)) {
+                    foundIndexes.push(index);
+                }
+            });
 
-        setFilteredMessages(foundIndexes);
-        setCurrentResultIndexFounded(foundIndexes[0]);
-        setIsShowingResultsSearch(foundIndexes.length);
+            setFilteredMessages(foundIndexes);
+            setCurrentResultIndexFounded(foundIndexes[0]);
+            setIsShowingResultsSearch(foundIndexes.length);
+        }
     };
 
     const chatRef = useRef(null);
@@ -814,12 +802,14 @@ function Message({ socket, onlineUsers, user }) {
                                     state={{ from: true }}
                                     onClick={handleClickOnCall}
                                 >
-                                    <PhoneCall className={cx('phone-call')} />
+                                    {!isBlocked && !blocked && currentChatBlock !== currentConversation && (
+                                        <PhoneCall className={cx('phone-call')} />
+                                    )}
                                 </Link>
                                 <Setting className={cx('chat-setting')} onClick={() => handleToggleSetting()} />
                             </div>
                         </div>
-                        {isShowingDetailSearch && (
+                        {isShowingDetailSearch && isCloseSearch && (
                             <div className={cx('search-action')}>
                                 <div className={cx('search-input')}>
                                     <div className={cx('search-message')} onClick={handleSearch}>
@@ -858,135 +848,142 @@ function Message({ socket, onlineUsers, user }) {
                             </div>
                         )}
                         <div className={cx('chat-main')} ref={chatRef}>
-                            {loadMessages?.chat.map((result, index) => (
-                                <div key={result.idMessage}>
-                                    {result.direct === 0 ? (
-                                        <div className={cx('chat-item')} key={index}>
-                                            <Link
-                                                to={`/api/profile/@${loadInfoChatSide.userName}`}
-                                                className={cx('link-to-profile')}
-                                            >
-                                                <img src={images[result.avatar]} alt="" />
-                                            </Link>
-                                            <div className={cx('message-detail')}>
-                                                {result.isFile === 0 ? (
-                                                    <p
-                                                        className={cx('message', {
-                                                            highlighted:
-                                                                firstVisit && index === currentResultIndexFounded,
-                                                        })}
-                                                    >
-                                                        {result.messageText}
-                                                    </p>
-                                                ) : result.isFile === 2 ? (
-                                                    <p
-                                                        className={cx('message-call', {
-                                                            highlighted:
-                                                                firstVisit && index === currentResultIndexFounded,
-                                                        })}
-                                                    >
-                                                        <div className={cx('message-call-group')}>
-                                                            <span className={cx('icon-call')}>
-                                                                <PhoneCall />
-                                                            </span>
-                                                            {result.messageText}
-                                                        </div>
-                                                        <Link
-                                                            to={`/api/call/${idConversation_}/${loadInfoChatSide.idUser}`}
-                                                            state={{ from: true }}
-                                                            className={cx(
-                                                                'button-call',
-                                                                (isBlocked ||
-                                                                    blocked ||
-                                                                    currentChatBlock === currentConversation) &&
-                                                                    'disabled-button-call',
-                                                            )}
-                                                            onClick={handleClickOnCall}
+                            {loadMessages?.length != 0 &&
+                                loadMessages?.chat.map((result, index) => (
+                                    <div key={result.idMessage}>
+                                        {result.direct === 0 ? (
+                                            <div className={cx('chat-item')} key={index}>
+                                                <Link
+                                                    to={`/api/profile/@${loadInfoChatSide.userName}`}
+                                                    className={cx('link-to-profile')}
+                                                >
+                                                    <img src={images[result.avatar]} alt="" />
+                                                </Link>
+                                                <div className={cx('message-detail')}>
+                                                    {result.isFile === 0 ? (
+                                                        <p
+                                                            className={cx('message', {
+                                                                highlighted:
+                                                                    firstVisit && index === currentResultIndexFounded,
+                                                            })}
                                                         >
-                                                            Gọi lại
-                                                        </Link>
-                                                    </p>
-                                                ) : isImageFile(result.messageText) ? (
-                                                    <img
-                                                        className={cx('transfer-image')}
-                                                        src={`${baseUrl}/${result.messageText}`}
-                                                        alt=""
-                                                    />
-                                                ) : (
-                                                    <a
-                                                        href={`${baseUrl}/${result.messageText}`}
-                                                        download={result.fileName}
-                                                        className={cx('container-file')}
-                                                    >
-                                                        <FileMessage className={cx('file-message-icon')} />{' '}
-                                                        {result.fileName}
-                                                    </a>
-                                                )}
-                                                <span className={cx('time-send')}>{formatTime(result.timeSend)}</span>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className={cx('chat-item-user')} key={index}>
-                                            <div className={cx('message-detail-user')}>
-                                                {result.isFile === 0 ? (
-                                                    <p
-                                                        className={cx('message', {
-                                                            highlighted:
-                                                                firstVisit && index === currentResultIndexFounded,
-                                                        })}
-                                                    >
-                                                        {result.messageText}
-                                                    </p>
-                                                ) : result.isFile === 2 ? (
-                                                    <p
-                                                        className={cx('message-call', {
-                                                            highlighted:
-                                                                firstVisit && index === currentResultIndexFounded,
-                                                        })}
-                                                    >
-                                                        <div className={cx('message-call-group')}>
-                                                            <span className={cx('icon-call')}>
-                                                                <PhoneCall />
-                                                            </span>
                                                             {result.messageText}
-                                                        </div>
-                                                        <Link
-                                                            to={`/api/call/${idConversation_}/${loadInfoChatSide.idUser}`}
-                                                            state={{ from: true }}
-                                                            className={cx(
-                                                                'button-call',
-                                                                (isBlocked ||
-                                                                    blocked ||
-                                                                    currentChatBlock === currentConversation) &&
-                                                                    'disabled-button-call',
-                                                            )}
-                                                            onClick={handleClickOnCall}
+                                                        </p>
+                                                    ) : result.isFile === 2 ? (
+                                                        <p
+                                                            className={cx('message-call', {
+                                                                highlighted:
+                                                                    firstVisit && index === currentResultIndexFounded,
+                                                            })}
                                                         >
-                                                            Gọi lại
-                                                        </Link>
-                                                    </p>
-                                                ) : isImageFile(result.messageText) ? (
-                                                    <img
-                                                        className={cx('transfer-image')}
-                                                        src={`${baseUrl}/${result.messageText}`}
-                                                        alt=""
-                                                    />
-                                                ) : (
-                                                    <a
-                                                        href={`${baseUrl}/${result.messageText}`}
-                                                        download={result.fileName}
-                                                        className={cx('container-file')}
-                                                    >
-                                                        <FileMessage className={cx('file-message-icon')} />
-                                                        {result.fileName}
-                                                    </a>
-                                                )}
-                                                <span className={cx('time-send')}>{formatTime(result.timeSend)}</span>
+                                                            <div className={cx('message-call-group')}>
+                                                                <span className={cx('icon-call')}>
+                                                                    <PhoneCall />
+                                                                </span>
+                                                                {result.messageText}
+                                                            </div>
+                                                            <Link
+                                                                to={`/api/call/${idConversation_}/${loadInfoChatSide.idUser}`}
+                                                                state={{ from: true }}
+                                                                className={cx(
+                                                                    'button-call',
+                                                                    (isBlocked ||
+                                                                        blocked ||
+                                                                        currentChatBlock === currentConversation) &&
+                                                                        'disabled-button-call',
+                                                                )}
+                                                                onClick={handleClickOnCall}
+                                                            >
+                                                                Gọi lại
+                                                            </Link>
+                                                        </p>
+                                                    ) : isImageFile(result.messageText) ? (
+                                                        <img
+                                                            className={cx('transfer-image')}
+                                                            src={`${baseUrl}/${result.messageText}`}
+                                                            alt=""
+                                                            onClick={() => handleTogglePreviewImage(result.idMessage)}
+                                                        />
+                                                    ) : (
+                                                        <a
+                                                            href={`${baseUrl}/${result.messageText}`}
+                                                            download={result.fileName}
+                                                            className={cx('container-file')}
+                                                        >
+                                                            <FileMessage className={cx('file-message-icon')} />{' '}
+                                                            {result.fileName}
+                                                        </a>
+                                                    )}
+                                                    <span className={cx('time-send')}>
+                                                        {formatTime(result.timeSend)}
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                                        ) : (
+                                            <div className={cx('chat-item-user')} key={index}>
+                                                <div className={cx('message-detail-user')}>
+                                                    {result.isFile === 0 ? (
+                                                        <p
+                                                            className={cx('message', {
+                                                                highlighted:
+                                                                    firstVisit && index === currentResultIndexFounded,
+                                                            })}
+                                                        >
+                                                            {result.messageText}
+                                                        </p>
+                                                    ) : result.isFile === 2 ? (
+                                                        <p
+                                                            className={cx('message-call', {
+                                                                highlighted:
+                                                                    firstVisit && index === currentResultIndexFounded,
+                                                            })}
+                                                        >
+                                                            <div className={cx('message-call-group')}>
+                                                                <span className={cx('icon-call')}>
+                                                                    <PhoneCall />
+                                                                </span>
+                                                                {result.messageText}
+                                                            </div>
+                                                            <Link
+                                                                to={`/api/call/${idConversation_}/${loadInfoChatSide.idUser}`}
+                                                                state={{ from: true }}
+                                                                className={cx(
+                                                                    'button-call',
+                                                                    (isBlocked ||
+                                                                        blocked ||
+                                                                        currentChatBlock === currentConversation) &&
+                                                                        'disabled-button-call',
+                                                                )}
+                                                                onClick={handleClickOnCall}
+                                                            >
+                                                                Gọi lại
+                                                            </Link>
+                                                        </p>
+                                                    ) : isImageFile(result.messageText) ? (
+                                                        <img
+                                                            className={cx('transfer-image')}
+                                                            src={`${baseUrl}/${result.messageText}`}
+                                                            alt=""
+                                                            onClick={() => handleTogglePreviewImage(result.idMessage)}
+                                                        />
+                                                    ) : (
+                                                        <a
+                                                            href={`${baseUrl}/${result.messageText}`}
+                                                            download={result.fileName}
+                                                            className={cx('container-file')}
+                                                        >
+                                                            <FileMessage className={cx('file-message-icon')} />
+                                                            {result.fileName}
+                                                        </a>
+                                                    )}
+                                                    <span className={cx('time-send')}>
+                                                        {formatTime(result.timeSend)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
                         </div>
                         {isBlocked || blocked || currentChatBlock === currentConversation ? (
                             <div className={cx('block-container')}>
@@ -1077,6 +1074,11 @@ function Message({ socket, onlineUsers, user }) {
                                 name="search"
                                 value={inputSearch}
                                 onChange={(value) => handleChangeInputSearch(value)}
+                                onKeyPress={(event) => {
+                                    if ((inputSearch !== '' && event.key === 'Enter') || event.key === 'NumpadEnter') {
+                                        handleSearch();
+                                    }
+                                }}
                             />
                         </div>
                         {filteredMessages.map((message) => (
@@ -1145,6 +1147,10 @@ function Message({ socket, onlineUsers, user }) {
                     </div>
                 </div>
             )}
+
+            <Modal modalPreview isShowing={isShowingPreviewImage} hide={handleTogglePreviewImage}>
+                <PreviewImage baseUrl={baseUrl} idMessagePreview={idMessagePreview} hide={handleTogglePreviewImage} />
+            </Modal>
         </div>
     );
 }

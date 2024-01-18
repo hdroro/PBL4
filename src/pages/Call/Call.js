@@ -1,4 +1,3 @@
-
 // Call.js
 import classNames from 'classnames/bind';
 import styles from './Call.module.scss';
@@ -145,7 +144,7 @@ function Call({ socket }) {
         socket.on('receive-close-call', (data) => {
             console.log('receive-close-call');
             console.log(avrc);
-            if(!audio?.paused) audio?.pause();
+            if (!audio?.paused) audio?.pause();
             avrc?.endCall();
             navigate('/api/messages');
         });
@@ -192,7 +191,7 @@ function Call({ socket }) {
         socket.emit('close-call', { id });
         console.log(avrc);
         console.log(audio);
-        if(!audio?.paused) audio?.pause();
+        if (!audio?.paused) audio?.pause();
         avrc?.endCall();
 
         navigate('/api/messages');
@@ -392,8 +391,6 @@ function Call({ socket }) {
             </div>
         </div>
     );
-
 }
-
 
 export default Call;

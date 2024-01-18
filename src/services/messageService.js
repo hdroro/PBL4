@@ -21,4 +21,17 @@ const handlePostMessage = (direct, messageText, timeSend, idConversation, isFile
     });
 };
 
-export { handleLoadMessage, handlePostMessage };
+const handleGetMessageById = (idMessage) => {
+    return axios.get('/api/get-message-by-idMessage', {
+        withCredentials: true,
+        params: { idMessage },
+    });
+};
+
+const handleGetIdMaxMessage = () => {
+    return axios.get('/api/get-max-idMessage', {
+        withCredentials: true,
+    });
+};
+
+export { handleLoadMessage, handlePostMessage, handleGetMessageById, handleGetIdMaxMessage };

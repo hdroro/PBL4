@@ -15,6 +15,7 @@ function Modal({
     leftIcon = false,
     rightIcon = false,
     background,
+    modalPreview,
     admin,
     texttype,
     className,
@@ -24,7 +25,7 @@ function Modal({
         [className]: className,
     });
 
-    const classes_ = cx('modal', { background });
+    const classes_ = cx('modal', { background }, { modalPreview });
     return isShowing
         ? ReactDOM.createPortal(
               <React.Fragment>
@@ -39,19 +40,21 @@ function Modal({
                                   </h2>
                               </div>
                           )}
-                          <div className={cx('modal-content', {adminColor})}>
+                          <div className={cx('modal-content', { adminColor })}>
                               <div className={cx('wrapper')}>{children}</div>
                           </div>
 
-                          {!closeAdmin && <button
-                              type="button"
-                              className={cx('modal-close-button', admin && 'modal-close-button-admin')}
-                              data-dismiss="modal"
-                              aria-label="Close"
-                              onClick={hide}
-                          >
-                              <span aria-hidden="true">×</span>
-                          </button>}
+                          {!closeAdmin && (
+                              <button
+                                  type="button"
+                                  className={cx('modal-close-button', admin && 'modal-close-button-admin')}
+                                  data-dismiss="modal"
+                                  aria-label="Close"
+                                  onClick={hide}
+                              >
+                                  <span aria-hidden="true">×</span>
+                              </button>
+                          )}
                       </div>
                   </div>
               </React.Fragment>,

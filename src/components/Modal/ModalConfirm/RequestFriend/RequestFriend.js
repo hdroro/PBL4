@@ -4,21 +4,20 @@ import images from '~/assets/images';
 import Button from '~/components/Button';
 import { Heart, HeartCrack } from '~/components/Icon/Icon';
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { handleCheckFriendRelation, handleGetDetailNotificationMatching, handleGetInfoByID, handleSetDenyNotificationMatching, handleSetMatchNotificationMatching } from '~/services/userService';
+import {
+    handleCheckFriendRelation,
+    handleGetDetailNotificationMatching,
+    handleGetInfoByID,
+    handleSetDenyNotificationMatching,
+    handleSetMatchNotificationMatching,
+} from '~/services/userService';
 import { handleCreateConversation } from '~/services/conversationService';
 import { mydate } from '~/utils/date';
 import { handlePostMessage } from '~/services/messageService';
 
 const cx = classNames.bind(styles);
 
-function RequestFriend({
-    idNotificationMatching,
-    timeData,
-    hide,
-    fromId,
-    socket,
-    matchId,
-}) {
+function RequestFriend({ idNotificationMatching, timeData, hide, fromId, socket, matchId }) {
     const [user, setUser] = useState();
     const [remainingMinutes, setRemainingMinutes] = useState(timeData.minutes);
     const [remainingSeconds, setRemainingSeconds] = useState(timeData.seconds);
@@ -46,30 +45,28 @@ function RequestFriend({
     }, []);
 
     useEffect(() => {
-        const fetchApi = async() => {
+        const fetchApi = async () => {
             try {
-                let notifData = await handleGetDetailNotificationMatching(idNotificationMatching ,matchId, fromId);
-                if(notifData.errCode == 0) {
-                    if(notifData.data.isDeny === 1) {
+                let notifData = await handleGetDetailNotificationMatching(idNotificationMatching, matchId, fromId);
+                if (notifData.errCode == 0) {
+                    if (notifData.data.isDeny === 1) {
                         setDeny(notifData.data.isDeny);
                         setRemainingMinutes(0);
                         setRemainingSeconds(0);
                     }
                     let converData = await handleCheckFriendRelation(fromId, matchId);
-                    if(converData.errCode === 1) {
+                    if (converData.errCode === 1) {
                         setMatch(1);
                         setRemainingMinutes(0);
                         setRemainingSeconds(0);
                     }
-                }
-                else {
+                } else {
                     console.log(notifData.errMessage);
                 }
-            }
-            catch(err) {
+            } catch (err) {
                 console.log(err);
             }
-        }
+        };
         fetchApi();
     }, []);
 
@@ -150,22 +147,37 @@ function RequestFriend({
                 Bio: <span className={cx('bio-content')}>{user && user.bio}</span>
             </div>
             <div className={cx('footer')}>
-                {(isDeny !== 1 && isMatch !== 1 && remainingMinutes !== 0 && remainingSeconds !== 0) ? (
-                    <Fragment>
-                        <Button medium leftIcon={<Heart />} className={cx('btn-accept', 'btn')} onClick={handleAddConversation}>
-                            Accept
-                        </Button>
-                        <Button
-                            onClick={handleDenyMatching}
-                            medium
-                            leftIcon={<HeartCrack />}
-                            noMargin
-                            className={cx('btn-deny', 'btn')}
-                        >
-                            Deny
-                        </Button>
-                    </Fragment>
-                ) : ' '} 
+                {/* <Fragment> */}
+                <button
+                    medium
+                    leftIcon={<Heart />}
+                    className={cx('btn-accept', 'btn', {
+                        disable:
+                            isDeny !== 1 && isMatch !== 1 && remainingMinutes !== 0 && remainingSeconds !== 0
+                                ? false
+                                : true,
+                    })}
+                    onClick={handleAddConversation}
+                >
+                    <Heart className={cx('icon-button')} />
+                    Accept
+                </button>
+                <button
+                    onClick={handleDenyMatching}
+                    medium
+                    leftIcon={<HeartCrack />}
+                    noMargin
+                    className={cx('btn-deny', 'btn', {
+                        disable:
+                            isDeny !== 1 && isMatch !== 1 && remainingMinutes !== 0 && remainingSeconds !== 0
+                                ? false
+                                : true,
+                    })}
+                >
+                    <HeartCrack className={cx('icon-button')} />
+                    Deny
+                </button>
+                {/* </Fragment> */}
             </div>
         </div>
     );

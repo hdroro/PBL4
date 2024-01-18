@@ -24,31 +24,34 @@ function NotiZodiacItem({ listNotiZodiac, user, onChangeStatusCreatePost }) {
         }
     };
 
+    console.log('listNotiZodiac', listNotiZodiac);
     return (
-        <>
-            {listNotiZodiac.map((item, index) => (
-                <div
-                    className={cx('wrapper', item.isRead && 'asRead')}
-                    key={index}
-                    onClick={() => handleToggleModel(item.idNoti)}
-                >
-                    <img alt="" src={images.admin} />
-                    <div className={cx('noti-container')}>
-                        <div>
-                            <span className={cx('nick-name')}>@xaloZodiac</span>
-                            <span className={cx('noti-content')}>
-                                đã có thông điệp tuần mới rồi nè <b>{user}</b> ơi!
-                            </span>
-                            <div className={cx('time')}>{formatTimeNotiZodiacMessage(item.timePost)}</div>
+        listNotiZodiac?.length && (
+            <>
+                {listNotiZodiac?.map((item, index) => (
+                    <div
+                        className={cx('wrapper', item.isRead && 'asRead')}
+                        key={index}
+                        onClick={() => handleToggleModel(item.idNoti)}
+                    >
+                        <img alt="" src={images.admin} />
+                        <div className={cx('noti-container')}>
+                            <div>
+                                <span className={cx('nick-name')}>@zodiacLazy</span>
+                                <span className={cx('noti-content')}>
+                                    đã có thông điệp tuần mới rồi nè <b>{user}</b> ơi!
+                                </span>
+                                <div className={cx('time')}>{formatTimeNotiZodiacMessage(item.timePost)}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            ))}
+                ))}
 
-            <Modal background hide={handleToggleModel} isShowing={isShowing}>
-                <ShowDetailZodiac idPostShowing={idPostShowing} />
-            </Modal>
-        </>
+                <Modal background hide={handleToggleModel} isShowing={isShowing}>
+                    <ShowDetailZodiac idPostShowing={idPostShowing} />
+                </Modal>
+            </>
+        )
     );
 }
 
